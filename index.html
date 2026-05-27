@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>캥거루족 시급 계산기</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    :root {
+      --p:#FF6B2B; --pl:#FFF0E8; --bg:#F7F7F7; --card:#fff;
+      --t:#1A1A1A; --sub:#888; --bd:#EEE; --r:20px;
+    }
+    body { font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif; background:#E0E0E0; display:flex; justify-content:center; min-height:100vh; }
+    .app { width:100%; max-width:430px; min-height:100vh; background:var(--bg); }
+    .screen { display:none; flex-direction:column; min-height:100vh; }
+    .screen.on { display:flex; }
+    .intro { align-items:center; justify-content:center; padding:48px 28px; text-align:center; gap:0; }
+    .em { font-size:88px; display:block; margin-bottom:24px; animation:bop 1.6s ease-in-out infinite; }
+    @keyframes bop { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+    .intro h1 { font-size:34px; font-weight:900; color:var(--t); line-height:1.2; margin-bottom:14px; }
+    .intro h1 b { color:var(--p); font-weight:900; }
+    .intro .sub { font-size:16px; color:var(--sub); line-height:1.7; margin-bottom:48px; }
+    .disc { margin-top:20px; font-size:12px; color:#CCC; }
+    .cta { display:block; width:100%; padding:18px; background:var(--p); color:#fff; border:none; border-radius:16px; font-size:17px; font-weight:700; cursor:pointer; text-align:center; text-decoration:none; box-shadow:0 6px 24px rgba(255,107,43,.35); -webkit-appearance:none; appearance:none; }
+    .cta:active { opacity:.85; }
+    .ihead { display:flex; align-items:center; gap:12px; padding:16px 20px 8px; position:sticky; top:0; background:var(--bg); z-index:9; }
+    .back { width:38px; height:38px; border-radius:50%; background:var(--card); border:none; font-size:18px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.08); -webkit-appearance:none; }
+    .ihead-t { font-size:18px; font-weight:700; }
+    .ibody { padding:8px 20px 130px; display:flex; flex-direction:column; gap:14px; }
+    .card { background:var(--card); border-radius:var(--r); padding:20px; box-shadow:0 2px 14px rgba(0,0,0,.06); }
+    .ch { display:flex; align-items:flex-start; gap:12px; margin-bottom:18px; }
+    .ce { font-size:26px; }
+    .ct { font-size:16px; font-weight:700; }
+    .cs { font-size:13px; color:var(--sub); margin-top:3px; }
+    .ctr { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .cbtn { width:48px; height:48px; border-radius:14px; border:2px solid var(--bd); background:#fff; font-size:22px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; -webkit-appearance:none; }
+    .cbtn:active { background:var(--pl); border-color:var(--p); color:var(--p); }
+    .cv { font-size:40px; font-weight:900; text-align:center; min-width:80px; }
+    .cu { font-size:14px; color:var(--sub); text-align:center; }
+    input[type=range] { -webkit-appearance:none; width:100%; height:6px; border-radius:3px; background:var(--bd); outline:none; cursor:pointer; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:26px; height:26px; border-radius:50%; background:var(--p); box-shadow:0 2px 10px rgba(255,107,43,.4); }
+    .sl { display:flex; justify-content:space-between; margin-top:8px; font-size:12px; color:#C0C0C0; }
+    .chips { display:flex; gap:8px; }
+    .chip { flex:1; padding:12px 4px; border-radius:14px; border:2px solid var(--bd); background:#fff; font-size:13px; font-weight:700; color:var(--sub); cursor:pointer; text-align:center; line-height:1.3; -webkit-appearance:none; }
+    .chip.on { border-color:var(--p); background:var(--pl); color:var(--p); }
+    .cl { font-size:10px; font-weight:500; display:block; margin-top:3px; opacity:.65; }
+    .ifoot { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; padding:14px 20px 36px; background:linear-gradient(to top,var(--bg) 75%,transparent); }
+    .rhead { background:linear-gradient(135deg,#FF6B2B,#FF3300); padding:44px 24px 36px; text-align:center; color:#fff; }
+    .rl { font-size:14px; font-weight:700; opacity:.85; margin-bottom:16px; }
+    .rtl { font-size:14px; opacity:.75; margin-bottom:6px; }
+    .rt { font-size:46px; font-weight:900; letter-spacing:-1px; }
+    .rtu { font-size:22px; font-weight:700; }
+    .rbody { padding:18px 20px 120px; display:flex; flex-direction:column; gap:14px; }
+    .bk { background:var(--card); border-radius:var(--r); padding:20px; box-shadow:0 2px 14px rgba(0,0,0,.06); }
+    .bkt { font-size:12px; font-weight:700; color:#BBB; text-transform:uppercase; letter-spacing:.6px; margin-bottom:14px; }
+    .bi { display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--bd); }
+    .bi:last-child { border-bottom:none; }
+    .bil { display:flex; align-items:center; gap:12px; }
+    .bin { font-size:15px; font-weight:600; }
+    .bid { font-size:12px; color:var(--sub); margin-top:2px; }
+    .bia { font-size:15px; font-weight:700; }
+    .rk { background:var(--card); border-radius:var(--r); padding:24px 20px; box-shadow:0 2px 14px rgba(0,0,0,.06); text-align:center; }
+    .hl { font-size:13px; font-weight:600; color:var(--sub); margin-bottom:4px; }
+    .hv { font-size:34px; font-weight:900; margin-bottom:18px; }
+    .hu { font-size:16px; font-weight:600; color:var(--sub); }
+    .dv { height:1px; background:var(--bd); margin-bottom:18px; }
+    .re { font-size:44px; display:block; margin-bottom:10px; }
+    .rr { font-size:22px; font-weight:900; margin-bottom:10px; }
+    .rc { font-size:15px; color:var(--sub); line-height:1.7; white-space:pre-line; }
+    .pc { background:#1A1A1A; border-radius:var(--r); padding:22px 20px; text-align:center; color:#fff; }
+    .pcl { font-size:13px; opacity:.55; margin-bottom:8px; }
+    .pcv { font-size:30px; font-weight:900; }
+    .pcv span { color:var(--p); }
+    .pcs { font-size:13px; opacity:.45; margin-top:4px; }
+    .jc { background:var(--pl); border-radius:var(--r); padding:18px 20px; text-align:center; }
+    .jt { font-size:16px; font-weight:700; color:var(--p); }
+    .rfoot { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; padding:14px 20px 36px; background:linear-gradient(to top,#fff 75%,transparent); display:flex; gap:10px; }
+    .bsec { flex:1; padding:16px; border:2px solid var(--bd); background:#fff; border-radius:14px; font-size:15px; font-weight:700; cursor:pointer; -webkit-appearance:none; }
+    .bshr { flex:2; padding:16px; background:#FEE500; border:none; border-radius:14px; font-size:15px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; -webkit-appearance:none; }
+    .toast { position:fixed; bottom:110px; left:50%; transform:translateX(-50%); background:#1A1A1A; color:#fff; padding:12px 24px; border-radius:100px; font-size:14px; font-weight:600; white-space:nowrap; opacity:0; transition:opacity .3s; pointer-events:none; z-index:999; }
+    .toast.show { opacity:1; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="toast" id="toast"></div>
+  <div class="screen intro on" id="s-intro">
+    <span class="em">🦘</span>
+    <h1>캥거루족<br><b>시급</b> 계산기</h1>
+    <p class="sub">이번 달 부모님 등골<br>얼마나 빼먹었는지 확인해봐요</p>
+    <button class="cta" id="btn-start">내 착취력 계산하기 →</button>
+    <p class="disc">※ 결과는 시장 평균 기준이며 재미를 위한 용도입니다</p>
+  </div>
+  <div class="screen" id="s-input">
+    <div class="ihead">
+      <button class="back" id="btn-back">←</button>
+      <span class="ihead-t">착취 내역 입력</span>
+    </div>
+    <div class="ibody">
+      <div class="card">
+        <div class="ch"><span class="ce">🍚</span><div><div class="ct">집밥</div><div class="cs">이번 달 부모님이 해준 밥이 몇 끼예요?</div></div></div>
+        <div class="ctr">
+          <button class="cbtn" id="meals-m">−</button>
+          <div><div class="cv" id="meals-v">45</div><div class="cu">끼</div></div>
+          <button class="cbtn" id="meals-p">+</button>
+        </div>
+        <input type="range" min="0" max="90" step="1" value="45" id="meals-s">
+        <div class="sl"><span>0끼</span><span>45끼</span><span>90끼</span></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ce">🧺</span><div><div class="ct">빨래</div><div class="cs">이번 달 부모님이 빨래 몇 번 해줬어요?</div></div></div>
+        <div class="ctr">
+          <button class="cbtn" id="wash-m">−</button>
+          <div><div class="cv" id="wash-v">8</div><div class="cu">회</div></div>
+          <button class="cbtn" id="wash-p">+</button>
+        </div>
+        <input type="range" min="0" max="20" step="1" value="8" id="wash-s">
+        <div class="sl"><span>0회</span><span>10회</span><span>20회</span></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ce">🧹</span><div><div class="ct">청소</div><div class="cs">집 청소를 주로 누가 해요?</div></div></div>
+        <div class="chips" id="grp-c">
+          <button class="chip" data-g="c" data-v="me">내가 해<span class="cl">부모님 쉬세요</span></button>
+          <button class="chip on" data-g="c" data-v="half">반반씩<span class="cl">그나마 양심</span></button>
+          <button class="chip" data-g="c" data-v="parents">부모님이<span class="cl">착취 확정</span></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ce">🏠</span><div><div class="ct">자취 예상 월세</div><div class="cs">내가 자취하면 월세 얼마일 것 같아요?</div></div></div>
+        <div class="chips" id="grp-r">
+          <button class="chip" data-g="r" data-v="50">50만<span class="cl">고시원/외곽</span></button>
+          <button class="chip on" data-g="r" data-v="70">70만<span class="cl">빌라/원룸</span></button>
+          <button class="chip" data-g="r" data-v="100">100만<span class="cl">역세권</span></button>
+          <button class="chip" data-g="r" data-v="150">150만+<span class="cl">서울 핵심</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="ifoot">
+      <button class="cta" id="btn-calc">등골 빼먹은 금액 계산하기 →</button>
+    </div>
+  </div>
+  <div class="screen" id="s-result">
+    <div class="rhead">
+      <div class="rl">🔥 이번달 착취 리포트 🔥</div>
+      <div class="rtl">등골 빼먹은 총액</div>
+      <div class="rt"><span class="rtu">₩ </span><span id="r-total">0</span></div>
+    </div>
+    <div class="rbody">
+      <div class="bk">
+        <div class="bkt">항목별 내역</div>
+        <div class="bi"><div class="bil"><span>🍚</span><div><div class="bin">집밥</div><div class="bid" id="r-md"></div></div></div><div class="bia" id="r-ma"></div></div>
+        <div class="bi"><div class="bil"><span>🧺</span><div><div class="bin">빨래</div><div class="bid" id="r-wd"></div></div></div><div class="bia" id="r-wa"></div></div>
+        <div class="bi"><div class="bil"><span>🧹</span><div><div class="bin">청소</div><div class="bid" id="r-cd"></div></div></div><div class="bia" id="r-ca"></div></div>
+        <div class="bi"><div class="bil"><span>🏠</span><div><div class="bin">주거비</div><div class="bid" id="r-rd"></div></div></div><div class="bia" id="r-ra"></div></div>
+      </div>
+      <div class="rk">
+        <div class="hl">시급으로 치면</div>
+        <div class="hv"><span id="r-hw">0</span><span class="hu"> 원/시간</span></div>
+        <div class="dv"></div>
+        <span class="re" id="r-em">💼</span>
+        <div class="rr" id="r-rk">대기업 대리급</div>
+        <div class="rc" id="r-cm"></div>
+      </div>
+      <div class="pc">
+        <div class="pcl">전국 캥거루족 중에서</div>
+        <div class="pcv">상위 <span id="r-pct">30</span>%</div>
+        <div class="pcs">의 착취력을 보여주고 있어요</div>
+      </div>
+      <div class="jc"><div class="jt">엄마 잔소리는 덤 🙂‍↔️</div></div>
+    </div>
+    <div class="rfoot">
+      <button class="bsec" id="btn-retry">다시 계산</button>
+      <button class="bshr" id="btn-share">💬 카톡으로 공유</button>
+    </div>
+  </div>
+</div>
+<script>
+var meals=45,wash=8,clean='half',rent=70;
+var MEAL=10000,WASH=12000;
+var CP={me:0,half:25000,parents:50000};
+var CH={me:0,half:4,parents:8};
+var CL={me:'직접 청소',half:'반반씩',parents:'부모님 전담'};
+function fmt(n){return n.toLocaleString('ko-KR');}
+function goTo(id){
+  var all=document.querySelectorAll('.screen');
+  for(var i=0;i<all.length;i++)all[i].classList.remove('on');
+  document.getElementById(id).classList.add('on');
+  window.scrollTo(0,0);
+}
+function setMeals(v){meals=v<0?0:v>90?90:v;document.getElementById('meals-v').textContent=meals;document.getElementById('meals-s').value=meals;}
+function setWash(v){wash=v<0?0:v>20?20:v;document.getElementById('wash-v').textContent=wash;document.getElementById('wash-s').value=wash;}
+function selectChip(btn){
+  var g=btn.getAttribute('data-g'),v=btn.getAttribute('data-v');
+  var group=document.querySelectorAll('[data-g="'+g+'"]');
+  for(var i=0;i<group.length;i++)group[i].classList.remove('on');
+  btn.classList.add('on');
+  if(g==='c')clean=v;
+  if(g==='r')rent=parseInt(v);
+}
+function calcResult(){
+  var mc=meals*MEAL,wc=wash*WASH,cc=CP[clean],rc=rent*10000;
+  var tot=mc+wc+cc+rc;
+  var hrs=meals*0.5+wash*0.5+CH[clean];
+  var hw=hrs>0?Math.round((mc+wc+cc)/hrs):0;
+  return{mc:mc,wc:wc,cc:cc,rc:rc,tot:tot,hw:hw};
+}
+function getRank(w){
+  if(w<5000)return{e:'🐣',r:'수습 인턴',c:'아직 양심이 살아있네요\n근데 언제까지 그럴 것 같아요?'};
+  if(w<8000)return{e:'👔',r:'신입사원급',c:'출발은 나쁘지 않은데...\n시작이 반이라더니'};
+  if(w<12000)return{e:'💼',r:'대기업 대리급',c:'엄마가 직원이에요?\n근무 계약서 어딨나요'};
+  if(w<18000)return{e:'🔥',r:'대기업 과장급',c:'이 정도면 착취예요\n진심으로'};
+  if(w<25000)return{e:'👑',r:'대기업 부장급',c:'부모님이 퇴직 신청\n준비 중이신 거 아세요?'};
+  return{e:'🚀',r:'임원급 이상',c:'법적으로 문제없는지\n한번 확인해보세요 아니 진짜로'};
+}
+function getPct(t){if(t<500000)return 70;if(t<800000)return 50;if(t<1200000)return 30;if(t<1600000)return 15;return 5;}
+function countUp(el,target){
+  var cur=0,step=target/60;
+  var tid=setInterval(function(){cur=cur+step>target?target:cur+step;el.textContent=fmt(Math.round(cur));if(cur>=target)clearInterval(tid);},16);
+}
+function showResult(){
+  var d=calcResult(),ri=getRank(d.hw),p=getPct(d.tot);
+  document.getElementById('r-md').textContent=meals+'끼 × '+fmt(MEAL)+'원';
+  document.getElementById('r-ma').textContent='₩'+fmt(d.mc);
+  document.getElementById('r-wd').textContent=wash+'회 × '+fmt(WASH)+'원';
+  document.getElementById('r-wa').textContent='₩'+fmt(d.wc);
+  document.getElementById('r-cd').textContent=CL[clean];
+  document.getElementById('r-ca').textContent='₩'+fmt(d.cc);
+  document.getElementById('r-rd').textContent=rent+'만원/월 기준';
+  document.getElementById('r-ra').textContent='₩'+fmt(d.rc);
+  document.getElementById('r-hw').textContent=fmt(d.hw);
+  document.getElementById('r-em').textContent=ri.e;
+  document.getElementById('r-rk').textContent=ri.r;
+  document.getElementById('r-cm').textContent=ri.c;
+  document.getElementById('r-pct').textContent=p;
+  goTo('s-result');
+  countUp(document.getElementById('r-total'),d.tot);
+}
+function doShare(){
+  var d=calcResult(),ri=getRank(d.hw),p=getPct(d.tot);
+  var text='🦘 캥거루족 시급 계산기\n\n이번 달 등골 빼먹은 총액: ₩'+fmt(d.tot)+'\n시급으로 치면: ₩'+fmt(d.hw)+'/시간\n직급: '+ri.e+' '+ri.r+'\n전국 캥거루족 상위 '+p+'%\n\n엄마 잔소리는 덤 🙂‍↔️';
+  if(navigator.share){navigator.share({text:text});}
+  else if(navigator.clipboard){navigator.clipboard.writeText(text).then(function(){showToast('클립보드에 복사됐어요!');});}
+  else{showToast('결과를 스크린샷으로 공유해보세요');}
+}
+function showToast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show');},2500);}
+function on(id,fn){var el=document.getElementById(id);if(!el)return;el.addEventListener('click',fn);el.onclick=fn;}
+on('btn-start',function(){goTo('s-input');});
+on('btn-back',function(){goTo('s-intro');});
+on('btn-calc',showResult);
+on('btn-retry',function(){goTo('s-input');});
+on('btn-share',doShare);
+on('meals-m',function(){setMeals(meals-5);});
+on('meals-p',function(){setMeals(meals+5);});
+on('wash-m',function(){setWash(wash-1);});
+on('wash-p',function(){setWash(wash+1);});
+document.getElementById('meals-s').oninput=function(){setMeals(parseInt(this.value));};
+document.getElementById('wash-s').oninput=function(){setWash(parseInt(this.value));};
+function bindChips(gid){
+  var grp=document.getElementById(gid);
+  grp.addEventListener('click',function(e){
+    var btn=e.target;
+    while(btn&&btn!==grp){if(btn.classList.contains('chip')){selectChip(btn);return;}btn=btn.parentNode;}
+  });
+}
+bindChips('grp-c');
+bindChips('grp-r');
+</script>
+</body>
+</html>
