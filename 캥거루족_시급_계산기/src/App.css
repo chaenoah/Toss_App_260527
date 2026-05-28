@@ -79,24 +79,6 @@
 }
 
 /* ── Buttons ──────────────────────────────────────── */
-.btn-primary {
-  width: 100%;
-  padding: 18px 24px;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: 16px;
-  font-size: 17px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 6px 24px rgba(255,107,43,.35);
-  transition: transform .12s, box-shadow .12s;
-}
-
-.btn-primary:active {
-  transform: scale(.97);
-  box-shadow: 0 3px 12px rgba(255,107,43,.25);
-}
 
 /* ── Input Header ─────────────────────────────────── */
 .input-header {
@@ -292,9 +274,21 @@
 /* ── Result Header ────────────────────────────────── */
 .result-header {
   background: linear-gradient(135deg, #FF6B2B 0%, #FF3300 100%);
-  padding: 44px 24px 36px;
+  padding: 16px 24px 36px;
   text-align: center;
   color: #fff;
+}
+
+.result-header-nav {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.result-back-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  box-shadow: none;
 }
 
 .result-label {
@@ -494,21 +488,6 @@
   display: flex;
   gap: 10px;
 }
-
-.btn-secondary {
-  flex: 1;
-  padding: 16px;
-  border: 2px solid var(--border);
-  background: #fff;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  color: var(--text);
-  transition: background .15s;
-}
-
-.btn-secondary:active { background: #F5F5F5; }
 
 .btn-share {
   flex: 2;

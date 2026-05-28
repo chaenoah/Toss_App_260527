@@ -1,3 +1,4 @@
+import { Button } from "@toss/tds-mobile";
 import { useState, useEffect } from "react";
 import "./App.css";
 
@@ -84,19 +85,33 @@ export default function App() {
   const [inputs, setInputs] = useState<Inputs>({ meals: 45, laundry: 8, cleaning: "half", rent: 70 });
   const [result, setResult] = useState<Result | null>(null);
 
+  useEffect(() => {
+    history.replaceState({ screen: "intro" }, "");
+    const handle = (e: PopStateEvent) => {
+      setScreen(((e.state as { screen?: Screen })?.screen) ?? "intro");
+    };
+    window.addEventListener("popstate", handle);
+    return () => window.removeEventListener("popstate", handle);
+  }, []);
+
+  function go(s: Screen) {
+    history.pushState({ screen: s }, "");
+    setScreen(s);
+  }
+
   function handleCalculate() {
     setResult(calculate(inputs));
-    setScreen("result");
+    go("result");
   }
 
   return (
     <div className="app">
-      {screen === "intro" && <IntroScreen onStart={() => setScreen("input")} />}
+      {screen === "intro" && <IntroScreen onStart={() => go("input")} />}
       {screen === "input" && (
-        <InputScreen inputs={inputs} onChange={setInputs} onCalculate={handleCalculate} onBack={() => setScreen("intro")} />
+        <InputScreen inputs={inputs} onChange={setInputs} onCalculate={handleCalculate} />
       )}
       {screen === "result" && result && (
-        <ResultScreen inputs={inputs} result={result} onRetry={() => setScreen("input")} />
+        <ResultScreen inputs={inputs} result={result} />
       )}
     </div>
   );
@@ -109,7 +124,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
       <span className="intro-emoji">🦘</span>
       <h1 className="intro-title">캥거루족<br /><span>시급</span> 계산기</h1>
       <p className="intro-subtitle">이번 달 부모님 등골<br />얼마나 빼먹었는지 확인해봐요</p>
-      <button className="btn-primary" onClick={onStart}>내 착취력 계산하기 →</button>
+      <Button variant="fill" size="large" style={{ width: "100%" }} onClick={onStart}>내 착취력 계산하기 →</Button>
       <p className="intro-disclaimer">※ 결과는 시장 평균 기준이며 재미를 위한 용도입니다</p>
     </div>
   );
@@ -120,10 +135,9 @@ interface InputScreenProps {
   inputs: Inputs;
   onChange: (i: Inputs) => void;
   onCalculate: () => void;
-  onBack: () => void;
 }
 
-function InputScreen({ inputs, onChange, onCalculate, onBack }: InputScreenProps) {
+function InputScreen({ inputs, onChange, onCalculate }: InputScreenProps) {
   function set<K extends keyof Inputs>(k: K, v: Inputs[K]) {
     onChange({ ...inputs, [k]: v });
   }
@@ -131,7 +145,7 @@ function InputScreen({ inputs, onChange, onCalculate, onBack }: InputScreenProps
   return (
     <div className="screen">
       <div className="input-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button className="back-btn" onClick={() => history.back()}>←</button>
         <span className="input-header-title">착취 내역 입력</span>
       </div>
 
@@ -218,7 +232,7 @@ function InputScreen({ inputs, onChange, onCalculate, onBack }: InputScreenProps
       </div>
 
       <div className="input-footer">
-        <button className="btn-primary" onClick={onCalculate}>등골 빼먹은 금액 계산하기 →</button>
+        <Button variant="fill" size="large" style={{ width: "100%" }} onClick={onCalculate}>등골 빼먹은 금액 계산하기 →</Button>
       </div>
     </div>
   );
@@ -228,10 +242,9 @@ function InputScreen({ inputs, onChange, onCalculate, onBack }: InputScreenProps
 interface ResultScreenProps {
   inputs: Inputs;
   result: Result;
-  onRetry: () => void;
 }
 
-function ResultScreen({ inputs, result, onRetry }: ResultScreenProps) {
+function ResultScreen({ inputs, result }: ResultScreenProps) {
   const displayTotal = useCountUp(result.total);
   const rank = getRank(result.hourlyWage);
   const pct = getPercentile(result.total);
@@ -261,6 +274,9 @@ function ResultScreen({ inputs, result, onRetry }: ResultScreenProps) {
   return (
     <div className="screen">
       <div className="result-header">
+        <div className="result-header-nav">
+          <button className="back-btn result-back-btn" onClick={() => history.back()}>←</button>
+        </div>
         <div className="result-label">🔥 이번달 착취 리포트 🔥</div>
         <div className="result-total-label">등골 빼먹은 총액</div>
         <div className="result-total">
@@ -306,7 +322,7 @@ function ResultScreen({ inputs, result, onRetry }: ResultScreenProps) {
       </div>
 
       <div className="result-footer">
-        <button className="btn-secondary" onClick={onRetry}>다시 계산</button>
+        <Button variant="weak" size="large" style={{ flex: 1 }} onClick={() => history.back()}>다시 계산</Button>
         <button className="btn-share" onClick={handleShare}>💬 카톡으로 공유</button>
       </div>
     </div>
