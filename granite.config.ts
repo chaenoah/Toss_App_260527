@@ -4,7 +4,7 @@ export default defineConfig({
   appName: "hangang-stock-rescue",
   brand: {
     displayName: "한강 수온 주식 구조대",
-    primaryColor: "#655DFF",
+    primaryColor: "#3182F6",
     icon: "/appsintoss-logo.png",
   },
   web: {
