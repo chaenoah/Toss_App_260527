@@ -3,7 +3,7 @@ import { defineConfig } from "@apps-in-toss/web-framework/config";
 export default defineConfig({
   appName: "backbreaker",
   brand: {
-    displayName: "캥거루족 시급 계산기",
+    displayName: "캥거루족 시급 계산",
     primaryColor: "#FF6B2B",
     icon: "",
   },
