@@ -209,21 +209,23 @@ export function initGame(root: HTMLElement) {
   function buildDOM() {
     root.innerHTML = "";
 
-    // Header
+    // Header: left=rank+cash+total, right=character tap button
     const header = el("div", "header");
+    const headerLeft = el("div", "header-left");
     rankEl  = el("span", "rank-badge");
     cashEl  = el("div", "cash-display");
     totalEl = el("div", "total-display");
-    header.append(rankEl, cashEl, totalEl);
+    headerLeft.append(rankEl, cashEl, totalEl);
 
-    // Character
-    const charArea = el("div", "char-area");
-    const charBtn  = el("button", "char-btn") as HTMLButtonElement;
+    const charBtn = el("button", "char-btn") as HTMLButtonElement;
     charBtn.textContent = "💰";
     charBtn.addEventListener("click", onTap);
-    const tapHint = el("div", "tap-hint");
-    tapHint.textContent = "탭해서 현금 획득!";
-    charArea.append(charBtn, tapHint);
+    const charWrap = el("div", "char-wrap");
+    const tapHint  = el("div", "tap-hint");
+    tapHint.textContent = "탭!";
+    charWrap.append(charBtn, tapHint);
+
+    header.append(headerLeft, charWrap);
 
     // Event box
     eventBoxEl = el("div", "event-box event-normal");
@@ -232,10 +234,10 @@ export function initGame(root: HTMLElement) {
     // Tab bar
     const tabBar = el("div", "tab-bar");
     [
-      { id: "market",   label: "📈 시장" },
-      { id: "portfolio",label: "💼 보유" },
-      { id: "news",     label: "📰 뉴스" },
-      { id: "upgrades", label: "⚙️ 업그레이드" },
+      { id: "market",    label: "📈 시장" },
+      { id: "portfolio", label: "💼 보유" },
+      { id: "news",      label: "📰 뉴스" },
+      { id: "upgrades",  label: "⚙️ 샵"  },
     ].forEach(({ id, label }) => {
       const btn = el("button", "tab-btn") as HTMLButtonElement;
       btn.textContent = label;
@@ -247,7 +249,9 @@ export function initGame(root: HTMLElement) {
     // Content area
     tabContentEl = el("div", "tab-content");
 
-    root.append(header, charArea, eventBoxEl, tabBar, tabContentEl);
+    const stickyTop = el("div", "sticky-top");
+    stickyTop.append(header, eventBoxEl, tabBar);
+    root.append(stickyTop, tabContentEl);
   }
 
   // ─── Header ─────────────────────────────────────────────────────────────────
