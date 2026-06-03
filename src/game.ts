@@ -206,11 +206,29 @@ export function initGame(root: HTMLElement) {
 
   // ─── Build skeleton DOM ─────────────────────────────────────────────────────
 
-  // Characters that evolve with rank
-  const CHAR_EMOJIS = ["🧑‍💼","🐜","📱","⚡","📊","💼","🏦","👑"];
-  let charEmojiEl: HTMLElement | null = null;
-  let charBubbleEl: HTMLElement | null = null;
+  // Characters evolve dramatically with rank (극단적 차별화)
+  const CHAR_STAGES = [
+    // 0. 백수 — 진짜 거지 그 자체
+    { face:"😩", top:"",    body:"👕",  bottom:"🩲",  props:"📦",  bg:"#c8d8a0", label:"백 수", desc:"월세도 못 낸다..." },
+    // 1. 개미투자자 — 쪼들리는 직장인
+    { face:"😓", top:"",    body:"👔",  bottom:"👖",  props:"📱",  bg:"#b8d4c0", label:"개미", desc:"적금 깨서 첫 투자..." },
+    // 2. 주린이 — 들뜬 초보
+    { face:"😬", top:"",    body:"🧥",  bottom:"👖",  props:"📊",  bg:"#a8c8e0", label:"주린이", desc:"유튜브로 공부했어요" },
+    // 3. 단타왕 — 눈이 뒤집힌 트레이더
+    { face:"🤩", top:"",    body:"👔",  bottom:"👖",  props:"⚡📈", bg:"#f0d080", label:"단타왕", desc:"손이 빠르면 장땡!" },
+    // 4. 차트마스터 — 분석에 미침
+    { face:"🧐", top:"🎩",  body:"🧣",  bottom:"👖",  props:"💻📊", bg:"#d0c8f0", label:"차트마", desc:"이 패턴은 상승이야" },
+    // 5. 펀드매니저 — 여유로운 슈트
+    { face:"😏", top:"",    body:"🤵",  bottom:"",    props:"💼💎", bg:"#f0c870", label:"펀드매", desc:"타인의 돈으로 투자" },
+    // 6. 헤지펀드대표 — 돈에 절어있음
+    { face:"🤑", top:"💈",  body:"🤵",  bottom:"",    props:"🏦💰💰", bg:"#f8a040", label:"헤지펀드", desc:"숏도 롱도 다 먹는다" },
+    // 7. 주식왕 — 전설의 등장
+    { face:"😈", top:"👑",  body:"🤵",  bottom:"",    props:"💎💎💎", bg:"#FFD700", label:"주식왕", desc:"시장이 나를 따른다" },
+  ];
+
   let charFigEl: HTMLElement | null = null;
+  let charBubbleEl: HTMLElement | null = null;
+  let charStageEl: HTMLElement | null = null;
 
   function buildDOM() {
     root.innerHTML = "";
@@ -249,11 +267,11 @@ export function initGame(root: HTMLElement) {
     // Main character
     const charWrap = el("div", "char-wrap");
     charBubbleEl = el("div", "char-bubble");
-    charBubbleEl.textContent = "+100원";
+    charBubbleEl.textContent = "+100원 / 탭";
     charFigEl = el("div", "char-fig");
-    charEmojiEl = el("span", "char-emoji");
-    charEmojiEl.textContent = CHAR_EMOJIS[state.rankIdx];
-    charFigEl.appendChild(charEmojiEl);
+    charStageEl = el("div", "char-stage");
+    buildCharStage();
+    charFigEl.appendChild(charStageEl);
     const charLabel = el("div", "char-label");
     charLabel.textContent = "탭!";
     charWrap.append(charBubbleEl, charFigEl, charLabel);
@@ -285,14 +303,40 @@ export function initGame(root: HTMLElement) {
     root.append(stickyTop, tabContentEl);
   }
 
+  // ─── Character stage builder ────────────────────────────────────────────────
+
+  function buildCharStage() {
+    if (!charStageEl) return;
+    const s = CHAR_STAGES[state.rankIdx];
+    charStageEl.innerHTML = `
+      ${s.top    ? `<div class="cs-top">${s.top}</div>`  : ""}
+      <div class="cs-face">${s.face}</div>
+      ${s.body   ? `<div class="cs-body">${s.body}${s.bottom ? " " + s.bottom : ""}</div>` : ""}
+      <div class="cs-props">${s.props}</div>
+      <div class="cs-desc">${s.desc}</div>
+    `;
+    // Tint scene background to rank colour
+    const sceneEl = root.querySelector(".scene") as HTMLElement | null;
+    if (sceneEl) {
+      sceneEl.style.background =
+        `linear-gradient(180deg, #87CEEB 0%, ${s.bg} 70%, #D4EFD8 100%)`;
+    }
+  }
+
   // ─── Header ─────────────────────────────────────────────────────────────────
+
+  let prevRankIdx = -1;
 
   function renderHeader() {
     rankEl.textContent  = RANKS[state.rankIdx].name;
     cashEl.textContent  = fmt(state.cash);
     totalEl.textContent = `총자산 ${fmtShort(totalAssets())}`;
-    if (charEmojiEl) charEmojiEl.textContent = CHAR_EMOJIS[state.rankIdx];
     if (charBubbleEl) charBubbleEl.textContent = `+${fmt(getTapAmount())} / 탭`;
+    // Rebuild character only when rank changes
+    if (state.rankIdx !== prevRankIdx) {
+      prevRankIdx = state.rankIdx;
+      buildCharStage();
+    }
   }
 
   // ─── Tap ────────────────────────────────────────────────────────────────────

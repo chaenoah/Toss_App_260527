@@ -172,12 +172,8 @@ body {
   transform: scale(0.85) translateY(4px);
 }
 
-.char-emoji {
-  font-size: 76px;
-  display: block;
-  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.18));
-  line-height: 1.1;
-}
+/* char-emoji kept for compat but stage replaces it */
+.char-emoji { display: none; }
 
 .char-label {
   font-size: 11px;
@@ -188,6 +184,30 @@ body {
   border-radius: 8px;
   margin-top: 4px;
   letter-spacing: 0.5px;
+}
+
+/* ── Character stage layers ── */
+.char-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  line-height: 1.1;
+}
+
+.cs-top   { font-size: 22px; margin-bottom: -4px; }
+.cs-face  { font-size: 62px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.22)); }
+.cs-body  { font-size: 28px; margin-top: -6px; }
+.cs-props { font-size: 20px; letter-spacing: 2px; margin-top: 2px; }
+.cs-desc  {
+  font-size: 10px;
+  font-weight: 700;
+  color: #444;
+  background: rgba(255,255,255,0.75);
+  padding: 2px 8px;
+  border-radius: 8px;
+  margin-top: 4px;
+  white-space: nowrap;
 }
 
 /* ── Floating tap text ── */
