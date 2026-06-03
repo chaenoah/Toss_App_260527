@@ -206,24 +206,352 @@ export function initGame(root: HTMLElement) {
 
   // ─── Build skeleton DOM ─────────────────────────────────────────────────────
 
-  // Characters evolve dramatically with rank (극단적 차별화)
+  // Characters evolve dramatically with rank — custom SVG cartoon characters
   const CHAR_STAGES = [
-    // 0. 백수 — 진짜 거지 그 자체
-    { face:"😩", top:"",    body:"👕",  bottom:"🩲",  props:"📦",  bg:"#c8d8a0", label:"백 수", desc:"월세도 못 낸다..." },
-    // 1. 개미투자자 — 쪼들리는 직장인
-    { face:"😓", top:"",    body:"👔",  bottom:"👖",  props:"📱",  bg:"#b8d4c0", label:"개미", desc:"적금 깨서 첫 투자..." },
-    // 2. 주린이 — 들뜬 초보
-    { face:"😬", top:"",    body:"🧥",  bottom:"👖",  props:"📊",  bg:"#a8c8e0", label:"주린이", desc:"유튜브로 공부했어요" },
-    // 3. 단타왕 — 눈이 뒤집힌 트레이더
-    { face:"🤩", top:"",    body:"👔",  bottom:"👖",  props:"⚡📈", bg:"#f0d080", label:"단타왕", desc:"손이 빠르면 장땡!" },
-    // 4. 차트마스터 — 분석에 미침
-    { face:"🧐", top:"🎩",  body:"🧣",  bottom:"👖",  props:"💻📊", bg:"#d0c8f0", label:"차트마", desc:"이 패턴은 상승이야" },
-    // 5. 펀드매니저 — 여유로운 슈트
-    { face:"😏", top:"",    body:"🤵",  bottom:"",    props:"💼💎", bg:"#f0c870", label:"펀드매", desc:"타인의 돈으로 투자" },
-    // 6. 헤지펀드대표 — 돈에 절어있음
-    { face:"🤑", top:"💈",  body:"🤵",  bottom:"",    props:"🏦💰💰", bg:"#f8a040", label:"헤지펀드", desc:"숏도 롱도 다 먹는다" },
-    // 7. 주식왕 — 전설의 등장
-    { face:"😈", top:"👑",  body:"🤵",  bottom:"",    props:"💎💎💎", bg:"#FFD700", label:"주식왕", desc:"시장이 나를 따른다" },
+    // 0. 백수 — 진짜 거지, 바닥에 주저앉아 울고 있음
+    { bg:"#c8d8a0", desc:"월세도 못 낸다...",
+      svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" width="110" height="110">
+  <!-- body (sitting hunched, torn shirt) -->
+  <ellipse cx="60" cy="118" rx="28" ry="16" fill="#a0785a"/>
+  <rect x="38" y="92" width="44" height="30" rx="8" fill="#d4a96a"/>
+  <!-- torn shirt patches -->
+  <polygon points="42,100 50,95 48,108" fill="#c4924a" opacity="0.6"/>
+  <polygon points="74,105 82,100 80,115" fill="#c4924a" opacity="0.6"/>
+  <!-- arms hunched forward -->
+  <ellipse cx="34" cy="105" rx="9" ry="6" fill="#FFCBA4" transform="rotate(-30,34,105)"/>
+  <ellipse cx="86" cy="105" rx="9" ry="6" fill="#FFCBA4" transform="rotate(30,86,105)"/>
+  <!-- bucket prop -->
+  <rect x="50" y="118" width="20" height="14" rx="3" fill="#888" stroke="#666" stroke-width="1.5"/>
+  <line x1="50" y1="120" x2="70" y2="120" stroke="#666" stroke-width="1.5"/>
+  <!-- neck -->
+  <rect x="54" y="76" width="12" height="12" rx="4" fill="#FFCBA4"/>
+  <!-- head (big, bald) -->
+  <ellipse cx="60" cy="54" rx="32" ry="30" fill="#FFCBA4"/>
+  <!-- ears -->
+  <ellipse cx="28" cy="56" rx="7" ry="9" fill="#F5B898"/>
+  <ellipse cx="92" cy="56" rx="7" ry="9" fill="#F5B898"/>
+  <!-- cheeks -->
+  <ellipse cx="40" cy="62" rx="9" ry="7" fill="#FF9999" opacity="0.38"/>
+  <ellipse cx="80" cy="62" rx="9" ry="7" fill="#FF9999" opacity="0.38"/>
+  <!-- sad eyes with tears -->
+  <ellipse cx="48" cy="50" rx="6" ry="7" fill="#333"/>
+  <ellipse cx="72" cy="50" rx="6" ry="7" fill="#333"/>
+  <circle cx="51" cy="47" r="2" fill="white"/>
+  <circle cx="75" cy="47" r="2" fill="white"/>
+  <!-- tear drops -->
+  <ellipse cx="44" cy="62" rx="3" ry="5" fill="#88BBFF" opacity="0.8"/>
+  <ellipse cx="68" cy="62" rx="3" ry="5" fill="#88BBFF" opacity="0.8"/>
+  <!-- crying mouth -->
+  <path d="M50 68 Q60 62 70 68" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>`},
+    // 1. 개미투자자 — 쪼들리는 직장인, 땀 흘리며 핸드폰
+    { bg:"#b8d4c0", desc:"적금 깨서 첫 투자...",
+      svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150" width="100" height="110">
+  <!-- legs -->
+  <rect x="48" y="110" width="12" height="30" rx="5" fill="#555"/>
+  <rect x="60" y="110" width="12" height="30" rx="5" fill="#555"/>
+  <!-- body (white shirt) -->
+  <rect x="36" y="80" width="48" height="38" rx="10" fill="#f0f0f0"/>
+  <!-- tie -->
+  <polygon points="58,82 62,82 64,105 60,110 56,105" fill="#e05050"/>
+  <!-- arm holding phone -->
+  <rect x="80" y="85" width="10" height="24" rx="5" fill="#FFCBA4" transform="rotate(15,80,85)"/>
+  <!-- phone -->
+  <rect x="86" y="88" width="16" height="24" rx="3" fill="#222" transform="rotate(15,86,88)"/>
+  <rect x="88" y="91" width="12" height="18" rx="2" fill="#44aaff" transform="rotate(15,88,91)"/>
+  <!-- other arm -->
+  <rect x="30" y="85" width="10" height="22" rx="5" fill="#FFCBA4" transform="rotate(-10,30,85)"/>
+  <!-- neck -->
+  <rect x="54" y="70" width="12" height="12" rx="4" fill="#FFCBA4"/>
+  <!-- head -->
+  <ellipse cx="60" cy="48" rx="30" ry="28" fill="#FFCBA4"/>
+  <!-- ears -->
+  <ellipse cx="30" cy="50" rx="6" ry="8" fill="#F5B898"/>
+  <ellipse cx="90" cy="50" rx="6" ry="8" fill="#F5B898"/>
+  <!-- cheeks -->
+  <ellipse cx="41" cy="56" rx="8" ry="6" fill="#FF9999" opacity="0.38"/>
+  <ellipse cx="79" cy="56" rx="8" ry="6" fill="#FF9999" opacity="0.38"/>
+  <!-- worried eyes -->
+  <ellipse cx="49" cy="44" rx="6" ry="7" fill="#333"/>
+  <ellipse cx="71" cy="44" rx="6" ry="7" fill="#333"/>
+  <circle cx="52" cy="41" r="2" fill="white"/>
+  <circle cx="74" cy="41" r="2" fill="white"/>
+  <!-- sweat drop -->
+  <ellipse cx="88" cy="36" rx="4" ry="6" fill="#88CCFF" opacity="0.85"/>
+  <!-- nervous mouth -->
+  <path d="M50 60 Q60 66 70 60" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- brow furrow -->
+  <path d="M43 36 Q49 32 53 37" stroke="#333" stroke-width="2" fill="none"/>
+  <path d="M67 37 Q71 32 77 36" stroke="#333" stroke-width="2" fill="none"/>
+</svg>`},
+    // 2. 주린이 — 놀란 눈, 파란 후드, 구겨진 차트
+    { bg:"#a8c8e0", desc:"유튜브로 공부했어요",
+      svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150" width="100" height="110">
+  <!-- legs -->
+  <rect x="48" y="110" width="12" height="30" rx="5" fill="#336699"/>
+  <rect x="60" y="110" width="12" height="30" rx="5" fill="#336699"/>
+  <!-- hoodie body -->
+  <rect x="34" y="78" width="52" height="40" rx="12" fill="#4488cc"/>
+  <!-- hoodie front pocket -->
+  <rect x="46" y="100" width="28" height="14" rx="6" fill="#3377bb"/>
+  <!-- arm holding crumpled chart -->
+  <rect x="80" y="84" width="10" height="22" rx="5" fill="#FFCBA4" transform="rotate(20,80,84)"/>
+  <!-- crumpled chart -->
+  <rect x="84" y="80" width="22" height="18" rx="2" fill="#fffde7" transform="rotate(20,84,80)"/>
+  <path d="M86 92 l4-6 l4 4 l4-8" stroke="#e53935" stroke-width="1.5" fill="none" transform="rotate(20,86,92)"/>
+  <!-- other arm -->
+  <rect x="30" y="84" width="10" height="22" rx="5" fill="#FFCBA4" transform="rotate(-20,30,84)"/>
+  <!-- neck -->
+  <rect x="54" y="68" width="12" height="12" rx="4" fill="#FFCBA4"/>
+  <!-- hoodie hood -->
+  <path d="M32 62 Q60 28 88 62" fill="#3377bb"/>
+  <!-- head -->
+  <ellipse cx="60" cy="46" rx="30" ry="28" fill="#FFCBA4"/>
+  <!-- ears -->
+  <ellipse cx="30" cy="48" rx="6" ry="8" fill="#F5B898"/>
+  <ellipse cx="90" cy="48" rx="6" ry="8" fill="#F5B898"/>
+  <!-- cheeks -->
+  <ellipse cx="41" cy="54" rx="8" ry="6" fill="#FF9999" opacity="0.38"/>
+  <ellipse cx="79" cy="54" rx="8" ry="6" fill="#FF9999" opacity="0.38"/>
+  <!-- surprised wide eyes -->
+  <ellipse cx="49" cy="42" rx="8" ry="9" fill="white" stroke="#333" stroke-width="1"/>
+  <ellipse cx="71" cy="42" rx="8" ry="9" fill="white" stroke="#333" stroke-width="1"/>
+  <ellipse cx="49" cy="43" rx="5" ry="6" fill="#333"/>
+  <ellipse cx="71" cy="43" rx="5" ry="6" fill="#333"/>
+  <circle cx="52" cy="40" r="2" fill="white"/>
+  <circle cx="74" cy="40" r="2" fill="white"/>
+  <!-- surprised mouth O -->
+  <ellipse cx="60" cy="60" rx="6" ry="7" fill="#333"/>
+  <ellipse cx="60" cy="61" rx="4" ry="5" fill="#cc6666"/>
+</svg>`},
+    // 3. 단타왕 — 별눈, 오렌지 줄무늬, 폰 두개
+    { bg:"#f0d080", desc:"손이 빠르면 장땡!",
+      svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150" width="100" height="110">
+  <!-- legs (spread energetically) -->
+  <rect x="44" y="108" width="12" height="30" rx="5" fill="#cc7722" transform="rotate(-8,44,108)"/>
+  <rect x="64" y="108" width="12" height="30" rx="5" fill="#cc7722" transform="rotate(8,64,108)"/>
+  <!-- body (orange striped shirt) -->
+  <rect x="34" y="76" width="52" height="40" rx="10" fill="#ff8c00"/>
+  <rect x="34" y="85" width="52" height="5" fill="#e07000"/>
+  <rect x="34" y="98" width="52" height="5" fill="#e07000"/>
+  <!-- left arm + phone -->
+  <rect x="24" y="80" width="12" height="22" rx="5" fill="#FFCBA4" transform="rotate(-25,24,80)"/>
+  <rect x="10" y="84" width="15" height="22" rx="3" fill="#222" transform="rotate(-25,10,84)"/>
+  <rect x="12" y="87" width="11" height="16" rx="2" fill="#44aaff" transform="rotate(-25,12,87)"/>
+  <!-- right arm + phone -->
+  <rect x="84" y="80" width="12" height="22" rx="5" fill="#FFCBA4" transform="rotate(25,96,80)"/>
+  <rect x="96" y="84" width="15" height="22" rx="3" fill="#222" transform="rotate(25,96,84)"/>
+  <rect x="98" y="87" width="11" height="16" rx="2" fill="#44aaff" transform="rotate(25,98,87)"/>
+  <!-- neck -->
+  <rect x="54" y="66" width="12" height="12" rx="4" fill="#FFCBA4"/>
+  <!-- head -->
+  <ellipse cx="60" cy="44" rx="30" ry="28" fill="#FFCBA4"/>
+  <!-- ears -->
+  <ellipse cx="30" cy="46" rx="6" ry="8" fill="#F5B898"/>
+  <ellipse cx="90" cy="46" rx="6" ry="8" fill="#F5B898"/>
+  <!-- cheeks -->
+  <ellipse cx="41" cy="52" rx="8" ry="6" fill="#FF9999" opacity="0.45"/>
+  <ellipse cx="79" cy="52" rx="8" ry="6" fill="#FF9999" opacity="0.45"/>
+  <!-- star eyes -->
+  <text x="42" y="50" font-size="16" fill="#FFD700" text-anchor="middle">★</text>
+  <text x="78" y="50" font-size="16" fill="#FFD700" text-anchor="middle">★</text>
+  <!-- excited mouth -->
+  <path d="M46 62 Q60 74 74 62" stroke="#333" stroke-width="2.5" fill="#ff6666" stroke-linecap="round"/>
+  <!-- speed lines -->
+  <line x1="2" y1="50" x2="18" y2="54" stroke="#FFD700" stroke-width="2" opacity="0.7"/>
+  <line x1="2" y1="60" x2="16" y2="60" stroke="#FFD700" stroke-width="2" opacity="0.7"/>
+  <line x1="102" y1="50" x2="118" y2="54" stroke="#FFD700" stroke-width="2" opacity="0.7"/>
+  <line x1="104" y1="60" x2="118" y2="60" stroke="#FFD700" stroke-width="2" opacity="0.7"/>
+</svg>`},
+    // 4. 차트마스터 — 침착한 표정, 외알안경, 짙은 코트, 노트북
+    { bg:"#d0c8f0", desc:"이 패턴은 상승이야",
+      svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150" width="100" height="110">
+  <!-- legs -->
+  <rect x="48" y="110" width="12" height="30" rx="5" fill="#2a2a3a"/>
+  <rect x="60" y="110" width="12" height="30" rx="5" fill="#2a2a3a"/>
+  <!-- trench coat body -->
+  <rect x="32" y="76" width="56" height="42" rx="10" fill="#3a3a5a"/>
+  <!-- coat lapels -->
+  <polygon points="60,78 50,90 60,85" fill="#2a2a4a"/>
+  <polygon points="60,78 70,90 60,85" fill="#2a2a4a"/>
+  <!-- belt -->
+  <rect x="32" y="104" width="56" height="6" rx="3" fill="#2a2a4a"/>
+  <!-- arm holding laptop -->
+  <rect x="78" y="82" width="11" height="24" rx="5" fill="#FFCBA4" transform="rotate(15,78,82)"/>
+  <!-- laptop -->
+  <rect x="82" y="78" width="28" height="20" rx="2" fill="#555" transform="rotate(15,82,78)"/>
+  <rect x="84" y="80" width="24" height="16" rx="1" fill="#00cc88" transform="rotate(15,84,80)"/>
+  <path d="M88 90 l3-5 l3 3 l3-6 l3 4" stroke="white" stroke-width="1.2" fill="none" transform="rotate(15,88,90)"/>
+  <!-- other arm -->
+  <rect x="30" y="82" width="10" height="24" rx="5" fill="#FFCBA4"/>
+  <!-- neck -->
+  <rect x="54" y="66" width="12" height="12" rx="4" fill="#FFCBA4"/>
+  <!-- head -->
+  <ellipse cx="60" cy="44" rx="30" ry="28" fill="#FFCBA4"/>
+  <!-- ears -->
+  <ellipse cx="30" cy="46" rx="6" ry="8" fill="#F5B898"/>
+  <ellipse cx="90" cy="46" rx="6" ry="8" fill="#F5B898"/>
+  <!-- cheeks -->
+  <ellipse cx="41" cy="52" rx="8" ry="6" fill="#FF9999" opacity="0.38"/>
+  <ellipse cx="79" cy="52" rx="8" ry="6" fill="#FF9999" opacity="0.38"/>
+  <!-- calm eyes -->
+  <ellipse cx="48" cy="42" rx="6" ry="7" fill="#333"/>
+  <ellipse cx="72" cy="42" rx="6" ry="7" fill="#333"/>
+  <circle cx="51" cy="39" r="2" fill="white"/>
+  <circle cx="75" cy="39" r="2" fill="white"/>
+  <!-- monocle on right eye -->
+  <circle cx="72" cy="42" r="10" fill="none" stroke="#cc9900" stroke-width="2"/>
+  <line x1="81" y1="49" x2="86" y2="55" stroke="#cc9900" stroke-width="1.5"/>
+  <!-- calm slight smile -->
+  <path d="M50 58 Q60 64 70 58" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>`},
+    // 5. 펀드매니저 — 반 내려뜬 눈, 네이비 슈트, 서류가방
+    { bg:"#f0c870", desc:"타인의 돈으로 투자",
+      svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150" width="100" height="110">
+  <!-- legs -->
+  <rect x="48" y="110" width="12" height="30" rx="5" fill="#1a2a5a"/>
+  <rect x="60" y="110" width="12" height="30" rx="5" fill="#1a2a5a"/>
+  <!-- suit body -->
+  <rect x="33" y="76" width="54" height="42" rx="10" fill="#1e3a8a"/>
+  <!-- shirt & tie -->
+  <rect x="52" y="76" width="16" height="42" fill="white"/>
+  <polygon points="58,78 62,78 64,108 60,114 56,108" fill="#8833cc"/>
+  <!-- suit lapels -->
+  <polygon points="52,76 36,92 52,86" fill="#162d72"/>
+  <polygon points="68,76 84,92 68,86" fill="#162d72"/>
+  <!-- arm left (resting) -->
+  <rect x="28" y="80" width="11" height="26" rx="5" fill="#1e3a8a"/>
+  <ellipse cx="28" cy="106" rx="7" ry="5" fill="#FFCBA4"/>
+  <!-- arm right + briefcase -->
+  <rect x="81" y="80" width="11" height="26" rx="5" fill="#1e3a8a"/>
+  <rect x="82" y="108" width="24" height="18" rx="4" fill="#8B4513" stroke="#6B3410" stroke-width="1.5"/>
+  <rect x="90" y="104" width="8" height="6" rx="2" fill="#6B3410"/>
+  <line x1="82" y1="118" x2="106" y2="118" stroke="#6B3410" stroke-width="1.5"/>
+  <!-- neck -->
+  <rect x="54" y="66" width="12" height="12" rx="4" fill="#FFCBA4"/>
+  <!-- head -->
+  <ellipse cx="60" cy="44" rx="30" ry="28" fill="#FFCBA4"/>
+  <!-- ears -->
+  <ellipse cx="30" cy="46" rx="6" ry="8" fill="#F5B898"/>
+  <ellipse cx="90" cy="46" rx="6" ry="8" fill="#F5B898"/>
+  <!-- cheeks -->
+  <ellipse cx="41" cy="52" rx="8" ry="6" fill="#FF9999" opacity="0.38"/>
+  <ellipse cx="79" cy="52" rx="8" ry="6" fill="#FF9999" opacity="0.38"/>
+  <!-- smug half-lidded eyes -->
+  <ellipse cx="48" cy="43" rx="6" ry="7" fill="#333"/>
+  <ellipse cx="72" cy="43" rx="6" ry="7" fill="#333"/>
+  <rect x="42" y="38" width="12" height="6" rx="2" fill="#FFCBA4"/>
+  <rect x="66" y="38" width="12" height="6" rx="2" fill="#FFCBA4"/>
+  <circle cx="51" cy="41" r="2" fill="white"/>
+  <circle cx="75" cy="41" r="2" fill="white"/>
+  <!-- smug slight smile -->
+  <path d="M51 59 Q60 65 70 59" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>`},
+    // 6. 헤지펀드대표 — 달러 눈, 검은 프리미엄 슈트, 금화 떠다님
+    { bg:"#f8a040", desc:"숏도 롱도 다 먹는다",
+      svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 160" width="105" height="118">
+  <!-- floating gold coins -->
+  <ellipse cx="15" cy="55" rx="10" ry="10" fill="#FFD700" stroke="#cc9900" stroke-width="1.5"/>
+  <text x="15" y="59" font-size="10" fill="#aa7700" text-anchor="middle" font-weight="bold">$</text>
+  <ellipse cx="105" cy="45" rx="10" ry="10" fill="#FFD700" stroke="#cc9900" stroke-width="1.5"/>
+  <text x="105" y="49" font-size="10" fill="#aa7700" text-anchor="middle" font-weight="bold">$</text>
+  <ellipse cx="108" cy="75" rx="8" ry="8" fill="#FFD700" stroke="#cc9900" stroke-width="1.5"/>
+  <text x="108" y="79" font-size="9" fill="#aa7700" text-anchor="middle" font-weight="bold">$</text>
+  <!-- legs -->
+  <rect x="48" y="118" width="12" height="30" rx="5" fill="#111"/>
+  <rect x="60" y="118" width="12" height="30" rx="5" fill="#111"/>
+  <!-- premium dark suit body -->
+  <rect x="32" y="84" width="56" height="42" rx="10" fill="#111"/>
+  <!-- white shirt -->
+  <rect x="51" y="84" width="18" height="42" fill="white"/>
+  <!-- gold tie -->
+  <polygon points="58,86 62,86 64,116 60,122 56,116" fill="#FFD700"/>
+  <!-- suit lapels -->
+  <polygon points="51,84 33,100 51,94" fill="#0a0a0a"/>
+  <polygon points="69,84 87,100 69,94" fill="#0a0a0a"/>
+  <!-- cufflinks -->
+  <circle cx="34" cy="112" r="3" fill="#FFD700"/>
+  <circle cx="86" cy="112" r="3" fill="#FFD700"/>
+  <!-- arms -->
+  <rect x="26" y="88" width="12" height="28" rx="5" fill="#111"/>
+  <ellipse cx="27" cy="116" rx="7" ry="5" fill="#FFCBA4"/>
+  <rect x="82" y="88" width="12" height="28" rx="5" fill="#111"/>
+  <ellipse cx="93" cy="116" rx="7" ry="5" fill="#FFCBA4"/>
+  <!-- neck -->
+  <rect x="54" y="74" width="12" height="12" rx="4" fill="#FFCBA4"/>
+  <!-- head -->
+  <ellipse cx="60" cy="52" rx="30" ry="28" fill="#FFCBA4"/>
+  <!-- ears -->
+  <ellipse cx="30" cy="54" rx="6" ry="8" fill="#F5B898"/>
+  <ellipse cx="90" cy="54" rx="6" ry="8" fill="#F5B898"/>
+  <!-- cheeks -->
+  <ellipse cx="41" cy="60" rx="8" ry="6" fill="#FF9999" opacity="0.4"/>
+  <ellipse cx="79" cy="60" rx="8" ry="6" fill="#FF9999" opacity="0.4"/>
+  <!-- dollar sign eyes -->
+  <ellipse cx="48" cy="48" rx="8" ry="8" fill="white" stroke="#333" stroke-width="1"/>
+  <ellipse cx="72" cy="48" rx="8" ry="8" fill="white" stroke="#333" stroke-width="1"/>
+  <text x="48" y="52" font-size="11" fill="#228B22" text-anchor="middle" font-weight="bold">$</text>
+  <text x="72" y="52" font-size="11" fill="#228B22" text-anchor="middle" font-weight="bold">$</text>
+  <!-- greedy grin -->
+  <path d="M44 66 Q60 78 76 66" stroke="#333" stroke-width="2.5" fill="#cc5544" stroke-linecap="round"/>
+  <!-- teeth -->
+  <path d="M50 68 Q60 76 70 68" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>`},
+    // 7. 주식왕 — 황홀한 표정, 금왕관, 네이비 슈트+빨간 넥타이, 돈가방+스파클
+    { bg:"#FFD700", desc:"시장이 나를 따른다",
+      svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 175" width="108" height="130">
+  <!-- sparkles around -->
+  <text x="8" y="28" font-size="14" fill="#FFD700">✦</text>
+  <text x="100" y="24" font-size="14" fill="#FFD700">✦</text>
+  <text x="4" y="80" font-size="10" fill="#FFD700">✦</text>
+  <text x="108" y="72" font-size="10" fill="#FFD700">✦</text>
+  <!-- gold crown -->
+  <polygon points="32,42 60,12 88,42 80,34 60,24 40,34" fill="#FFD700" stroke="#cc9900" stroke-width="1.5"/>
+  <circle cx="60" cy="18" r="5" fill="#FF4444"/>
+  <circle cx="38" cy="38" r="4" fill="#4444FF"/>
+  <circle cx="82" cy="38" r="4" fill="#44AA44"/>
+  <!-- head -->
+  <ellipse cx="60" cy="60" rx="30" ry="28" fill="#FFCBA4"/>
+  <!-- ears -->
+  <ellipse cx="30" cy="62" rx="6" ry="8" fill="#F5B898"/>
+  <ellipse cx="90" cy="62" rx="6" ry="8" fill="#F5B898"/>
+  <!-- cheeks (extra rosy for king) -->
+  <ellipse cx="41" cy="68" rx="9" ry="7" fill="#FF9999" opacity="0.5"/>
+  <ellipse cx="79" cy="68" rx="9" ry="7" fill="#FF9999" opacity="0.5"/>
+  <!-- blissful closed-curve eyes (^ ^) -->
+  <path d="M42 56 Q48 49 54 56" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M66 56 Q72 49 78 56" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- big happy smile -->
+  <path d="M44 72 Q60 86 76 72" stroke="#333" stroke-width="2.5" fill="#ff8866" stroke-linecap="round"/>
+  <path d="M50 75 Q60 83 70 75" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- neck -->
+  <rect x="54" y="84" width="12" height="12" rx="4" fill="#FFCBA4"/>
+  <!-- suit body (navy premium) -->
+  <rect x="30" y="92" width="60" height="48" rx="10" fill="#1e3a8a"/>
+  <!-- white shirt front -->
+  <rect x="50" y="92" width="20" height="48" fill="white"/>
+  <!-- red tie -->
+  <polygon points="57,94 63,94 65,128 60,134 55,128" fill="#cc2222"/>
+  <!-- suit lapels -->
+  <polygon points="50,92 30,108 50,102" fill="#162d72"/>
+  <polygon points="70,92 90,108 70,102" fill="#162d72"/>
+  <!-- medal/pin on lapel -->
+  <circle cx="42" cy="100" r="4" fill="#FFD700" stroke="#cc9900" stroke-width="1"/>
+  <!-- arms -->
+  <rect x="22" y="96" width="13" height="30" rx="6" fill="#1e3a8a"/>
+  <ellipse cx="23" cy="126" rx="8" ry="6" fill="#FFCBA4"/>
+  <rect x="85" y="96" width="13" height="30" rx="6" fill="#1e3a8a"/>
+  <!-- money bag -->
+  <ellipse cx="100" cy="130" rx="14" ry="16" fill="#FFD700" stroke="#cc9900" stroke-width="1.5"/>
+  <text x="100" y="134" font-size="13" fill="#aa7700" text-anchor="middle" font-weight="bold">$</text>
+  <ellipse cx="100" cy="114" rx="7" ry="5" fill="#cc9900"/>
+  <!-- legs -->
+  <rect x="46" y="136" width="12" height="28" rx="5" fill="#1e3a8a"/>
+  <rect x="62" y="136" width="12" height="28" rx="5" fill="#1e3a8a"/>
+  <!-- shoes -->
+  <ellipse cx="52" cy="163" rx="10" ry="5" fill="#111"/>
+  <ellipse cx="68" cy="163" rx="10" ry="5" fill="#111"/>
+</svg>`},
   ];
 
   let charFigEl: HTMLElement | null = null;
@@ -309,13 +637,9 @@ export function initGame(root: HTMLElement) {
     if (!charStageEl) return;
     const s = CHAR_STAGES[state.rankIdx];
     charStageEl.innerHTML = `
-      ${s.top    ? `<div class="cs-top">${s.top}</div>`  : ""}
-      <div class="cs-face">${s.face}</div>
-      ${s.body   ? `<div class="cs-body">${s.body}${s.bottom ? " " + s.bottom : ""}</div>` : ""}
-      <div class="cs-props">${s.props}</div>
+      <div class="cs-svg">${s.svg}</div>
       <div class="cs-desc">${s.desc}</div>
     `;
-    // Tint scene background to rank colour
     const sceneEl = root.querySelector(".scene") as HTMLElement | null;
     if (sceneEl) {
       sceneEl.style.background =
