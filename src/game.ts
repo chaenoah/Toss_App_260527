@@ -206,51 +206,82 @@ export function initGame(root: HTMLElement) {
 
   // ─── Build skeleton DOM ─────────────────────────────────────────────────────
 
+  // Characters that evolve with rank
+  const CHAR_EMOJIS = ["🧑‍💼","🐜","📱","⚡","📊","💼","🏦","👑"];
+  let charEmojiEl: HTMLElement | null = null;
+  let charBubbleEl: HTMLElement | null = null;
+  let charFigEl: HTMLElement | null = null;
+
   function buildDOM() {
     root.innerHTML = "";
 
-    // Header: left=rank+cash+total, right=character tap button
-    const header = el("div", "header");
-    const headerLeft = el("div", "header-left");
-    rankEl  = el("span", "rank-badge");
-    cashEl  = el("div", "cash-display");
-    totalEl = el("div", "total-display");
-    headerLeft.append(rankEl, cashEl, totalEl);
+    // ── Top stats bar (dark) ──
+    const topbar = el("div", "topbar");
+    const topLeft = el("div", "topbar-left");
+    const coinIcon = el("span"); coinIcon.textContent = "💰";
+    cashEl = el("div", "topbar-cash");
+    topLeft.append(coinIcon, cashEl);
 
-    const charBtn = el("button", "char-btn") as HTMLButtonElement;
-    charBtn.textContent = "💰";
-    charBtn.addEventListener("click", onTap);
+    const topRight = el("div", "topbar-right");
+    rankEl  = el("span", "topbar-rank");
+    totalEl = el("div", "topbar-total");
+    topRight.append(rankEl, totalEl);
+    topbar.append(topLeft, topRight);
+
+    // ── Scene (tap area) ──
+    const scene = el("div", "scene");
+    scene.addEventListener("click", onTap);
+
+    // Background NPC crowd (decorative, not clickable)
+    const crowd = el("div", "scene-crowd");
+    const npcs = [
+      { cls:"npc npc-1", e:"🤑" }, { cls:"npc npc-2", e:"👨‍💻" },
+      { cls:"npc npc-3", e:"👩‍💼" }, { cls:"npc npc-4", e:"📊" },
+      { cls:"npc npc-5", e:"💹" }, { cls:"npc npc-6", e:"🏦" },
+      { cls:"npc npc-7", e:"📈" }, { cls:"npc npc-8", e:"💼" },
+    ];
+    npcs.forEach(({ cls, e }) => {
+      const s = el("span", cls); s.textContent = e;
+      crowd.appendChild(s);
+    });
+    scene.appendChild(crowd);
+
+    // Main character
     const charWrap = el("div", "char-wrap");
-    const tapHint  = el("div", "tap-hint");
-    tapHint.textContent = "탭!";
-    charWrap.append(charBtn, tapHint);
+    charBubbleEl = el("div", "char-bubble");
+    charBubbleEl.textContent = "+100원";
+    charFigEl = el("div", "char-fig");
+    charEmojiEl = el("span", "char-emoji");
+    charEmojiEl.textContent = CHAR_EMOJIS[state.rankIdx];
+    charFigEl.appendChild(charEmojiEl);
+    const charLabel = el("div", "char-label");
+    charLabel.textContent = "탭!";
+    charWrap.append(charBubbleEl, charFigEl, charLabel);
+    scene.appendChild(charWrap);
 
-    header.append(headerLeft, charWrap);
-
-    // Event box
+    // ── Event box ──
     eventBoxEl = el("div", "event-box event-normal");
     eventBoxEl.textContent = "📊 시장이 열렸습니다. 투자를 시작하세요!";
 
-    // Tab bar
+    // ── Tab bar ──
     const tabBar = el("div", "tab-bar");
     [
-      { id: "market",    label: "📈 시장" },
-      { id: "portfolio", label: "💼 보유" },
-      { id: "news",      label: "📰 뉴스" },
-      { id: "upgrades",  label: "⚙️ 샵"  },
-    ].forEach(({ id, label }) => {
+      { id: "market",    icon: "📈", text: "시장" },
+      { id: "portfolio", icon: "💼", text: "보유" },
+      { id: "news",      icon: "📰", text: "뉴스" },
+      { id: "upgrades",  icon: "⚙️", text: "샵"  },
+    ].forEach(({ id, icon, text }) => {
       const btn = el("button", "tab-btn") as HTMLButtonElement;
-      btn.textContent = label;
+      btn.innerHTML = `<span class="tab-icon">${icon}</span><span class="tab-text">${text}</span>`;
       btn.dataset.tab = id;
       btn.addEventListener("click", () => switchTab(id));
       tabBar.appendChild(btn);
     });
 
-    // Content area
     tabContentEl = el("div", "tab-content");
 
     const stickyTop = el("div", "sticky-top");
-    stickyTop.append(header, eventBoxEl, tabBar);
+    stickyTop.append(topbar, scene, eventBoxEl, tabBar);
     root.append(stickyTop, tabContentEl);
   }
 
@@ -258,8 +289,10 @@ export function initGame(root: HTMLElement) {
 
   function renderHeader() {
     rankEl.textContent  = RANKS[state.rankIdx].name;
-    cashEl.textContent  = `현금 ${fmt(state.cash)}`;
+    cashEl.textContent  = fmt(state.cash);
     totalEl.textContent = `총자산 ${fmtShort(totalAssets())}`;
+    if (charEmojiEl) charEmojiEl.textContent = CHAR_EMOJIS[state.rankIdx];
+    if (charBubbleEl) charBubbleEl.textContent = `+${fmt(getTapAmount())} / 탭`;
   }
 
   // ─── Tap ────────────────────────────────────────────────────────────────────
@@ -271,6 +304,11 @@ export function initGame(root: HTMLElement) {
     renderHeader();
     save();
     showFloat(e.clientX, e.clientY, `+${fmt(amt)}`);
+    // Bounce animation on character
+    if (charFigEl) {
+      charFigEl.classList.add("tapped");
+      setTimeout(() => charFigEl!.classList.remove("tapped"), 120);
+    }
   }
 
   function showFloat(x: number, y: number, text: string) {
