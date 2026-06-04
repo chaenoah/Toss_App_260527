@@ -811,6 +811,7 @@ export function initGame(root: HTMLElement) {
 
     // ── Avg info ──
     const avgInfo = el("div", "avg-info");
+    avgInfo.dataset.avgInfo = String(i);
     if (s.held > 0) {
       const avg    = s.totalCost / s.held;
       const profit = (s.price - avg) * s.held;
@@ -848,6 +849,19 @@ export function initGame(root: HTMLElement) {
         const arrow = s.pctChange >= 0 ? "▲" : "▼";
         pctEl.textContent = arrow + fmtP(s.pctChange);
         pctEl.className   = `s-pct ${s.pctChange >= 0 ? "up" : "dn"}`;
+      }
+      // Real-time avg-info (평가손익) in market tab
+      const avgInfo = root.querySelector(`[data-avg-info="${i}"]`) as HTMLElement | null;
+      if (avgInfo) {
+        if (s.held > 0) {
+          const avg    = s.totalCost / s.held;
+          const profit = (s.price - avg) * s.held;
+          const pct    = ((s.price - avg) / avg) * 100;
+          const cls    = profit >= 0 ? "up" : "dn";
+          avgInfo.innerHTML = `평균단가 ${fmt(avg)} | 평가손익 <span class="${cls}">${profit >= 0 ? "+" : ""}${fmt(profit)} (${fmtP(pct)})</span>`;
+        } else {
+          avgInfo.textContent = "보유 없음";
+        }
       }
       // Sync jakjeon highlight
       const summary = root.querySelector(`[data-stock-index="${i}"]`);
