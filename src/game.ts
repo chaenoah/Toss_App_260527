@@ -60,12 +60,12 @@ const RANKS = [
 ];
 
 const UPGRADES = [
-  { id: "hts",     name: "HTS 설치",       desc: "탭 수익 2배",        cost: 5000,    tapMult: 2,  autoCash: 0   },
-  { id: "book",    name: "투자 서적 정독", desc: "탭 수익 3배",        cost: 20000,   tapMult: 3,  autoCash: 0   },
-  { id: "report",  name: "증권사 리포트",  desc: "탭 수익 5배",        cost: 80000,   tapMult: 5,  autoCash: 0   },
-  { id: "algo",    name: "알고리즘 분석기",desc: "탭 수익 8배",        cost: 300000,  tapMult: 8,  autoCash: 0   },
-  { id: "bot",     name: "AI 트레이딩 봇", desc: "3초마다 자동 수익",  cost: 800000,  tapMult: 0,  autoCash: 500 },
-  { id: "insider", name: "내부정보 입수",  desc: "탭 수익 15배",       cost: 3000000, tapMult: 15, autoCash: 0   },
+  { id: "hts",     name: "HTS 설치",       desc: "탭 수익 2배",               cost: 30000,    tapMult: 2,  autoCash: 0     },
+  { id: "book",    name: "투자 서적 정독", desc: "탭 수익 3배",               cost: 100000,   tapMult: 3,  autoCash: 0     },
+  { id: "report",  name: "증권사 리포트",  desc: "탭 수익 5배",               cost: 500000,   tapMult: 5,  autoCash: 0     },
+  { id: "algo",    name: "알고리즘 분석기",desc: "탭 수익 8배",               cost: 2000000,  tapMult: 8,  autoCash: 0     },
+  { id: "bot",     name: "AI 트레이딩 봇", desc: "3초마다 자동 수익 50,000원", cost: 5000000,  tapMult: 0,  autoCash: 50000 },
+  { id: "insider", name: "내부정보 입수",  desc: "탭 수익 15배",              cost: 20000000, tapMult: 15, autoCash: 0     },
 ];
 
 const SECTOR_EVENTS = [
@@ -129,7 +129,7 @@ export function initGame(root: HTMLElement) {
   function defaultState(): GameState {
     const indices = shuffle(POOL.map((_, i) => i)).slice(0, 5);
     return {
-      cash: 0,
+      cash: 5000,
       stocks: indices.map((pi) => ({
         poolIdx: pi,
         name: POOL[pi].name,
@@ -168,7 +168,7 @@ export function initGame(root: HTMLElement) {
     const mults = UPGRADES.filter(
       (u) => u.tapMult > 0 && state.purchasedUpgrades.includes(u.id)
     ).map((u) => u.tapMult);
-    return 100 * (mults.length ? Math.max(...mults) : 1);
+    return 1000 * (mults.length ? Math.max(...mults) : 1);
   }
 
   function totalAssets(): number {
