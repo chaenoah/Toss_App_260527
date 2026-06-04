@@ -922,10 +922,11 @@ export function initGame(root: HTMLElement) {
     const total     = totalAssets();
     const stockVal  = state.stocks.reduce((s, x) => s + x.held * x.price, 0);
     const summary   = el("div", "port-summary");
+    summary.dataset.portSummary = "1";
     summary.innerHTML = `
-      <div class="port-row"><span>총자산</span><span class="bold">${fmtShort(total)}</span></div>
-      <div class="port-row"><span>현금</span><span>${fmt(state.cash)}</span></div>
-      <div class="port-row"><span>주식 평가액</span><span>${fmtShort(stockVal)}</span></div>
+      <div class="port-row"><span>총자산</span><span class="bold" data-port="total">${fmtShort(total)}</span></div>
+      <div class="port-row"><span>현금</span><span data-port="cash">${fmt(state.cash)}</span></div>
+      <div class="port-row"><span>주식 평가액</span><span data-port="stockval">${fmtShort(stockVal)}</span></div>
     `;
     wrap.appendChild(summary);
     const held = state.stocks.filter((s) => s.held > 0);
@@ -933,22 +934,51 @@ export function initGame(root: HTMLElement) {
       const empty = el("div", "empty-msg"); empty.textContent = "보유 주식이 없습니다.";
       wrap.appendChild(empty);
     } else {
-      held.forEach((s) => {
+      held.forEach((s, cardIdx) => {
         const avg    = s.totalCost / s.held;
         const profit = (s.price - avg) * s.held;
         const pct    = ((s.price - avg) / avg) * 100;
         const card   = el("div", "port-card");
+        card.dataset.portIdx = String(cardIdx);
         card.innerHTML = `
           <div class="port-stock-name">${s.name}</div>
-          <div class="port-row"><span>${s.held}주</span><span>현재가 ${fmt(s.price)}</span></div>
+          <div class="port-row"><span>${s.held}주</span><span data-port-price="${cardIdx}">현재가 ${fmt(s.price)}</span></div>
           <div class="port-row"><span>평균단가 ${fmt(avg)}</span>
-            <span class="${profit >= 0 ? "up" : "dn"}">${profit >= 0 ? "+" : ""}${fmt(profit)} (${fmtP(pct)})</span></div>
-          <div class="port-row"><span>평가액</span><span>${fmt(s.held * s.price)}</span></div>
+            <span class="${profit >= 0 ? "up" : "dn"}" data-port-profit="${cardIdx}">${profit >= 0 ? "+" : ""}${fmt(profit)} (${fmtP(pct)})</span></div>
+          <div class="port-row"><span>평가액</span><span data-port-val="${cardIdx}">${fmt(s.held * s.price)}</span></div>
         `;
         wrap.appendChild(card);
       });
     }
     tabContentEl.appendChild(wrap);
+  }
+
+  function patchPortfolio() {
+    if (activeTab !== "portfolio") return;
+    const total    = totalAssets();
+    const stockVal = state.stocks.reduce((s, x) => s + x.held * x.price, 0);
+    const tEl = tabContentEl.querySelector('[data-port="total"]') as HTMLElement | null;
+    const cEl = tabContentEl.querySelector('[data-port="cash"]')  as HTMLElement | null;
+    const vEl = tabContentEl.querySelector('[data-port="stockval"]') as HTMLElement | null;
+    if (tEl) tEl.textContent = fmtShort(total);
+    if (cEl) cEl.textContent = fmt(state.cash);
+    if (vEl) vEl.textContent = fmtShort(stockVal);
+
+    const held = state.stocks.filter((s) => s.held > 0);
+    held.forEach((s, cardIdx) => {
+      const avg    = s.totalCost / s.held;
+      const profit = (s.price - avg) * s.held;
+      const pct    = ((s.price - avg) / avg) * 100;
+      const priceEl  = tabContentEl.querySelector(`[data-port-price="${cardIdx}"]`)  as HTMLElement | null;
+      const profitEl = tabContentEl.querySelector(`[data-port-profit="${cardIdx}"]`) as HTMLElement | null;
+      const valEl    = tabContentEl.querySelector(`[data-port-val="${cardIdx}"]`)    as HTMLElement | null;
+      if (priceEl)  priceEl.textContent  = `현재가 ${fmt(s.price)}`;
+      if (profitEl) {
+        profitEl.textContent = `${profit >= 0 ? "+" : ""}${fmt(profit)} (${fmtP(pct)})`;
+        profitEl.className   = profit >= 0 ? "up" : "dn";
+      }
+      if (valEl) valEl.textContent = fmt(s.held * s.price);
+    });
   }
 
   // ─── News ───────────────────────────────────────────────────────────────────
@@ -1020,7 +1050,7 @@ export function initGame(root: HTMLElement) {
       s.pctChange = ((s.price - s.basePrice) / s.basePrice) * 100;
     });
     patchPrices();
-    if (activeTab === "portfolio") renderPortfolio();
+    patchPortfolio();
     renderHeader();
     save();
   }
