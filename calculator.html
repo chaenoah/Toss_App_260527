@@ -3,297 +3,179 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>대출 갈아타기 손익계산기</title>
+<title>대출 갈아타기 계산기</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-  :root {
-    --blue: #3182F6;
-    --blue-light: #EBF3FE;
-    --green: #00B493;
-    --green-bg: #E6F6F0;
-    --red: #F04452;
-    --red-bg: #FEF0F0;
-    --text: #191F28;
-    --muted: #8B95A1;
-    --border: #E5E8EB;
-    --surface: #F9FAFB;
-    --bg: #F2F4F6;
-  }
+:root {
+  --blue: #3182F6;
+  --green: #00B493;
+  --red: #F04452;
+  --text: #191F28;
+  --muted: #B0B8C1;
+  --border: #EBEEF2;
+  --bg: #F7F8FA;
+  --white: #ffffff;
+}
 
-  body {
-    font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-    background: var(--bg);
-    min-height: 100vh;
-    color: var(--text);
-  }
+body {
+  font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
 
-  .wrap {
-    max-width: 480px;
-    margin: 0 auto;
-    background: var(--bg);
-    min-height: 100vh;
-  }
+.wrap { max-width: 480px; margin: 0 auto; padding-bottom: 60px; }
 
-  /* 헤더 */
-  .header {
-    background: #fff;
-    padding: 52px 20px 24px;
-  }
-  .header h1 {
-    font-size: 24px;
-    font-weight: 800;
-    line-height: 1.35;
-    color: var(--text);
-    margin-bottom: 8px;
-  }
-  .header p {
-    font-size: 15px;
-    color: var(--muted);
-  }
+/* ── 헤더 ── */
+.header { padding: 52px 24px 28px; background: var(--white); }
+.header-eyebrow {
+  font-size: 12px; font-weight: 700; color: var(--blue);
+  letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 8px;
+}
+.header h1 { font-size: 26px; font-weight: 900; line-height: 1.3; letter-spacing: -0.5px; }
+.header p  { font-size: 14px; color: var(--muted); margin-top: 6px; }
 
-  /* 카드 */
-  .card {
-    background: #fff;
-    border-radius: 20px;
-    padding: 20px;
-    margin: 12px 16px 0;
-  }
-  .card-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 18px;
-  }
+/* ── 폼 영역 ── */
+.form-body { padding: 0 24px; }
 
-  /* 입력 필드 */
-  .field { margin-bottom: 16px; }
-  .field-label {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 500;
-    margin-bottom: 6px;
-  }
-  .field-hint {
-    font-size: 12px;
-    color: var(--blue);
-    font-weight: 700;
-  }
-  .input-wrap {
-    display: flex;
-    align-items: center;
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 0 14px;
-    height: 50px;
-    transition: border-color 0.15s;
-  }
-  .input-wrap:focus-within {
-    border-color: #3182F666;
-    background: #fff;
-  }
-  .input-wrap input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    font-size: 16px;
-    color: var(--text);
-    outline: none;
-    min-width: 0;
-  }
-  .input-wrap input::placeholder { color: #C9D0D8; }
-  .suffix {
-    font-size: 14px;
-    color: var(--muted);
-    margin-left: 6px;
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
+/* 스텝 */
+.step { padding: 24px 0 0; }
+.step-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 700; color: var(--muted);
+  letter-spacing: 0.5px; text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.step-num {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--blue); color: #fff;
+  font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step + .step { border-top: 1px solid var(--border); }
 
-  /* 세그먼트 */
-  .segment {
-    display: flex;
-    background: var(--surface);
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    padding: 3px;
-    gap: 3px;
-  }
-  .seg-btn {
-    flex: 1;
-    height: 46px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    font-family: inherit;
-    background: transparent;
-    color: var(--muted);
-    transition: all 0.15s;
-    line-height: 1.2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-  }
-  .seg-btn.active {
-    background: #fff;
-    color: var(--blue);
-    box-shadow: 0 1px 6px rgba(0,0,0,0.10);
-  }
-  .seg-sub { font-size: 10px; font-weight: 400; opacity: 0.8; }
+/* 인라인 행 입력 */
+.row { display: flex; gap: 10px; margin-bottom: 10px; }
+.field { flex: 1; }
+.field.narrow { flex: 0 0 100px; }
 
-  /* 안내 텍스트 */
-  .tip {
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.6;
-    margin-top: -4px;
-    margin-bottom: 16px;
-  }
+.field-label {
+  font-size: 12px; color: var(--muted); font-weight: 600;
+  margin-bottom: 5px; display: flex; justify-content: space-between;
+}
+.field-hint { color: var(--blue); font-weight: 700; }
 
-  /* 에러 */
-  .error-box {
-    background: var(--red-bg);
-    border: 1px solid #FFCCCC;
-    border-radius: 10px;
-    padding: 12px 16px;
-    color: var(--red);
-    font-size: 14px;
-    text-align: center;
-    margin: 12px 16px 0;
-    display: none;
-  }
+.input-box {
+  display: flex; align-items: center;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 10px; height: 46px; padding: 0 12px;
+  transition: border-color 0.15s;
+}
+.input-box:focus-within { border-color: var(--blue); }
+.input-box input {
+  flex: 1; border: none; background: transparent;
+  font-size: 16px; color: var(--text); outline: none; min-width: 0;
+  font-family: inherit;
+}
+.input-box input::placeholder { color: #D0D5DC; font-size: 14px; }
+.suffix { font-size: 13px; color: var(--muted); flex-shrink: 0; margin-left: 4px; }
 
-  /* 계산 버튼 */
-  .calc-btn {
-    display: block;
-    width: calc(100% - 32px);
-    margin: 16px 16px 0;
-    height: 56px;
-    background: var(--blue);
-    color: #fff;
-    border: none;
-    border-radius: 14px;
-    font-size: 17px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
-    letter-spacing: -0.3px;
-  }
-  .calc-btn:active { opacity: 0.85; transform: scale(0.98); }
+/* 세그먼트 */
+.seg {
+  display: flex; background: var(--bg); border-radius: 10px;
+  border: 1.5px solid var(--border); padding: 3px; gap: 3px;
+  margin-bottom: 10px;
+}
+.seg-btn {
+  flex: 1; height: 36px; border-radius: 8px; border: none;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+  background: transparent; color: var(--muted);
+}
+.seg-btn.on { background: var(--white); color: var(--blue); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
 
-  /* 결과 영역 */
-  #result { display: none; padding-top: 8px; }
+/* 팁 */
+.tip { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
 
-  /* 결론 배너 */
-  .verdict {
-    margin: 12px 16px 0;
-    border-radius: 20px;
-    padding: 22px 20px;
-  }
-  .verdict.good { background: linear-gradient(135deg, #E6F6F0, #C8EEE1); border: 1.5px solid #99DFC0; }
-  .verdict.bad  { background: linear-gradient(135deg, #FEF0F0, #FDDEDE); border: 1.5px solid #F5AAAA; }
+/* 에러 */
+.err {
+  margin: 12px 24px 0; padding: 12px 16px; border-radius: 10px;
+  background: #FFF0F0; color: var(--red); font-size: 13px;
+  text-align: center; display: none;
+}
 
-  .verdict-title {
-    font-size: 20px;
-    font-weight: 800;
-    margin-bottom: 12px;
-  }
-  .verdict.good .verdict-title { color: var(--green); }
-  .verdict.bad  .verdict-title { color: var(--red); }
+/* 계산 버튼 */
+.go-btn {
+  display: block; width: calc(100% - 48px); margin: 20px 24px 0;
+  height: 54px; border-radius: 14px; border: none;
+  background: var(--blue); color: #fff;
+  font-family: inherit; font-size: 16px; font-weight: 800;
+  cursor: pointer; letter-spacing: -0.3px;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.go-btn:active { opacity: 0.85; transform: scale(0.98); }
 
-  .verdict-amount-box {
-    background: rgba(255,255,255,0.75);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 12px;
-  }
-  .verdict-amount-label {
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 4px;
-  }
-  .verdict-amount {
-    font-size: 32px;
-    font-weight: 900;
-    letter-spacing: -1px;
-  }
-  .verdict.good .verdict-amount { color: var(--green); }
-  .verdict.bad  .verdict-amount { color: var(--red); }
+/* ── 결과 ── */
+#result { display: none; }
 
-  .verdict-break {
-    font-size: 14px;
-    color: #374151;
-    line-height: 1.65;
-  }
-  .verdict-break b { font-weight: 800; }
-  .verdict.good .verdict-break b { color: var(--blue); }
-  .verdict.bad  .verdict-break b { color: var(--red); }
+/* 결론 배너 */
+.verdict {
+  margin: 20px 24px 0; border-radius: 20px; padding: 24px 20px;
+}
+.verdict.good { background: linear-gradient(145deg, #E8F8F3, #C8EEE1); border: 1.5px solid #A0DFC5; }
+.verdict.bad  { background: linear-gradient(145deg, #FEF0F0, #FDDEDE); border: 1.5px solid #F5B5B5; }
 
-  /* 결과 테이블 카드 */
-  .result-card { margin: 12px 16px 0; }
+.verdict-label { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.verdict.good .verdict-label { color: var(--green); }
+.verdict.bad  .verdict-label { color: var(--red); }
 
-  .result-section-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-    padding: 16px 0 8px;
-    border-bottom: 1px solid var(--border);
-  }
+.verdict-num {
+  font-size: 40px; font-weight: 900; letter-spacing: -1.5px;
+  line-height: 1.1; margin-bottom: 12px;
+}
+.verdict.good .verdict-num { color: var(--green); }
+.verdict.bad  .verdict-num { color: var(--red); }
 
-  .result-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .result-row:last-child { border-bottom: none; }
-  .result-row-label { font-size: 14px; color: var(--muted); }
-  .result-row-val {
-    text-align: right;
-  }
-  .result-row-val .main {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text);
-  }
-  .result-row-val .main.green { color: var(--green); }
-  .result-row-val .main.red   { color: var(--red); }
-  .result-row-val .main.large { font-size: 18px; }
-  .result-row-val .sub {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
+.verdict-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,0.7); border-radius: 20px;
+  padding: 5px 10px; font-size: 12px; font-weight: 600; color: #374151;
+}
+.chip b { font-weight: 800; }
+.chip.blue b { color: var(--blue); }
+.chip.red  b { color: var(--red); }
 
-  /* 다시 계산 */
-  .reset-btn {
-    display: block;
-    width: calc(100% - 32px);
-    margin: 16px 16px 40px;
-    height: 52px;
-    background: #fff;
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--muted);
-    font-family: inherit;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-  .reset-btn:active { opacity: 0.7; }
+/* 비교 테이블 */
+.compare { margin: 12px 24px 0; background: var(--white); border-radius: 16px; overflow: hidden; }
+.compare-header {
+  padding: 14px 16px 10px;
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  letter-spacing: 0.5px; border-bottom: 1px solid var(--border);
+}
+.crow {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 13px 16px; border-bottom: 1px solid var(--border);
+}
+.crow:last-child { border-bottom: none; }
+.crow-label { font-size: 13px; color: var(--muted); }
+.crow-val { font-size: 15px; font-weight: 700; color: var(--text); }
+.crow-val.green { color: var(--green); }
+.crow-val.red   { color: var(--red); }
+.crow-val.big   { font-size: 17px; }
+.crow-sub { font-size: 11px; color: var(--muted); font-weight: 400; display: block; text-align: right; margin-top: 1px; }
+
+/* 리셋 버튼 */
+.reset-btn {
+  display: block; width: calc(100% - 48px); margin: 12px 24px 0;
+  height: 48px; border-radius: 12px;
+  background: transparent; border: 1.5px solid var(--border);
+  font-family: inherit; font-size: 14px; font-weight: 600; color: var(--muted);
+  cursor: pointer; transition: opacity 0.15s;
+}
+.reset-btn:active { opacity: 0.6; }
 </style>
 </head>
 <body>
@@ -301,406 +183,306 @@
 
   <!-- 헤더 -->
   <div class="header">
-    <h1>대출 갈아타기<br>손익계산기</h1>
-    <p>수수료까지 고려해서 진짜 이득인지 알려드려요</p>
+    <div class="header-eyebrow">Loan Calculator</div>
+    <h1>갈아타면<br>얼마나 이득일까?</h1>
+    <p>수수료까지 계산해서 딱 알려드려요</p>
   </div>
 
-  <!-- 현재 대출 -->
-  <div class="card">
-    <div class="card-title">📋 현재 대출</div>
+  <div class="form-body">
 
-    <div class="field">
-      <div class="field-label">
-        <span>대출 잔액</span>
-        <span class="field-hint" id="hint-balance"></span>
+    <!-- STEP 1 현재 대출 -->
+    <div class="step">
+      <div class="step-label"><span class="step-num">1</span> 지금 대출</div>
+
+      <div class="row">
+        <div class="field">
+          <div class="field-label">
+            잔액
+            <span class="field-hint" id="hint-balance"></span>
+          </div>
+          <div class="input-box">
+            <input type="number" id="balance" placeholder="30000" inputmode="decimal" oninput="updateHint()">
+            <span class="suffix">만원</span>
+          </div>
+        </div>
+        <div class="field narrow">
+          <div class="field-label">금리 (연)</div>
+          <div class="input-box">
+            <input type="number" id="currentRate" placeholder="5.5" inputmode="decimal" step="0.1">
+            <span class="suffix">%</span>
+          </div>
+        </div>
       </div>
-      <div class="input-wrap">
-        <input type="number" id="balance" placeholder="예) 30000" inputmode="decimal" oninput="updateHint()">
-        <span class="suffix">만원</span>
-      </div>
-    </div>
 
-    <div class="field">
-      <div class="field-label">현재 금리 (연)</div>
-      <div class="input-wrap">
-        <input type="number" id="currentRate" placeholder="예) 5.5" inputmode="decimal" step="0.1">
-        <span class="suffix">%</span>
-      </div>
-    </div>
-
-    <div class="field">
-      <div class="field-label">남은 기간</div>
-      <div class="input-wrap">
-        <input type="number" id="currentMonths" placeholder="예) 240 (20년)" inputmode="numeric">
-        <span class="suffix">개월</span>
-      </div>
-    </div>
-
-    <div class="field">
-      <div class="field-label">상환 방식</div>
-      <div class="segment">
-        <button class="seg-btn active" id="cur-eq" onclick="selectRepay('current','equalPayment')">
-          원리금균등<span class="seg-sub">매달 동일 금액</span>
-        </button>
-        <button class="seg-btn" id="cur-ep" onclick="selectRepay('current','equalPrincipal')">
-          원금균등<span class="seg-sub">매달 원금 동일</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 갈아탈 대출 -->
-  <div class="card">
-    <div class="card-title">🔄 갈아탈 대출</div>
-
-    <div class="field">
-      <div class="field-label">새 금리 (연)</div>
-      <div class="input-wrap">
-        <input type="number" id="newRate" placeholder="예) 3.9" inputmode="decimal" step="0.1">
-        <span class="suffix">%</span>
+      <div class="row">
+        <div class="field narrow">
+          <div class="field-label">남은 기간</div>
+          <div class="input-box">
+            <input type="number" id="currentMonths" placeholder="240" inputmode="numeric">
+            <span class="suffix">개월</span>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">상환 방식</div>
+          <div class="seg" style="height:46px;margin-bottom:0">
+            <button class="seg-btn on" id="cur-eq" onclick="setRepay('cur','eq')">원리금균등</button>
+            <button class="seg-btn"    id="cur-ep" onclick="setRepay('cur','ep')">원금균등</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="field">
-      <div class="field-label">새 기간</div>
-      <div class="input-wrap">
-        <input type="number" id="newMonths" placeholder="예) 240 (20년)" inputmode="numeric">
-        <span class="suffix">개월</span>
+    <!-- STEP 2 새 대출 -->
+    <div class="step">
+      <div class="step-label"><span class="step-num">2</span> 갈아탈 대출</div>
+
+      <div class="row">
+        <div class="field narrow">
+          <div class="field-label">새 금리 (연)</div>
+          <div class="input-box">
+            <input type="number" id="newRate" placeholder="3.9" inputmode="decimal" step="0.1">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+        <div class="field narrow">
+          <div class="field-label">새 기간</div>
+          <div class="input-box">
+            <input type="number" id="newMonths" placeholder="240" inputmode="numeric">
+            <span class="suffix">개월</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-label" style="margin-bottom:5px">상환 방식</div>
+      <div class="seg">
+        <button class="seg-btn on" id="new-eq" onclick="setRepay('new','eq')">원리금균등</button>
+        <button class="seg-btn"    id="new-ep" onclick="setRepay('new','ep')">원금균등</button>
       </div>
     </div>
 
-    <div class="field">
-      <div class="field-label">상환 방식</div>
-      <div class="segment">
-        <button class="seg-btn active" id="new-eq" onclick="selectRepay('new','equalPayment')">
-          원리금균등<span class="seg-sub">매달 동일 금액</span>
-        </button>
-        <button class="seg-btn" id="new-ep" onclick="selectRepay('new','equalPrincipal')">
-          원금균등<span class="seg-sub">매달 원금 동일</span>
-        </button>
-      </div>
-    </div>
-  </div>
+    <!-- STEP 3 수수료 -->
+    <div class="step">
+      <div class="step-label"><span class="step-num">3</span> 중도상환수수료</div>
 
-  <!-- 중도상환수수료 -->
-  <div class="card">
-    <div class="card-title">💸 중도상환수수료</div>
-
-    <div class="field">
-      <div class="segment">
-        <button class="seg-btn active" id="fee-amount" onclick="selectFeeType('amount')">직접 금액 입력</button>
-        <button class="seg-btn" id="fee-rate" onclick="selectFeeType('rate')">요율로 계산</button>
+      <div class="seg">
+        <button class="seg-btn on" id="fee-amt-btn" onclick="setFee('amt')">금액 직접 입력</button>
+        <button class="seg-btn"    id="fee-pct-btn" onclick="setFee('pct')">요율로 계산</button>
       </div>
-    </div>
 
-    <div id="fee-amount-field" class="field">
-      <div class="field-label">수수료 금액</div>
-      <div class="input-wrap">
-        <input type="number" id="feeAmount" placeholder="없으면 0 또는 비워두세요" inputmode="decimal">
-        <span class="suffix">만원</span>
+      <div id="fee-amt-wrap">
+        <div class="input-box">
+          <input type="number" id="feeAmt" placeholder="없으면 0 (만원)" inputmode="decimal">
+          <span class="suffix">만원</span>
+        </div>
       </div>
+      <div id="fee-pct-wrap" style="display:none">
+        <div class="field-label" style="margin-bottom:5px">
+          요율
+          <span class="field-hint" id="hint-fee"></span>
+        </div>
+        <div class="input-box">
+          <input type="number" id="feePct" placeholder="예) 1.2" inputmode="decimal" step="0.1" oninput="updateFeeHint()">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <p class="tip">은행 앱 › 대출 상세 › 중도상환수수료 조회</p>
     </div>
 
-    <div id="fee-rate-field" class="field" style="display:none">
-      <div class="field-label">
-        <span>수수료 요율</span>
-        <span class="field-hint" id="hint-fee-rate"></span>
-      </div>
-      <div class="input-wrap">
-        <input type="number" id="feeRate" placeholder="예) 1.2" inputmode="decimal" step="0.1" oninput="updateFeeHint()">
-        <span class="suffix">%</span>
-      </div>
-    </div>
+  </div><!-- /form-body -->
 
-    <p class="tip">💡 은행 앱 또는 대출 계약서에서 확인할 수 있어요</p>
-  </div>
+  <div class="err" id="err">입력하지 않은 항목이 있어요</div>
+  <button class="go-btn" onclick="calc()">계산하기</button>
 
-  <div class="error-box" id="error-box">모든 항목을 입력해 주세요.</div>
-
-  <button class="calc-btn" onclick="calculate()">손익 계산하기</button>
-
-  <!-- 결과 -->
+  <!-- ── 결과 ── -->
   <div id="result">
 
-    <!-- 결론 배너 -->
-    <div class="verdict" id="verdict-box">
-      <div class="verdict-title" id="verdict-title"></div>
-      <div class="verdict-amount-box">
-        <div class="verdict-amount-label">수수료 제외 최종 손익</div>
-        <div class="verdict-amount" id="verdict-amount"></div>
-      </div>
-      <div class="verdict-break" id="verdict-break"></div>
+    <div class="verdict" id="vbox">
+      <div class="verdict-label" id="vlabel"></div>
+      <div class="verdict-num"   id="vnum"></div>
+      <div class="verdict-chips" id="vchips"></div>
     </div>
 
-    <!-- 월 납입액 비교 -->
-    <div class="card result-card">
-      <div class="result-section-label">월 납입액 비교</div>
-      <div class="result-row">
-        <span class="result-row-label">현재 월 납입액</span>
-        <div class="result-row-val">
-          <div class="main" id="r-cur-monthly"></div>
-          <div class="sub">첫 달 기준</div>
-        </div>
+    <div class="compare">
+      <div class="compare-header">월 납입액</div>
+      <div class="crow">
+        <span class="crow-label">지금</span>
+        <div><span class="crow-val" id="r-cm1"></span><span class="crow-sub">첫 달 기준</span></div>
       </div>
-      <div class="result-row">
-        <span class="result-row-label">새 월 납입액</span>
-        <div class="result-row-val">
-          <div class="main" id="r-new-monthly"></div>
-          <div class="sub">첫 달 기준</div>
-        </div>
+      <div class="crow">
+        <span class="crow-label">갈아타면</span>
+        <div><span class="crow-val" id="r-cm2"></span><span class="crow-sub">첫 달 기준</span></div>
       </div>
-      <div class="result-row">
-        <span class="result-row-label">월 납입액 차이</span>
-        <div class="result-row-val">
-          <div class="main large" id="r-monthly-diff"></div>
-        </div>
+      <div class="crow">
+        <span class="crow-label">차이</span>
+        <span class="crow-val big" id="r-cdiff"></span>
       </div>
     </div>
 
-    <!-- 총 이자 비교 -->
-    <div class="card result-card">
-      <div class="result-section-label">총 이자 비교</div>
-      <div class="result-row">
-        <span class="result-row-label">현재 총 이자</span>
-        <div class="result-row-val"><div class="main" id="r-cur-interest"></div></div>
+    <div class="compare">
+      <div class="compare-header">총 이자</div>
+      <div class="crow">
+        <span class="crow-label">지금</span>
+        <span class="crow-val" id="r-ti1"></span>
       </div>
-      <div class="result-row">
-        <span class="result-row-label">새 총 이자</span>
-        <div class="result-row-val"><div class="main" id="r-new-interest"></div></div>
+      <div class="crow">
+        <span class="crow-label">갈아타면</span>
+        <span class="crow-val" id="r-ti2"></span>
       </div>
-      <div class="result-row">
-        <span class="result-row-label">이자 절감액</span>
-        <div class="result-row-val"><div class="main large" id="r-interest-diff"></div></div>
+      <div class="crow">
+        <span class="crow-label">이자 절감</span>
+        <span class="crow-val big" id="r-tidiff"></span>
       </div>
-      <div class="result-row" id="r-fee-row">
-        <span class="result-row-label">중도상환수수료</span>
-        <div class="result-row-val"><div class="main red" id="r-fee"></div></div>
+      <div class="crow" id="r-fee-row">
+        <span class="crow-label">수수료</span>
+        <span class="crow-val red" id="r-fee"></span>
       </div>
-      <div class="result-row">
-        <span class="result-row-label">최종 순이익</span>
-        <div class="result-row-val"><div class="main large" id="r-net"></div></div>
+      <div class="crow">
+        <span class="crow-label">최종 순이익</span>
+        <span class="crow-val big" id="r-net"></span>
       </div>
     </div>
 
-    <button class="reset-btn" onclick="resetAll()">↩ 다시 계산하기</button>
+    <button class="reset-btn" onclick="reset()">↩ 다시 계산하기</button>
+
   </div>
 
-</div>
-
+</div><!-- /wrap -->
 <script>
-/* ── 상태 ──────────────────────────────────── */
-let currentRepay = 'equalPayment';
-let newRepay     = 'equalPayment';
-let feeType      = 'amount';
+/* 상태 */
+let curRepay = 'eq', newRepay = 'eq', feeMode = 'amt';
 
-/* ── 세그먼트 토글 ────────────────────────── */
-function selectRepay(which, val) {
-  if (which === 'current') {
-    currentRepay = val;
-    document.getElementById('cur-eq').classList.toggle('active', val === 'equalPayment');
-    document.getElementById('cur-ep').classList.toggle('active', val === 'equalPrincipal');
+/* 토글 */
+function setRepay(who, val) {
+  if (who === 'cur') {
+    curRepay = val;
+    document.getElementById('cur-eq').className = 'seg-btn' + (val==='eq'?' on':'');
+    document.getElementById('cur-ep').className = 'seg-btn' + (val==='ep'?' on':'');
   } else {
     newRepay = val;
-    document.getElementById('new-eq').classList.toggle('active', val === 'equalPayment');
-    document.getElementById('new-ep').classList.toggle('active', val === 'equalPrincipal');
+    document.getElementById('new-eq').className = 'seg-btn' + (val==='eq'?' on':'');
+    document.getElementById('new-ep').className = 'seg-btn' + (val==='ep'?' on':'');
   }
 }
-
-function selectFeeType(val) {
-  feeType = val;
-  document.getElementById('fee-amount').classList.toggle('active', val === 'amount');
-  document.getElementById('fee-rate').classList.toggle('active', val === 'rate');
-  document.getElementById('fee-amount-field').style.display = val === 'amount' ? '' : 'none';
-  document.getElementById('fee-rate-field').style.display  = val === 'rate'   ? '' : 'none';
+function setFee(v) {
+  feeMode = v;
+  document.getElementById('fee-amt-btn').className = 'seg-btn' + (v==='amt'?' on':'');
+  document.getElementById('fee-pct-btn').className = 'seg-btn' + (v==='pct'?' on':'');
+  document.getElementById('fee-amt-wrap').style.display = v==='amt' ? '' : 'none';
+  document.getElementById('fee-pct-wrap').style.display = v==='pct' ? '' : 'none';
 }
 
-/* ── 힌트 ────────────────────────────────── */
+/* 힌트 */
 function updateHint() {
-  const v = parseFloat(document.getElementById('balance').value) || 0;
-  document.getElementById('hint-balance').textContent = v > 0 ? fmtManwon(v) : '';
+  const v = +document.getElementById('balance').value || 0;
+  document.getElementById('hint-balance').textContent = v ? fmtMW(v) : '';
 }
-
 function updateFeeHint() {
-  const rate    = parseFloat(document.getElementById('feeRate').value) || 0;
-  const balance = (parseFloat(document.getElementById('balance').value) || 0) * 10000;
-  if (rate > 0 && balance > 0) {
-    document.getElementById('hint-fee-rate').textContent = '≈ ' + fmtWon(balance * rate / 100);
-  } else {
-    document.getElementById('hint-fee-rate').textContent = '';
+  const r = +document.getElementById('feePct').value || 0;
+  const b = (+document.getElementById('balance').value || 0) * 1e4;
+  document.getElementById('hint-fee').textContent = (r && b) ? '≈ ' + fw(b*r/100) : '';
+}
+
+/* 포매팅 */
+function fmtMW(mw) {
+  const w = mw * 1e4;
+  if (w >= 1e8) { const e=Math.floor(w/1e8), m=Math.floor((w%1e8)/1e4); return m ? e+'억 '+m.toLocaleString()+'만원' : e+'억원'; }
+  return mw.toLocaleString()+'만원';
+}
+function fw(n) {
+  const a=Math.abs(n);
+  if (a>=1e8) { const e=Math.floor(a/1e8),m=Math.floor((a%1e8)/1e4); return m ? e+'억 '+m.toLocaleString()+'만원' : e+'억원'; }
+  if (a>=1e4) return Math.round(a/1e4).toLocaleString()+'만원';
+  return Math.round(a).toLocaleString()+'원';
+}
+function fx(n) { return Math.round(Math.abs(n)).toLocaleString()+'원'; }
+
+/* 계산 */
+function meq(p,r,m) { if(!r) return p/m; const x=r/100/12; return p*x*Math.pow(1+x,m)/(Math.pow(1+x,m)-1); }
+function tiq(p,r,m) { return meq(p,r,m)*m-p; }
+function mep(p,r,m) { return p/m+p*r/100/12; }
+function tip(p,r,m) { const x=r/100/12,mp=p/m; let t=0,rem=p; for(let i=0;i<m;i++){t+=rem*x;rem-=mp;} return t; }
+function fm(p,r,m,t) { return t==='eq' ? meq(p,r,m) : mep(p,r,m); }
+function fi(p,r,m,t) { return t==='eq' ? tiq(p,r,m) : tip(p,r,m); }
+
+function calc() {
+  const bal  = (+document.getElementById('balance').value||0)*1e4;
+  const cr   = +document.getElementById('currentRate').value||0;
+  const cm   = +document.getElementById('currentMonths').value||0;
+  const nr   = +document.getElementById('newRate').value||0;
+  const nm   = +document.getElementById('newMonths').value||0;
+  const err  = document.getElementById('err');
+
+  if (!bal||!cr||!cm||!nr||!nm) { err.style.display='block'; return; }
+  err.style.display='none';
+
+  let fee = feeMode==='amt'
+    ? (+document.getElementById('feeAmt').value||0)*1e4
+    : bal*(+document.getElementById('feePct').value||0)/100;
+
+  const cm1 = fm(bal,cr,cm,curRepay), cm2 = fm(bal,nr,nm,newRepay);
+  const ti1 = fi(bal,cr,cm,curRepay), ti2 = fi(bal,nr,nm,newRepay);
+  const mdiff = cm1-cm2, tidiff = ti1-ti2, net = tidiff-fee;
+  const good = net>=0;
+
+  /* 배너 */
+  const vbox = document.getElementById('vbox');
+  vbox.className = 'verdict '+(good?'good':'bad');
+  document.getElementById('vlabel').textContent = good ? '갈아타면 이득이에요 ✅' : '갈아타면 손해예요 ⚠️';
+  document.getElementById('vnum').textContent   = (good?'+':'−')+fw(Math.abs(net));
+
+  /* 칩 */
+  let chips = '';
+  if (mdiff>0) chips += `<span class="chip">월 <b class="blue">${fx(mdiff)} 절약</b></span>`;
+  else if (mdiff<0) chips += `<span class="chip">월 <b class="red">${fx(mdiff)} 증가</b></span>`;
+
+  let bk = null;
+  if (fee>0 && mdiff>0) bk = Math.ceil(fee/mdiff);
+  if (bk!==null) {
+    const yrs = bk>=12 ? ` (${Math.ceil(bk/12)}년)` : '';
+    chips += good
+      ? `<span class="chip">손익분기 <b class="blue">${bk}개월${yrs}</b></span>`
+      : `<span class="chip red">회수까지 <b class="red">${bk}개월${yrs}</b> 필요</span>`;
+  } else if (!fee) {
+    chips += `<span class="chip">🎉 즉시 이득</span>`;
   }
+  document.getElementById('vchips').innerHTML = chips;
+
+  /* 테이블 */
+  document.getElementById('r-cm1').textContent    = fx(cm1);
+  document.getElementById('r-cm2').textContent    = fx(cm2);
+  const cdEl = document.getElementById('r-cdiff');
+  cdEl.textContent  = mdiff>=0 ? fw(mdiff)+' 절약' : fw(Math.abs(mdiff))+' 증가';
+  cdEl.className    = 'crow-val big '+(mdiff>=0?'green':'red');
+
+  document.getElementById('r-ti1').textContent    = fw(ti1);
+  document.getElementById('r-ti2').textContent    = fw(ti2);
+  const tdEl = document.getElementById('r-tidiff');
+  tdEl.textContent  = tidiff>=0 ? fw(tidiff)+' 절약' : fw(Math.abs(tidiff))+' 증가';
+  tdEl.className    = 'crow-val big '+(tidiff>=0?'green':'red');
+
+  const frow = document.getElementById('r-fee-row');
+  if (fee>0) { document.getElementById('r-fee').textContent='− '+fw(fee); frow.style.display=''; }
+  else frow.style.display='none';
+
+  const nEl = document.getElementById('r-net');
+  nEl.textContent = good ? fw(net)+' 이득' : fw(Math.abs(net))+' 손해';
+  nEl.className   = 'crow-val big '+(good?'green':'red');
+
+  document.getElementById('result').style.display='block';
+  setTimeout(()=>document.getElementById('vbox').scrollIntoView({behavior:'smooth',block:'start'}),80);
 }
 
-/* ── 포매팅 ──────────────────────────────── */
-function fmtManwon(manwon) {
-  const won = manwon * 10000;
-  if (won >= 1e8) {
-    const eok = Math.floor(won / 1e8);
-    const man = Math.floor((won % 1e8) / 10000);
-    return man > 0 ? eok + '억 ' + man.toLocaleString() + '만원' : eok + '억원';
-  }
-  return manwon.toLocaleString() + '만원';
-}
-
-function fmtWon(n) {
-  const a = Math.abs(n);
-  if (a >= 1e8) {
-    const eok = Math.floor(a / 1e8);
-    const man = Math.floor((a % 1e8) / 10000);
-    return man > 0 ? eok + '억 ' + man.toLocaleString() + '만원' : eok + '억원';
-  }
-  if (a >= 10000) return Math.round(a / 10000).toLocaleString() + '만원';
-  return Math.round(a).toLocaleString() + '원';
-}
-
-function fmtExact(n) {
-  return Math.round(Math.abs(n)).toLocaleString() + '원';
-}
-
-/* ── 계산 로직 ───────────────────────────── */
-function monthlyEqual(p, annRate, months) {
-  if (annRate === 0) return p / months;
-  const r = annRate / 100 / 12;
-  return (p * r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1);
-}
-
-function totalInterestEqual(p, annRate, months) {
-  return monthlyEqual(p, annRate, months) * months - p;
-}
-
-function firstMonthPrincipal(p, annRate, months) {
-  const r = annRate / 100 / 12;
-  return p / months + p * r;
-}
-
-function totalInterestPrincipal(p, annRate, months) {
-  const r = annRate / 100 / 12;
-  const mp = p / months;
-  let total = 0, rem = p;
-  for (let i = 0; i < months; i++) { total += rem * r; rem -= mp; }
-  return total;
-}
-
-function getFirstMonthly(p, rate, months, type) {
-  return type === 'equalPayment' ? monthlyEqual(p, rate, months) : firstMonthPrincipal(p, rate, months);
-}
-
-function getTotalInterest(p, rate, months, type) {
-  return type === 'equalPayment' ? totalInterestEqual(p, rate, months) : totalInterestPrincipal(p, rate, months);
-}
-
-/* ── 계산 실행 ───────────────────────────── */
-function calculate() {
-  const balance       = (parseFloat(document.getElementById('balance').value) || 0) * 10000;
-  const currentRate   = parseFloat(document.getElementById('currentRate').value) || 0;
-  const currentMonths = parseInt(document.getElementById('currentMonths').value) || 0;
-  const newRate       = parseFloat(document.getElementById('newRate').value) || 0;
-  const newMonths     = parseInt(document.getElementById('newMonths').value) || 0;
-
-  const err = document.getElementById('error-box');
-  if (!balance || !currentRate || !currentMonths || !newRate || !newMonths) {
-    err.textContent = '모든 항목을 입력해 주세요.';
-    err.style.display = 'block';
-    return;
-  }
-  err.style.display = 'none';
-
-  let fee = 0;
-  if (feeType === 'amount') {
-    fee = (parseFloat(document.getElementById('feeAmount').value) || 0) * 10000;
-  } else {
-    fee = balance * (parseFloat(document.getElementById('feeRate').value) || 0) / 100;
-  }
-
-  const curMonthly   = getFirstMonthly(balance, currentRate, currentMonths, currentRepay);
-  const newMonthly   = getFirstMonthly(balance, newRate, newMonths, newRepay);
-  const curInterest  = getTotalInterest(balance, currentRate, currentMonths, currentRepay);
-  const newInterest  = getTotalInterest(balance, newRate, newMonths, newRepay);
-  const monthlyDiff  = curMonthly - newMonthly;
-  const interestDiff = curInterest - newInterest;
-  const netBenefit   = interestDiff - fee;
-  const good         = netBenefit >= 0;
-
-  let breakEven = null;
-  if (fee > 0 && monthlyDiff > 0) breakEven = Math.ceil(fee / monthlyDiff);
-
-  /* 결론 배너 */
-  const vbox = document.getElementById('verdict-box');
-  vbox.className = 'verdict ' + (good ? 'good' : 'bad');
-
-  document.getElementById('verdict-title').textContent =
-    good ? '✅ 갈아타세요!' : '⚠️ 갈아타면 손해예요';
-
-  document.getElementById('verdict-amount').textContent =
-    (good ? '+' : '−') + fmtWon(Math.abs(netBenefit));
-
-  let breakMsg = '';
-  if (breakEven !== null) {
-    const yrs = breakEven >= 12 ? ` (약 ${Math.ceil(breakEven / 12)}년)` : '';
-    breakMsg = good
-      ? `📅 수수료 회수까지 <b>${breakEven}개월${yrs}</b> — 그 이후부터 순수 절약이에요`
-      : `📅 손익분기까지 <b>${breakEven}개월${yrs}</b> 필요 — 남은 기간 안에 회수가 안 돼요`;
-  } else {
-    breakMsg = '🎉 수수료가 없어 갈아타는 즉시 이득이에요';
-  }
-  document.getElementById('verdict-break').innerHTML = breakMsg;
-
-  /* 상세 행 */
-  document.getElementById('r-cur-monthly').textContent = fmtExact(curMonthly);
-  document.getElementById('r-new-monthly').textContent = fmtExact(newMonthly);
-
-  const mDiffEl = document.getElementById('r-monthly-diff');
-  mDiffEl.textContent = monthlyDiff >= 0
-    ? '월 ' + fmtExact(monthlyDiff) + ' 절약'
-    : '월 ' + fmtExact(monthlyDiff) + ' 증가';
-  mDiffEl.className = 'main large ' + (monthlyDiff >= 0 ? 'green' : 'red');
-
-  document.getElementById('r-cur-interest').textContent = fmtWon(curInterest);
-  document.getElementById('r-new-interest').textContent = fmtWon(newInterest);
-
-  const iDiffEl = document.getElementById('r-interest-diff');
-  iDiffEl.textContent = interestDiff >= 0
-    ? fmtWon(interestDiff) + ' 절약'
-    : fmtWon(Math.abs(interestDiff)) + ' 증가';
-  iDiffEl.className = 'main large ' + (interestDiff >= 0 ? 'green' : 'red');
-
-  const feeRow = document.getElementById('r-fee-row');
-  if (fee > 0) {
-    document.getElementById('r-fee').textContent = '− ' + fmtWon(fee);
-    feeRow.style.display = '';
-  } else {
-    feeRow.style.display = 'none';
-  }
-
-  const netEl = document.getElementById('r-net');
-  netEl.textContent = good
-    ? fmtWon(netBenefit) + ' 이득'
-    : fmtWon(Math.abs(netBenefit)) + ' 손해';
-  netEl.className = 'main large ' + (good ? 'green' : 'red');
-
-  /* 보이기 + 스크롤 */
-  document.getElementById('result').style.display = 'block';
-  setTimeout(() => {
-    document.getElementById('verdict-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 80);
-}
-
-/* ── 초기화 ──────────────────────────────── */
-function resetAll() {
-  document.querySelectorAll('input').forEach(i => i.value = '');
-  document.getElementById('hint-balance').textContent = '';
-  document.getElementById('hint-fee-rate').textContent = '';
-  document.getElementById('error-box').style.display = 'none';
-  document.getElementById('result').style.display = 'none';
-  currentRepay = 'equalPayment'; newRepay = 'equalPayment'; feeType = 'amount';
-  document.getElementById('cur-eq').classList.add('active');
-  document.getElementById('cur-ep').classList.remove('active');
-  document.getElementById('new-eq').classList.add('active');
-  document.getElementById('new-ep').classList.remove('active');
-  document.getElementById('fee-amount').classList.add('active');
-  document.getElementById('fee-rate').classList.remove('active');
-  document.getElementById('fee-amount-field').style.display = '';
-  document.getElementById('fee-rate-field').style.display = 'none';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+function reset() {
+  document.querySelectorAll('input').forEach(i=>i.value='');
+  ['hint-balance','hint-fee'].forEach(id=>document.getElementById(id).textContent='');
+  document.getElementById('err').style.display='none';
+  document.getElementById('result').style.display='none';
+  curRepay='eq'; newRepay='eq'; feeMode='amt';
+  ['cur-eq','new-eq','fee-amt-btn'].forEach(id=>document.getElementById(id).classList.add('on'));
+  ['cur-ep','new-ep','fee-pct-btn'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById('fee-amt-wrap').style.display='';
+  document.getElementById('fee-pct-wrap').style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 </script>
 </body>
