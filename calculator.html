@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>대출 갈아타기 계산기</title>
+
+<!-- OG 메타태그: 카카오/SNS 공유 시 미리보기 -->
+<meta property="og:type"        content="website">
+<meta property="og:title"       id="og-title"       content="대출 갈아타기 계산기">
+<meta property="og:description" id="og-desc"        content="수수료까지 계산해서 진짜 이득인지 알려드려요">
+<meta property="og:image"       content="https://placehold.co/600x315/3182F6/ffffff?text=대출+갈아타기+계산기">
+
+<!-- Kakao SDK -->
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
+        integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4"
+        crossorigin="anonymous"></script>
+
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
@@ -16,170 +28,119 @@
   --border: #EBEEF2;
   --bg: #F7F8FA;
   --white: #ffffff;
+  --kakao: #FEE500;
 }
 
-body {
-  font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
+body { font-family: -apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+.wrap { max-width:480px; margin:0 auto; padding-bottom:60px; }
+
+/* 헤더 */
+.header { padding:52px 24px 28px; background:var(--white); }
+.header-eyebrow { font-size:12px; font-weight:700; color:var(--blue); letter-spacing:.8px; text-transform:uppercase; margin-bottom:8px; }
+.header h1 { font-size:26px; font-weight:900; line-height:1.3; letter-spacing:-.5px; }
+.header p  { font-size:14px; color:var(--muted); margin-top:6px; }
+
+/* 폼 */
+.form-body { padding:0 24px; }
+.step { padding:24px 0 0; }
+.step-label { display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; color:var(--muted); letter-spacing:.5px; text-transform:uppercase; margin-bottom:16px; }
+.step-num { width:20px; height:20px; border-radius:50%; background:var(--blue); color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.step+.step { border-top:1px solid var(--border); }
+
+.row { display:flex; gap:10px; margin-bottom:10px; }
+.field { flex:1; }
+.field.narrow { flex:0 0 120px; }
+.field-label { font-size:12px; color:var(--muted); font-weight:600; margin-bottom:5px; display:flex; justify-content:space-between; }
+.field-hint { color:var(--blue); font-weight:700; }
+
+.input-box { display:flex; align-items:center; background:var(--white); border:1.5px solid var(--border); border-radius:10px; height:46px; padding:0 12px; transition:border-color .15s; }
+.input-box:focus-within { border-color:var(--blue); }
+.input-box input { flex:1; border:none; background:transparent; font-size:16px; color:var(--text); outline:none; min-width:0; font-family:inherit; }
+.input-box input::placeholder { color:#D0D5DC; font-size:14px; }
+.suffix { font-size:13px; color:var(--muted); flex-shrink:0; margin-left:4px; }
+
+.seg { display:flex; background:var(--bg); border-radius:10px; border:1.5px solid var(--border); padding:3px; gap:3px; margin-bottom:10px; }
+.seg-btn { flex:1; height:36px; border-radius:8px; border:none; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; background:transparent; color:var(--muted); }
+.seg-btn.on { background:var(--white); color:var(--blue); box-shadow:0 1px 4px rgba(0,0,0,.08); }
+
+.tip { font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5; }
+.err { margin:12px 24px 0; padding:12px 16px; border-radius:10px; background:#FFF0F0; color:var(--red); font-size:13px; text-align:center; display:none; }
+
+.go-btn { display:block; width:calc(100% - 48px); margin:20px 24px 0; height:54px; border-radius:14px; border:none; background:var(--blue); color:#fff; font-family:inherit; font-size:16px; font-weight:800; cursor:pointer; letter-spacing:-.3px; transition:opacity .15s,transform .1s; }
+.go-btn:active { opacity:.85; transform:scale(.98); }
+
+/* 결과 */
+#result { display:none; }
+
+.verdict { margin:20px 24px 0; border-radius:20px; padding:24px 20px; }
+.verdict.good { background:linear-gradient(145deg,#E8F8F3,#C8EEE1); border:1.5px solid #A0DFC5; }
+.verdict.bad  { background:linear-gradient(145deg,#FEF0F0,#FDDEDE); border:1.5px solid #F5B5B5; }
+.verdict-label { font-size:13px; font-weight:700; margin-bottom:4px; }
+.verdict.good .verdict-label { color:var(--green); }
+.verdict.bad  .verdict-label { color:var(--red); }
+.verdict-num { font-size:40px; font-weight:900; letter-spacing:-1.5px; line-height:1.1; margin-bottom:12px; }
+.verdict.good .verdict-num { color:var(--green); }
+.verdict.bad  .verdict-num { color:var(--red); }
+.verdict-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+.chip { display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,.7); border-radius:20px; padding:5px 10px; font-size:12px; font-weight:600; color:#374151; }
+.chip b { font-weight:800; }
+.chip b.blue { color:var(--blue); }
+.chip b.red  { color:var(--red); }
+
+/* 공유 버튼 영역 */
+.share-row { display:flex; gap:8px; margin-top:4px; }
+.share-btn {
+  flex:1; height:44px; border-radius:12px; border:none;
+  font-family:inherit; font-size:13px; font-weight:700;
+  cursor:pointer; transition:opacity .15s,transform .1s;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.share-btn:active { opacity:.8; transform:scale(.97); }
+.share-btn.kakao  { background:var(--kakao); color:#3A1D1D; }
+.share-btn.copy   { background:rgba(255,255,255,.8); color:var(--text); border:1.5px solid rgba(0,0,0,.08); }
+.share-btn.more   { background:rgba(255,255,255,.8); color:var(--text); border:1.5px solid rgba(0,0,0,.08); flex:0 0 44px; border-radius:12px; }
+
+/* 비교표 */
+.compare { margin:12px 24px 0; background:var(--white); border-radius:16px; overflow:hidden; }
+.compare-header { padding:14px 16px 10px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.5px; border-bottom:1px solid var(--border); }
+.crow { display:flex; justify-content:space-between; align-items:center; padding:13px 16px; border-bottom:1px solid var(--border); }
+.crow:last-child { border-bottom:none; }
+.crow-label { font-size:13px; color:var(--muted); }
+.crow-val { font-size:15px; font-weight:700; color:var(--text); }
+.crow-val.green { color:var(--green); }
+.crow-val.red   { color:var(--red); }
+.crow-val.big   { font-size:17px; }
+.crow-sub { font-size:11px; color:var(--muted); font-weight:400; display:block; text-align:right; margin-top:1px; }
+
+.reset-btn { display:block; width:calc(100% - 48px); margin:12px 24px 0; height:48px; border-radius:12px; background:transparent; border:1.5px solid var(--border); font-family:inherit; font-size:14px; font-weight:600; color:var(--muted); cursor:pointer; transition:opacity .15s; }
+.reset-btn:active { opacity:.6; }
+
+/* 공유 결과 배너 */
+.shared-banner {
+  margin:16px 24px 0; padding:14px 16px; border-radius:14px;
+  background:linear-gradient(135deg,#EBF3FE,#D6E9FE);
+  border:1.5px solid #A8CEFC;
+  font-size:13px; color:#1a4f9e; font-weight:600; line-height:1.5;
+  display:none;
 }
 
-.wrap { max-width: 480px; margin: 0 auto; padding-bottom: 60px; }
-
-/* ── 헤더 ── */
-.header { padding: 52px 24px 28px; background: var(--white); }
-.header-eyebrow {
-  font-size: 12px; font-weight: 700; color: var(--blue);
-  letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 8px;
+/* 토스트 */
+.toast {
+  position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:rgba(25,31,40,.9); color:#fff; border-radius:10px;
+  padding:10px 20px; font-size:13px; font-weight:600;
+  opacity:0; transition:opacity .2s,transform .2s; pointer-events:none; white-space:nowrap; z-index:999;
 }
-.header h1 { font-size: 26px; font-weight: 900; line-height: 1.3; letter-spacing: -0.5px; }
-.header p  { font-size: 14px; color: var(--muted); margin-top: 6px; }
-
-/* ── 폼 영역 ── */
-.form-body { padding: 0 24px; }
-
-/* 스텝 */
-.step { padding: 24px 0 0; }
-.step-label {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 12px; font-weight: 700; color: var(--muted);
-  letter-spacing: 0.5px; text-transform: uppercase;
-  margin-bottom: 16px;
-}
-.step-num {
-  width: 20px; height: 20px; border-radius: 50%;
-  background: var(--blue); color: #fff;
-  font-size: 11px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.step + .step { border-top: 1px solid var(--border); }
-
-/* 인라인 행 입력 */
-.row { display: flex; gap: 10px; margin-bottom: 10px; }
-.field { flex: 1; }
-.field.narrow { flex: 0 0 100px; }
-
-.field-label {
-  font-size: 12px; color: var(--muted); font-weight: 600;
-  margin-bottom: 5px; display: flex; justify-content: space-between;
-}
-.field-hint { color: var(--blue); font-weight: 700; }
-
-.input-box {
-  display: flex; align-items: center;
-  background: var(--white); border: 1.5px solid var(--border);
-  border-radius: 10px; height: 46px; padding: 0 12px;
-  transition: border-color 0.15s;
-}
-.input-box:focus-within { border-color: var(--blue); }
-.input-box input {
-  flex: 1; border: none; background: transparent;
-  font-size: 16px; color: var(--text); outline: none; min-width: 0;
-  font-family: inherit;
-}
-.input-box input::placeholder { color: #D0D5DC; font-size: 14px; }
-.suffix { font-size: 13px; color: var(--muted); flex-shrink: 0; margin-left: 4px; }
-
-/* 세그먼트 */
-.seg {
-  display: flex; background: var(--bg); border-radius: 10px;
-  border: 1.5px solid var(--border); padding: 3px; gap: 3px;
-  margin-bottom: 10px;
-}
-.seg-btn {
-  flex: 1; height: 36px; border-radius: 8px; border: none;
-  font-family: inherit; font-size: 13px; font-weight: 600;
-  cursor: pointer; transition: all 0.15s;
-  background: transparent; color: var(--muted);
-}
-.seg-btn.on { background: var(--white); color: var(--blue); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-
-/* 팁 */
-.tip { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
-
-/* 에러 */
-.err {
-  margin: 12px 24px 0; padding: 12px 16px; border-radius: 10px;
-  background: #FFF0F0; color: var(--red); font-size: 13px;
-  text-align: center; display: none;
-}
-
-/* 계산 버튼 */
-.go-btn {
-  display: block; width: calc(100% - 48px); margin: 20px 24px 0;
-  height: 54px; border-radius: 14px; border: none;
-  background: var(--blue); color: #fff;
-  font-family: inherit; font-size: 16px; font-weight: 800;
-  cursor: pointer; letter-spacing: -0.3px;
-  transition: opacity 0.15s, transform 0.1s;
-}
-.go-btn:active { opacity: 0.85; transform: scale(0.98); }
-
-/* ── 결과 ── */
-#result { display: none; }
-
-/* 결론 배너 */
-.verdict {
-  margin: 20px 24px 0; border-radius: 20px; padding: 24px 20px;
-}
-.verdict.good { background: linear-gradient(145deg, #E8F8F3, #C8EEE1); border: 1.5px solid #A0DFC5; }
-.verdict.bad  { background: linear-gradient(145deg, #FEF0F0, #FDDEDE); border: 1.5px solid #F5B5B5; }
-
-.verdict-label { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-.verdict.good .verdict-label { color: var(--green); }
-.verdict.bad  .verdict-label { color: var(--red); }
-
-.verdict-num {
-  font-size: 40px; font-weight: 900; letter-spacing: -1.5px;
-  line-height: 1.1; margin-bottom: 12px;
-}
-.verdict.good .verdict-num { color: var(--green); }
-.verdict.bad  .verdict-num { color: var(--red); }
-
-.verdict-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip {
-  display: inline-flex; align-items: center; gap: 4px;
-  background: rgba(255,255,255,0.7); border-radius: 20px;
-  padding: 5px 10px; font-size: 12px; font-weight: 600; color: #374151;
-}
-.chip b { font-weight: 800; }
-.chip.blue b { color: var(--blue); }
-.chip.red  b { color: var(--red); }
-
-/* 비교 테이블 */
-.compare { margin: 12px 24px 0; background: var(--white); border-radius: 16px; overflow: hidden; }
-.compare-header {
-  padding: 14px 16px 10px;
-  font-size: 11px; font-weight: 700; color: var(--muted);
-  letter-spacing: 0.5px; border-bottom: 1px solid var(--border);
-}
-.crow {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 13px 16px; border-bottom: 1px solid var(--border);
-}
-.crow:last-child { border-bottom: none; }
-.crow-label { font-size: 13px; color: var(--muted); }
-.crow-val { font-size: 15px; font-weight: 700; color: var(--text); }
-.crow-val.green { color: var(--green); }
-.crow-val.red   { color: var(--red); }
-.crow-val.big   { font-size: 17px; }
-.crow-sub { font-size: 11px; color: var(--muted); font-weight: 400; display: block; text-align: right; margin-top: 1px; }
-
-/* 리셋 버튼 */
-.reset-btn {
-  display: block; width: calc(100% - 48px); margin: 12px 24px 0;
-  height: 48px; border-radius: 12px;
-  background: transparent; border: 1.5px solid var(--border);
-  font-family: inherit; font-size: 14px; font-weight: 600; color: var(--muted);
-  cursor: pointer; transition: opacity 0.15s;
-}
-.reset-btn:active { opacity: 0.6; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 <div class="wrap">
+
+  <!-- 공유받은 경우 안내 배너 -->
+  <div class="shared-banner" id="shared-banner">
+    📩 공유받은 계산 결과예요. 아래에서 수치를 바꿔 직접 계산해 볼 수 있어요.
+  </div>
 
   <!-- 헤더 -->
   <div class="header">
@@ -190,16 +151,12 @@ body {
 
   <div class="form-body">
 
-    <!-- STEP 1 현재 대출 -->
+    <!-- STEP 1 -->
     <div class="step">
       <div class="step-label"><span class="step-num">1</span> 지금 대출</div>
-
       <div class="row">
         <div class="field">
-          <div class="field-label">
-            잔액
-            <span class="field-hint" id="hint-balance"></span>
-          </div>
+          <div class="field-label">잔액 <span class="field-hint" id="hint-balance"></span></div>
           <div class="input-box">
             <input type="number" id="balance" placeholder="30000" inputmode="decimal" oninput="updateHint()">
             <span class="suffix">만원</span>
@@ -213,7 +170,6 @@ body {
           </div>
         </div>
       </div>
-
       <div class="row">
         <div class="field narrow">
           <div class="field-label">남은 기간</div>
@@ -232,10 +188,9 @@ body {
       </div>
     </div>
 
-    <!-- STEP 2 새 대출 -->
+    <!-- STEP 2 -->
     <div class="step">
       <div class="step-label"><span class="step-num">2</span> 갈아탈 대출</div>
-
       <div class="row">
         <div class="field narrow">
           <div class="field-label">새 금리 (연)</div>
@@ -252,7 +207,6 @@ body {
           </div>
         </div>
       </div>
-
       <div class="field-label" style="margin-bottom:5px">상환 방식</div>
       <div class="seg">
         <button class="seg-btn on" id="new-eq" onclick="setRepay('new','eq')">원리금균등</button>
@@ -260,15 +214,13 @@ body {
       </div>
     </div>
 
-    <!-- STEP 3 수수료 -->
+    <!-- STEP 3 -->
     <div class="step">
       <div class="step-label"><span class="step-num">3</span> 중도상환수수료</div>
-
       <div class="seg">
         <button class="seg-btn on" id="fee-amt-btn" onclick="setFee('amt')">금액 직접 입력</button>
         <button class="seg-btn"    id="fee-pct-btn" onclick="setFee('pct')">요율로 계산</button>
       </div>
-
       <div id="fee-amt-wrap">
         <div class="input-box">
           <input type="number" id="feeAmt" placeholder="없으면 0 (만원)" inputmode="decimal">
@@ -276,10 +228,7 @@ body {
         </div>
       </div>
       <div id="fee-pct-wrap" style="display:none">
-        <div class="field-label" style="margin-bottom:5px">
-          요율
-          <span class="field-hint" id="hint-fee"></span>
-        </div>
+        <div class="field-label" style="margin-bottom:5px">요율 <span class="field-hint" id="hint-fee"></span></div>
         <div class="input-box">
           <input type="number" id="feePct" placeholder="예) 1.2" inputmode="decimal" step="0.1" oninput="updateFeeHint()">
           <span class="suffix">%</span>
@@ -288,123 +237,174 @@ body {
       <p class="tip">은행 앱 › 대출 상세 › 중도상환수수료 조회</p>
     </div>
 
-  </div><!-- /form-body -->
+  </div>
 
   <div class="err" id="err">입력하지 않은 항목이 있어요</div>
-  <button class="go-btn" onclick="calc()">계산하기</button>
+  <button class="go-btn" onclick="doCalc()">계산하기</button>
 
-  <!-- ── 결과 ── -->
+  <!-- 결과 -->
   <div id="result">
 
     <div class="verdict" id="vbox">
       <div class="verdict-label" id="vlabel"></div>
       <div class="verdict-num"   id="vnum"></div>
       <div class="verdict-chips" id="vchips"></div>
+
+      <!-- 공유 버튼 -->
+      <div class="share-row">
+        <button class="share-btn kakao" onclick="shareKakao()">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 1C4.582 1 1 3.896 1 7.455c0 2.28 1.517 4.285 3.81 5.418l-.972 3.544c-.085.31.27.557.548.376L8.64 14.26c.117.01.235.016.355.016 4.418 0 8-2.896 8-6.821C17 3.896 13.418 1 9 1z" fill="#3A1D1D"/></svg>
+          카카오톡
+        </button>
+        <button class="share-btn copy" onclick="copyLink()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.5 9.5l3-3M5.757 7.757L4.343 6.343a3 3 0 014.243-4.243l1.414 1.414M10.243 8.243l1.414 1.414a3 3 0 01-4.243 4.243L6 12.486" stroke="#191F28" stroke-width="1.5" stroke-linecap="round"/></svg>
+          링크 복사
+        </button>
+        <button class="share-btn more" onclick="shareNative()" id="native-share-btn" style="display:none">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="14" cy="4" r="2" stroke="#191F28" stroke-width="1.5"/><circle cx="4" cy="9" r="2" stroke="#191F28" stroke-width="1.5"/><circle cx="14" cy="14" r="2" stroke="#191F28" stroke-width="1.5"/><path d="M6 10.2l6 2.6M12 5.2L6 7.8" stroke="#191F28" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
     </div>
 
     <div class="compare">
       <div class="compare-header">월 납입액</div>
-      <div class="crow">
-        <span class="crow-label">지금</span>
-        <div><span class="crow-val" id="r-cm1"></span><span class="crow-sub">첫 달 기준</span></div>
-      </div>
-      <div class="crow">
-        <span class="crow-label">갈아타면</span>
-        <div><span class="crow-val" id="r-cm2"></span><span class="crow-sub">첫 달 기준</span></div>
-      </div>
-      <div class="crow">
-        <span class="crow-label">차이</span>
-        <span class="crow-val big" id="r-cdiff"></span>
-      </div>
+      <div class="crow"><span class="crow-label">지금</span><div><span class="crow-val" id="r-cm1"></span><span class="crow-sub">첫 달 기준</span></div></div>
+      <div class="crow"><span class="crow-label">갈아타면</span><div><span class="crow-val" id="r-cm2"></span><span class="crow-sub">첫 달 기준</span></div></div>
+      <div class="crow"><span class="crow-label">차이</span><span class="crow-val big" id="r-cdiff"></span></div>
     </div>
 
     <div class="compare">
       <div class="compare-header">총 이자</div>
-      <div class="crow">
-        <span class="crow-label">지금</span>
-        <span class="crow-val" id="r-ti1"></span>
-      </div>
-      <div class="crow">
-        <span class="crow-label">갈아타면</span>
-        <span class="crow-val" id="r-ti2"></span>
-      </div>
-      <div class="crow">
-        <span class="crow-label">이자 절감</span>
-        <span class="crow-val big" id="r-tidiff"></span>
-      </div>
-      <div class="crow" id="r-fee-row">
-        <span class="crow-label">수수료</span>
-        <span class="crow-val red" id="r-fee"></span>
-      </div>
-      <div class="crow">
-        <span class="crow-label">최종 순이익</span>
-        <span class="crow-val big" id="r-net"></span>
-      </div>
+      <div class="crow"><span class="crow-label">지금</span><span class="crow-val" id="r-ti1"></span></div>
+      <div class="crow"><span class="crow-label">갈아타면</span><span class="crow-val" id="r-ti2"></span></div>
+      <div class="crow"><span class="crow-label">이자 절감</span><span class="crow-val big" id="r-tidiff"></span></div>
+      <div class="crow" id="r-fee-row"><span class="crow-label">수수료</span><span class="crow-val red" id="r-fee"></span></div>
+      <div class="crow"><span class="crow-label">최종 순이익</span><span class="crow-val big" id="r-net"></span></div>
     </div>
 
-    <button class="reset-btn" onclick="reset()">↩ 다시 계산하기</button>
-
+    <button class="reset-btn" onclick="doReset()">↩ 다시 계산하기</button>
   </div>
 
-</div><!-- /wrap -->
-<script>
-/* 상태 */
-let curRepay = 'eq', newRepay = 'eq', feeMode = 'amt';
+</div>
 
-/* 토글 */
-function setRepay(who, val) {
-  if (who === 'cur') {
-    curRepay = val;
-    document.getElementById('cur-eq').className = 'seg-btn' + (val==='eq'?' on':'');
-    document.getElementById('cur-ep').className = 'seg-btn' + (val==='ep'?' on':'');
-  } else {
-    newRepay = val;
-    document.getElementById('new-eq').className = 'seg-btn' + (val==='eq'?' on':'');
-    document.getElementById('new-ep').className = 'seg-btn' + (val==='ep'?' on':'');
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── 상태 ── */
+let curRepay='eq', newRepay='eq', feeMode='amt';
+let lastResult = null; // 공유용 마지막 계산 결과
+
+/* ── Kakao 초기화 ──
+   실제 배포 시 https://developers.kakao.com 에서 앱 등록 후
+   아래 'YOUR_KAKAO_APP_KEY' 를 발급받은 JavaScript 키로 교체하세요. */
+const KAKAO_KEY = 'YOUR_KAKAO_APP_KEY';
+let kakaoReady = false;
+try {
+  if (typeof Kakao !== 'undefined' && KAKAO_KEY !== 'YOUR_KAKAO_APP_KEY') {
+    Kakao.init(KAKAO_KEY);
+    kakaoReady = true;
   }
+} catch(e) {}
+
+/* ── URL 파라미터 ── */
+function buildShareURL(params) {
+  const u = new URL(location.href.split('?')[0].split('#')[0]);
+  Object.entries(params).forEach(([k,v]) => u.searchParams.set(k, v));
+  return u.toString();
+}
+
+function getShareParams() {
+  const p = new URLSearchParams(location.search);
+  if (!p.has('bal')) return null;
+  return {
+    bal:  p.get('bal'),  cr: p.get('cr'),  cm: p.get('cm'),  crt: p.get('crt')||'eq',
+    nr:   p.get('nr'),   nm: p.get('nm'),  nrt: p.get('nrt')||'eq',
+    fmt:  p.get('fmt')||'amt', fa: p.get('fa')||'0', fp: p.get('fp')||'0',
+  };
+}
+
+/* ── 페이지 로드 시 공유 파라미터 처리 ── */
+window.addEventListener('load', () => {
+  // Web Share API 지원 여부에 따라 버튼 표시
+  if (navigator.share) document.getElementById('native-share-btn').style.display = '';
+
+  const sp = getShareParams();
+  if (!sp) return;
+
+  // 배너 표시
+  document.getElementById('shared-banner').style.display = 'block';
+
+  // 입력값 채우기
+  document.getElementById('balance').value      = sp.bal;
+  document.getElementById('currentRate').value  = sp.cr;
+  document.getElementById('currentMonths').value= sp.cm;
+  document.getElementById('newRate').value      = sp.nr;
+  document.getElementById('newMonths').value    = sp.nm;
+
+  setRepay('cur', sp.crt); setRepay('new', sp.nrt);
+  setFee(sp.fmt);
+  if (sp.fmt==='amt') document.getElementById('feeAmt').value = sp.fa;
+  else                document.getElementById('feePct').value = sp.fp;
+
+  updateHint(); updateFeeHint();
+
+  // 자동 계산
+  setTimeout(() => {
+    doCalc(true);
+    document.getElementById('shared-banner').scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 300);
+});
+
+/* ── 토글 ── */
+function setRepay(who, val) {
+  if (who==='cur') { curRepay=val; toggle('cur-eq','cur-ep',val==='eq'); }
+  else             { newRepay=val; toggle('new-eq','new-ep',val==='eq'); }
 }
 function setFee(v) {
-  feeMode = v;
-  document.getElementById('fee-amt-btn').className = 'seg-btn' + (v==='amt'?' on':'');
-  document.getElementById('fee-pct-btn').className = 'seg-btn' + (v==='pct'?' on':'');
-  document.getElementById('fee-amt-wrap').style.display = v==='amt' ? '' : 'none';
-  document.getElementById('fee-pct-wrap').style.display = v==='pct' ? '' : 'none';
+  feeMode=v;
+  toggle('fee-amt-btn','fee-pct-btn',v==='amt');
+  document.getElementById('fee-amt-wrap').style.display = v==='amt'?'':'none';
+  document.getElementById('fee-pct-wrap').style.display = v==='pct'?'':'none';
+}
+function toggle(a,b,aOn) {
+  document.getElementById(a).className='seg-btn'+(aOn?' on':'');
+  document.getElementById(b).className='seg-btn'+(!aOn?' on':'');
 }
 
-/* 힌트 */
+/* ── 힌트 ── */
 function updateHint() {
-  const v = +document.getElementById('balance').value || 0;
-  document.getElementById('hint-balance').textContent = v ? fmtMW(v) : '';
+  const v=+document.getElementById('balance').value||0;
+  document.getElementById('hint-balance').textContent=v?fmtMW(v):'';
 }
 function updateFeeHint() {
-  const r = +document.getElementById('feePct').value || 0;
-  const b = (+document.getElementById('balance').value || 0) * 1e4;
-  document.getElementById('hint-fee').textContent = (r && b) ? '≈ ' + fw(b*r/100) : '';
+  const r=+document.getElementById('feePct').value||0;
+  const b=(+document.getElementById('balance').value||0)*1e4;
+  document.getElementById('hint-fee').textContent=(r&&b)?'≈ '+fw(b*r/100):'';
 }
 
-/* 포매팅 */
+/* ── 포매팅 ── */
 function fmtMW(mw) {
-  const w = mw * 1e4;
-  if (w >= 1e8) { const e=Math.floor(w/1e8), m=Math.floor((w%1e8)/1e4); return m ? e+'억 '+m.toLocaleString()+'만원' : e+'억원'; }
+  const w=mw*1e4;
+  if(w>=1e8){const e=Math.floor(w/1e8),m=Math.floor((w%1e8)/1e4);return m?e+'억 '+m.toLocaleString()+'만원':e+'억원';}
   return mw.toLocaleString()+'만원';
 }
 function fw(n) {
   const a=Math.abs(n);
-  if (a>=1e8) { const e=Math.floor(a/1e8),m=Math.floor((a%1e8)/1e4); return m ? e+'억 '+m.toLocaleString()+'만원' : e+'억원'; }
-  if (a>=1e4) return Math.round(a/1e4).toLocaleString()+'만원';
+  if(a>=1e8){const e=Math.floor(a/1e8),m=Math.floor((a%1e8)/1e4);return m?e+'억 '+m.toLocaleString()+'만원':e+'억원';}
+  if(a>=1e4)return Math.round(a/1e4).toLocaleString()+'만원';
   return Math.round(a).toLocaleString()+'원';
 }
-function fx(n) { return Math.round(Math.abs(n)).toLocaleString()+'원'; }
+function fx(n){return Math.round(Math.abs(n)).toLocaleString()+'원';}
 
-/* 계산 */
-function meq(p,r,m) { if(!r) return p/m; const x=r/100/12; return p*x*Math.pow(1+x,m)/(Math.pow(1+x,m)-1); }
-function tiq(p,r,m) { return meq(p,r,m)*m-p; }
-function mep(p,r,m) { return p/m+p*r/100/12; }
-function tip(p,r,m) { const x=r/100/12,mp=p/m; let t=0,rem=p; for(let i=0;i<m;i++){t+=rem*x;rem-=mp;} return t; }
-function fm(p,r,m,t) { return t==='eq' ? meq(p,r,m) : mep(p,r,m); }
-function fi(p,r,m,t) { return t==='eq' ? tiq(p,r,m) : tip(p,r,m); }
+/* ── 계산 ── */
+function meq(p,r,m){if(!r)return p/m;const x=r/100/12;return p*x*Math.pow(1+x,m)/(Math.pow(1+x,m)-1);}
+function tiq(p,r,m){return meq(p,r,m)*m-p;}
+function mep(p,r,m){return p/m+p*r/100/12;}
+function tip(p,r,m){const x=r/100/12,mp=p/m;let t=0,rem=p;for(let i=0;i<m;i++){t+=rem*x;rem-=mp;}return t;}
+function fm(p,r,m,t){return t==='eq'?meq(p,r,m):mep(p,r,m);}
+function fi(p,r,m,t){return t==='eq'?tiq(p,r,m):tip(p,r,m);}
 
-function calc() {
+function doCalc(silent) {
   const bal  = (+document.getElementById('balance').value||0)*1e4;
   const cr   = +document.getElementById('currentRate').value||0;
   const cm   = +document.getElementById('currentMonths').value||0;
@@ -412,76 +412,179 @@ function calc() {
   const nm   = +document.getElementById('newMonths').value||0;
   const err  = document.getElementById('err');
 
-  if (!bal||!cr||!cm||!nr||!nm) { err.style.display='block'; return; }
+  if(!bal||!cr||!cm||!nr||!nm){err.style.display='block';return;}
   err.style.display='none';
 
   let fee = feeMode==='amt'
     ? (+document.getElementById('feeAmt').value||0)*1e4
     : bal*(+document.getElementById('feePct').value||0)/100;
 
-  const cm1 = fm(bal,cr,cm,curRepay), cm2 = fm(bal,nr,nm,newRepay);
-  const ti1 = fi(bal,cr,cm,curRepay), ti2 = fi(bal,nr,nm,newRepay);
-  const mdiff = cm1-cm2, tidiff = ti1-ti2, net = tidiff-fee;
-  const good = net>=0;
+  const cm1=fm(bal,cr,cm,curRepay), cm2=fm(bal,nr,nm,newRepay);
+  const ti1=fi(bal,cr,cm,curRepay), ti2=fi(bal,nr,nm,newRepay);
+  const mdiff=cm1-cm2, tidiff=ti1-ti2, net=tidiff-fee;
+  const good=net>=0;
+
+  lastResult = {bal,cr,cm,nr,nm,fee,cm1,cm2,mdiff,ti1,ti2,tidiff,net,good};
 
   /* 배너 */
-  const vbox = document.getElementById('vbox');
-  vbox.className = 'verdict '+(good?'good':'bad');
-  document.getElementById('vlabel').textContent = good ? '갈아타면 이득이에요 ✅' : '갈아타면 손해예요 ⚠️';
-  document.getElementById('vnum').textContent   = (good?'+':'−')+fw(Math.abs(net));
+  const vbox=document.getElementById('vbox');
+  vbox.className='verdict '+(good?'good':'bad');
+  document.getElementById('vlabel').textContent=good?'갈아타면 이득이에요 ✅':'갈아타면 손해예요 ⚠️';
+  document.getElementById('vnum').textContent=(good?'+':'−')+fw(Math.abs(net));
 
-  /* 칩 */
-  let chips = '';
-  if (mdiff>0) chips += `<span class="chip">월 <b class="blue">${fx(mdiff)} 절약</b></span>`;
-  else if (mdiff<0) chips += `<span class="chip">월 <b class="red">${fx(mdiff)} 증가</b></span>`;
-
-  let bk = null;
-  if (fee>0 && mdiff>0) bk = Math.ceil(fee/mdiff);
-  if (bk!==null) {
-    const yrs = bk>=12 ? ` (${Math.ceil(bk/12)}년)` : '';
-    chips += good
-      ? `<span class="chip">손익분기 <b class="blue">${bk}개월${yrs}</b></span>`
-      : `<span class="chip red">회수까지 <b class="red">${bk}개월${yrs}</b> 필요</span>`;
-  } else if (!fee) {
-    chips += `<span class="chip">🎉 즉시 이득</span>`;
-  }
-  document.getElementById('vchips').innerHTML = chips;
+  let chips='';
+  if(mdiff>0) chips+=`<span class="chip">월 <b class="blue">${fx(mdiff)} 절약</b></span>`;
+  else if(mdiff<0) chips+=`<span class="chip">월 <b class="red">${fx(Math.abs(mdiff))} 증가</b></span>`;
+  let bk=null;
+  if(fee>0&&mdiff>0) bk=Math.ceil(fee/mdiff);
+  if(bk!==null){
+    const yrs=bk>=12?` (${Math.ceil(bk/12)}년)`:'';
+    chips+=good
+      ?`<span class="chip">손익분기 <b class="blue">${bk}개월${yrs}</b></span>`
+      :`<span class="chip">회수 <b class="red">${bk}개월${yrs}</b> 필요</span>`;
+  } else if(!fee) chips+=`<span class="chip">🎉 즉시 이득</span>`;
+  document.getElementById('vchips').innerHTML=chips;
 
   /* 테이블 */
-  document.getElementById('r-cm1').textContent    = fx(cm1);
-  document.getElementById('r-cm2').textContent    = fx(cm2);
-  const cdEl = document.getElementById('r-cdiff');
-  cdEl.textContent  = mdiff>=0 ? fw(mdiff)+' 절약' : fw(Math.abs(mdiff))+' 증가';
-  cdEl.className    = 'crow-val big '+(mdiff>=0?'green':'red');
+  document.getElementById('r-cm1').textContent=fx(cm1);
+  document.getElementById('r-cm2').textContent=fx(cm2);
+  const cdEl=document.getElementById('r-cdiff');
+  cdEl.textContent=mdiff>=0?fw(mdiff)+' 절약':fw(Math.abs(mdiff))+' 증가';
+  cdEl.className='crow-val big '+(mdiff>=0?'green':'red');
 
-  document.getElementById('r-ti1').textContent    = fw(ti1);
-  document.getElementById('r-ti2').textContent    = fw(ti2);
-  const tdEl = document.getElementById('r-tidiff');
-  tdEl.textContent  = tidiff>=0 ? fw(tidiff)+' 절약' : fw(Math.abs(tidiff))+' 증가';
-  tdEl.className    = 'crow-val big '+(tidiff>=0?'green':'red');
+  document.getElementById('r-ti1').textContent=fw(ti1);
+  document.getElementById('r-ti2').textContent=fw(ti2);
+  const tdEl=document.getElementById('r-tidiff');
+  tdEl.textContent=tidiff>=0?fw(tidiff)+' 절약':fw(Math.abs(tidiff))+' 증가';
+  tdEl.className='crow-val big '+(tidiff>=0?'green':'red');
 
-  const frow = document.getElementById('r-fee-row');
-  if (fee>0) { document.getElementById('r-fee').textContent='− '+fw(fee); frow.style.display=''; }
+  const frow=document.getElementById('r-fee-row');
+  if(fee>0){document.getElementById('r-fee').textContent='− '+fw(fee);frow.style.display='';}
   else frow.style.display='none';
 
-  const nEl = document.getElementById('r-net');
-  nEl.textContent = good ? fw(net)+' 이득' : fw(Math.abs(net))+' 손해';
-  nEl.className   = 'crow-val big '+(good?'green':'red');
+  const nEl=document.getElementById('r-net');
+  nEl.textContent=good?fw(net)+' 이득':fw(Math.abs(net))+' 손해';
+  nEl.className='crow-val big '+(good?'green':'red');
 
   document.getElementById('result').style.display='block';
-  setTimeout(()=>document.getElementById('vbox').scrollIntoView({behavior:'smooth',block:'start'}),80);
+  if(!silent) setTimeout(()=>document.getElementById('vbox').scrollIntoView({behavior:'smooth',block:'start'}),80);
 }
 
-function reset() {
+/* ── 공유 URL 생성 ── */
+function makeShareURL() {
+  const params = {
+    bal: document.getElementById('balance').value,
+    cr:  document.getElementById('currentRate').value,
+    cm:  document.getElementById('currentMonths').value,
+    crt: curRepay,
+    nr:  document.getElementById('newRate').value,
+    nm:  document.getElementById('newMonths').value,
+    nrt: newRepay,
+    fmt: feeMode,
+    fa:  document.getElementById('feeAmt').value||'0',
+    fp:  document.getElementById('feePct').value||'0',
+  };
+  return buildShareURL(params);
+}
+
+function makeShareText() {
+  if(!lastResult) return '';
+  const {net,good,mdiff,cm} = lastResult;
+  const bk = lastResult.fee>0&&mdiff>0 ? Math.ceil(lastResult.fee/mdiff) : null;
+  let txt = good
+    ? `대출 갈아타면 ${fw(net)} 이득이에요! 💰`
+    : `대출 갈아타기 계산해봤는데 ${fw(Math.abs(net))} 손해네요 😅`;
+  if(mdiff>0) txt += `\n매달 ${fx(mdiff)}씩 절약`;
+  if(bk)      txt += ` · 손익분기 ${bk}개월`;
+  txt += '\n\n아래 링크에서 직접 계산해보세요 👇';
+  return txt;
+}
+
+/* ── 카카오톡 공유 ── */
+function shareKakao() {
+  if(!lastResult){ showToast('먼저 계산하기를 눌러주세요'); return; }
+  const url  = makeShareURL();
+  const {net,good,mdiff} = lastResult;
+  const title = good ? `갈아타면 ${fw(net)} 이득!` : `갈아타면 ${fw(Math.abs(net))} 손해`;
+  const desc  = mdiff>0
+    ? `매달 ${fx(mdiff)} 절약 · 직접 계산해보세요`
+    : '직접 수치를 입력해 계산해보세요';
+
+  if(kakaoReady) {
+    Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title,
+        description: desc,
+        imageUrl: `https://placehold.co/600x315/3182F6/ffffff?text=${encodeURIComponent(good?'+'+fw(net):'-'+fw(Math.abs(net)))}`,
+        link: { mobileWebUrl: url, webUrl: url },
+      },
+      buttons: [{ title: '계산 결과 보기', link: { mobileWebUrl: url, webUrl: url } }],
+    });
+  } else {
+    /* Kakao 키 미설정 시 카카오 앱 URL 스킴으로 폴백 */
+    const text = encodeURIComponent(makeShareText()+'\n'+url);
+    const kakaoFallback = `kakaotalk://msg/text?text=${text}`;
+    const opened = window.open(kakaoFallback, '_blank');
+    if(!opened) {
+      copyToClipboard(makeShareText()+'\n'+url);
+      showToast('카카오톡 앱이 없어 링크를 복사했어요');
+    }
+  }
+}
+
+/* ── 링크 복사 ── */
+function copyLink() {
+  if(!lastResult){ showToast('먼저 계산하기를 눌러주세요'); return; }
+  copyToClipboard(makeShareURL());
+  showToast('링크가 복사됐어요! 어디든 붙여넣기 하세요 📋');
+}
+
+function copyToClipboard(text) {
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(text);
+  } else {
+    const el = document.createElement('textarea');
+    el.value = text; el.style.position='fixed'; el.style.opacity='0';
+    document.body.appendChild(el); el.select();
+    document.execCommand('copy'); document.body.removeChild(el);
+  }
+}
+
+/* ── 네이티브 공유 (모바일) ── */
+async function shareNative() {
+  if(!lastResult){ showToast('먼저 계산하기를 눌러주세요'); return; }
+  try {
+    await navigator.share({
+      title: '대출 갈아타기 계산 결과',
+      text:  makeShareText(),
+      url:   makeShareURL(),
+    });
+  } catch(e) {}
+}
+
+/* ── 토스트 ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+/* ── 리셋 ── */
+function doReset() {
   document.querySelectorAll('input').forEach(i=>i.value='');
   ['hint-balance','hint-fee'].forEach(id=>document.getElementById(id).textContent='');
   document.getElementById('err').style.display='none';
   document.getElementById('result').style.display='none';
+  document.getElementById('shared-banner').style.display='none';
+  lastResult=null;
   curRepay='eq'; newRepay='eq'; feeMode='amt';
   ['cur-eq','new-eq','fee-amt-btn'].forEach(id=>document.getElementById(id).classList.add('on'));
   ['cur-ep','new-ep','fee-pct-btn'].forEach(id=>document.getElementById(id).classList.remove('on'));
   document.getElementById('fee-amt-wrap').style.display='';
   document.getElementById('fee-pct-wrap').style.display='none';
+  // URL 파라미터 제거
+  history.replaceState(null,'',location.pathname);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 </script>
