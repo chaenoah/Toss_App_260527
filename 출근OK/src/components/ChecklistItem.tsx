@@ -8,9 +8,7 @@ interface Props {
 
 export function ChecklistItem({ item, onToggle, onRemove }: Props) {
   return (
-    <div
-      className={`checklist-item ${item.checked ? 'checklist-item--checked' : ''}`}
-    >
+    <div className="checklist-item">
       <button
         className="checklist-item__toggle"
         onClick={() => onToggle(item.id)}
@@ -19,14 +17,10 @@ export function ChecklistItem({ item, onToggle, onRemove }: Props) {
         <span className="checklist-item__checkbox">
           {item.checked ? '✅' : '⬜'}
         </span>
-        <span
-          className={`checklist-item__label ${item.checked ? 'checklist-item__label--done' : ''}`}
-        >
+        <span className={`checklist-item__label ${item.checked ? 'checklist-item__label--done' : ''}`}>
           {item.label}
           {item.required && <span className="checklist-item__required"> *</span>}
-          {item.autoAdded && (
-            <span className="checklist-item__badge">자동</span>
-          )}
+          {item.autoAdded && <span className="checklist-item__badge">자동</span>}
         </span>
       </button>
       {!item.required && (

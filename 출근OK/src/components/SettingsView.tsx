@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import type { ChecklistItem } from '../types';
 import { CITIES } from '../lib/weather';
-import { loadCity, saveCity } from '../lib/storage';
 
 interface Props {
   items: ChecklistItem[];
+  city: string;
   onBack: () => void;
   onAddItem: (label: string) => void;
   onRemoveItem: (id: string) => void;
@@ -17,6 +17,7 @@ interface Props {
 
 export function SettingsView({
   items,
+  city,
   onBack,
   onAddItem,
   onRemoveItem,
@@ -26,14 +27,7 @@ export function SettingsView({
   commuteTime,
   onCommuteTimeChange,
 }: Props) {
-  const [city, setCity] = useState(() => loadCity());
   const [newLabel, setNewLabel] = useState('');
-
-  function handleCityChange(c: string) {
-    setCity(c);
-    saveCity(c);
-    onCityChange(c);
-  }
 
   function handleAdd() {
     if (!newLabel.trim()) return;
@@ -46,9 +40,7 @@ export function SettingsView({
   return (
     <div className="settings-view">
       <header className="settings-view__header">
-        <button className="settings-view__back" onClick={onBack}>
-          ← 뒤로
-        </button>
+        <button className="settings-view__back" onClick={onBack}>← 뒤로</button>
         <h2 className="settings-view__title">설정</h2>
       </header>
 
@@ -60,7 +52,7 @@ export function SettingsView({
             <button
               key={c}
               className={`settings-city-btn ${city === c ? 'settings-city-btn--active' : ''}`}
-              onClick={() => handleCityChange(c)}
+              onClick={() => onCityChange(c)}
             >
               {c}
             </button>
@@ -71,9 +63,7 @@ export function SettingsView({
       {/* 출근 시간 */}
       <section className="settings-section">
         <h3 className="settings-section__title">⏰ 출근 시간</h3>
-        <p className="settings-section__desc">
-          앱 알림 기준 시간이에요. (현재는 참고용)
-        </p>
+        <p className="settings-section__desc">알림 기준 시간 (현재는 참고용)</p>
         <input
           type="time"
           className="settings-time-input"
@@ -84,9 +74,9 @@ export function SettingsView({
 
       {/* 체크리스트 항목 관리 */}
       <section className="settings-section">
-        <h3 className="settings-section__title">📋 체크리스트 항목 관리</h3>
+        <h3 className="settings-section__title">📋 항목 관리</h3>
         <p className="settings-section__desc">
-          * 필수 항목 · 선택 항목 구분 / 위아래 순서 이동 가능
+          * 필수 항목은 삭제 불가 · ▲▼로 순서 변경
         </p>
 
         <div className="settings-items">
@@ -97,43 +87,29 @@ export function SettingsView({
                   className="settings-item__order-btn"
                   disabled={idx === 0}
                   onClick={() => onMoveItem(item.id, 'up')}
-                  aria-label="위로"
-                >
-                  ▲
-                </button>
+                >▲</button>
                 <button
                   className="settings-item__order-btn"
                   disabled={idx === nonAutoItems.length - 1}
                   onClick={() => onMoveItem(item.id, 'down')}
-                  aria-label="아래로"
-                >
-                  ▼
-                </button>
+                >▼</button>
               </div>
-
               <span className="settings-item__label">{item.label}</span>
-
               <button
                 className={`settings-item__required-btn ${item.required ? 'settings-item__required-btn--on' : ''}`}
                 onClick={() => onToggleRequired(item.id)}
-                title={item.required ? '필수 해제' : '필수로 설정'}
               >
                 {item.required ? '필수 *' : '선택'}
               </button>
-
               <button
                 className="settings-item__remove"
                 onClick={() => onRemoveItem(item.id)}
                 disabled={item.required}
-                title={item.required ? '필수 항목은 삭제 불가' : '삭제'}
-              >
-                ✕
-              </button>
+              >✕</button>
             </div>
           ))}
         </div>
 
-        {/* 항목 추가 */}
         <div className="settings-add">
           <input
             className="settings-add__input"
@@ -143,9 +119,7 @@ export function SettingsView({
             onChange={(e) => setNewLabel(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
           />
-          <button className="settings-add__btn" onClick={handleAdd}>
-            추가
-          </button>
+          <button className="settings-add__btn" onClick={handleAdd}>추가</button>
         </div>
       </section>
     </div>

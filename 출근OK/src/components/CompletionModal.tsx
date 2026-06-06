@@ -41,11 +41,9 @@ export function CompletionModal({ streak, isMilestone, onClose }: Props) {
         <h2 className="modal__title">{copy.title}</h2>
         <p className="modal__sub">{copy.sub}</p>
 
-        {streak > 0 && (
-          <div className={`modal__streak ${isMilestone ? 'modal__streak--milestone' : ''}`}>
-            🔥 {streak}일 연속 출근
-          </div>
-        )}
+        <div className={`modal__streak ${isMilestone ? 'modal__streak--milestone' : ''}`}>
+          {streak > 0 ? `🔥 ${streak}일 연속 출근` : '🌱 오늘부터 streak 시작!'}
+        </div>
 
         {/* 공유 카드 미리보기 */}
         <div className="modal__share-card">

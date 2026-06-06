@@ -10,7 +10,7 @@ import { CompletionModal } from './components/CompletionModal';
 import { CalendarView } from './components/CalendarView';
 import { SettingsView } from './components/SettingsView';
 import { BottomNav } from './components/BottomNav';
-import { loadCommuteTime, saveCommuteTime } from './lib/storage';
+import { loadCity, saveCity, loadCommuteTime, saveCommuteTime } from './lib/storage';
 import type { ViewType } from './types';
 import './App.css';
 
@@ -22,7 +22,8 @@ export default function App() {
     allChecked, checkedCount, total,
   } = useChecklist();
 
-  const { city, weather, airQuality, loading, error, needsUmbrella, needsMask } = useWeather();
+  const [city, setCity] = useState(() => loadCity());
+  const { weather, airQuality, loading, error, needsUmbrella, needsMask } = useWeather(city);
   const { streak, markComplete, isMilestone } = useStreak();
 
   const [view, setView] = useState<ViewType>('home');
@@ -32,7 +33,6 @@ export default function App() {
     return localStorage.getItem('modal_shown_date') === new Date().toISOString().slice(0, 10);
   });
 
-  // 날씨 로드 후 우산·마스크 자동 추가/제거
   useEffect(() => {
     if (!loading) {
       syncUmbrella(needsUmbrella);
@@ -40,7 +40,6 @@ export default function App() {
     }
   }, [needsUmbrella, needsMask, loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 전체 체크 완료 시 모달 (오늘 최초 1회)
   useEffect(() => {
     if (allChecked && !modalShownToday) {
       markComplete();
@@ -51,39 +50,38 @@ export default function App() {
     }
   }, [allChecked]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  function handleCityChange(c: string) {
+    saveCity(c);
+    setCity(c);
+  }
+
   function handleCommuteTimeChange(t: string) {
     setCommuteTime(t);
     saveCommuteTime(t);
   }
 
-  // ── 뷰 렌더 ─────────────────────────────────────────────────────────────────
   const renderView = () => {
     if (view === 'calendar') {
-      return (
-        <CalendarView
-          streak={streak}
-          onBack={() => setView('home')}
-        />
-      );
+      return <CalendarView streak={streak} onBack={() => setView('home')} />;
     }
 
     if (view === 'settings') {
       return (
         <SettingsView
           items={items}
+          city={city}
           onBack={() => setView('home')}
           onAddItem={addItem}
           onRemoveItem={removeItem}
           onToggleRequired={toggleRequired}
           onMoveItem={moveItem}
-          onCityChange={() => window.location.reload()}
+          onCityChange={handleCityChange}
           commuteTime={commuteTime}
           onCommuteTimeChange={handleCommuteTimeChange}
         />
       );
     }
 
-    // 홈 뷰
     return (
       <div className="app__inner">
         <header className="app__header">
@@ -97,19 +95,8 @@ export default function App() {
           </span>
         </header>
 
-        <WeatherCard
-          city={city}
-          weather={weather}
-          airQuality={airQuality}
-          loading={loading}
-          error={error}
-        />
-
-        <WeatherTip
-          needsUmbrella={needsUmbrella}
-          needsMask={needsMask}
-          airQuality={airQuality}
-        />
+        <WeatherCard city={city} weather={weather} airQuality={airQuality} loading={loading} error={error} />
+        <WeatherTip needsUmbrella={needsUmbrella} needsMask={needsMask} airQuality={airQuality} />
 
         <Checklist
           items={items}
@@ -118,12 +105,10 @@ export default function App() {
           onAdd={addItem}
           checkedCount={checkedCount}
           total={total}
+          allChecked={allChecked}
         />
 
-        <StreakFooter
-          streak={streak.count}
-          onCalendarClick={() => setView('calendar')}
-        />
+        <StreakFooter streak={streak.count} onCalendarClick={() => setView('calendar')} />
       </div>
     );
   };
@@ -131,9 +116,7 @@ export default function App() {
   return (
     <div className="app">
       {renderView()}
-
       <BottomNav current={view} onChange={setView} />
-
       {showModal && (
         <CompletionModal
           streak={streak.count}

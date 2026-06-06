@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { WeatherData, AirQualityData } from '../types';
 import { fetchWeather, fetchAirQuality } from '../lib/weather';
-import { loadCity } from '../lib/storage';
 
-export function useWeather() {
-  const [city] = useState(() => loadCity());
+export function useWeather(city: string) {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [airQuality, setAirQuality] = useState<AirQualityData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -12,12 +10,11 @@ export function useWeather() {
 
   useEffect(() => {
     setLoading(true);
-    // 날씨 + 미세먼지 병렬 fetch
+    setError(false);
     Promise.allSettled([fetchWeather(city), fetchAirQuality(city)]).then(
       ([weatherResult, airResult]) => {
         if (weatherResult.status === 'fulfilled') {
           setWeather(weatherResult.value);
-          setError(false);
         } else {
           setError(true);
         }
@@ -32,5 +29,5 @@ export function useWeather() {
   const needsUmbrella = (weather?.precipitationProbability ?? 0) >= 50;
   const needsMask = (airQuality?.pm25 ?? 0) > 35;
 
-  return { city, weather, airQuality, loading, error, needsUmbrella, needsMask };
+  return { weather, airQuality, loading, error, needsUmbrella, needsMask };
 }
