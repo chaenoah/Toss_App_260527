@@ -92,6 +92,30 @@ export function useChecklist() {
     [state, update]
   );
 
+  // 미세먼지 기반 마스크 자동 추가/제거
+  const syncMask = useCallback(
+    (shouldAdd: boolean) => {
+      const hasMask = state.items.some((i) => i.id === 'mask');
+      if (shouldAdd && !hasMask) {
+        const mask: ChecklistItem = {
+          id: 'mask',
+          label: '마스크',
+          checked: false,
+          required: false,
+          autoAdded: true,
+        };
+        update({ ...state, items: [mask, ...state.items] });
+      } else if (!shouldAdd) {
+        const item = state.items.find((i) => i.id === 'mask');
+        // autoAdded인 경우만 제거 (사용자가 직접 추가한 마스크는 유지)
+        if (item?.autoAdded) {
+          update({ ...state, items: state.items.filter((i) => i.id !== 'mask') });
+        }
+      }
+    },
+    [state, update]
+  );
+
   const allChecked =
     state.items.length > 0 && state.items.every((i) => i.checked);
   const requiredAllChecked =
@@ -104,6 +128,7 @@ export function useChecklist() {
     addItem,
     removeItem,
     syncUmbrella,
+    syncMask,
     allChecked,
     requiredAllChecked,
     checkedCount,

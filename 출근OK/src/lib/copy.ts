@@ -46,6 +46,10 @@ export const ALMOST_DONE_COPY = [
 // 우산 자동 추가 배너
 export const UMBRELLA_TIP = '오늘 비 소식 있어요 ☂️ 우산 챙기세요';
 
+// 미세먼지 배너
+export const MASK_TIP_BAD = '미세먼지 나쁨 😷 마스크 챙기세요';
+export const MASK_TIP_VERY_BAD = '미세먼지 매우나쁨 🤢 오늘 마스크 없으면 진짜 위험해요';
+
 // 빈 streak 상태
 export const STREAK_ZERO_COPY = '첫 완료 시 streak 시작!';
 

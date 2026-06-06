@@ -10,9 +10,9 @@ import { CompletionModal } from './components/CompletionModal';
 import './App.css';
 
 export default function App() {
-  const { items, toggle, addItem, removeItem, syncUmbrella, allChecked, checkedCount, total } =
+  const { items, toggle, addItem, removeItem, syncUmbrella, syncMask, allChecked, checkedCount, total } =
     useChecklist();
-  const { city, weather, loading, error, needsUmbrella } = useWeather();
+  const { city, weather, airQuality, loading, error, needsUmbrella, needsMask } = useWeather();
   const { streak, markComplete } = useStreak();
 
   const [showModal, setShowModal] = useState(false);
@@ -20,10 +20,13 @@ export default function App() {
     return localStorage.getItem('modal_shown_date') === new Date().toISOString().slice(0, 10);
   });
 
-  // 날씨 로드 후 우산 자동 추가/제거
+  // 날씨 로드 후 우산·마스크 자동 추가/제거
   useEffect(() => {
-    if (!loading) syncUmbrella(needsUmbrella);
-  }, [needsUmbrella, loading]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!loading) {
+      syncUmbrella(needsUmbrella);
+      syncMask(needsMask);
+    }
+  }, [needsUmbrella, needsMask, loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 전체 체크 완료 시 모달 표출 (오늘 최초 1회)
   useEffect(() => {
@@ -50,8 +53,19 @@ export default function App() {
           </span>
         </header>
 
-        <WeatherCard city={city} weather={weather} loading={loading} error={error} />
-        <WeatherTip needsUmbrella={needsUmbrella} />
+        <WeatherCard
+          city={city}
+          weather={weather}
+          airQuality={airQuality}
+          loading={loading}
+          error={error}
+        />
+
+        <WeatherTip
+          needsUmbrella={needsUmbrella}
+          needsMask={needsMask}
+          airQuality={airQuality}
+        />
 
         <Checklist
           items={items}

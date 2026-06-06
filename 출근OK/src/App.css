@@ -107,10 +107,28 @@ body { background: var(--toss-gray-100); }
 }
 
 .weather-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   font-size: 13px;
   opacity: 0.85;
   margin-bottom: 8px;
 }
+
+.weather-card__meta-item { white-space: nowrap; }
+
+.weather-card__pm25 {
+  font-weight: 600;
+  opacity: 1;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.weather-card__pm25--good     { background: rgba(255,255,255,0.25); }
+.weather-card__pm25--moderate { background: rgba(255,220,0,0.35); }
+.weather-card__pm25--bad      { background: rgba(255,120,0,0.4); }
+.weather-card__pm25--very_bad { background: rgba(200,0,0,0.4); }
 
 .weather-card__outfit {
   background: rgba(255,255,255,0.2);
@@ -120,18 +138,37 @@ body { background: var(--toss-gray-100); }
   font-weight: 500;
 }
 
-/* ── 우산 팁 배너 ── */
+/* ── 날씨 팁 배너 묶음 ── */
+.weather-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 16px;
+}
+
 .weather-tip {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #ebf3fe;
   border-radius: var(--radius-sm);
-  margin: 0 16px;
   padding: 12px 16px;
   font-size: 14px;
   font-weight: 500;
+}
+
+.weather-tip--blue {
+  background: #ebf3fe;
   color: var(--toss-blue);
+}
+
+.weather-tip--orange {
+  background: #fff4e5;
+  color: #d96d00;
+}
+
+.weather-tip--red {
+  background: #ffeaea;
+  color: #c0392b;
 }
 
 .weather-tip__icon { font-size: 18px; }

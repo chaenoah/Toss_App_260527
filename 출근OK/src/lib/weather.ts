@@ -1,4 +1,4 @@
-import type { WeatherData } from '../types';
+import type { WeatherData, AirQualityData } from '../types';
 
 export const CITIES: Record<string, { lat: number; lon: number }> = {
   서울: { lat: 37.5665, lon: 126.978 },
@@ -31,13 +31,36 @@ export async function fetchWeather(city: string): Promise<WeatherData> {
   };
 }
 
+export async function fetchAirQuality(city: string): Promise<AirQualityData> {
+  const { lat, lon } = CITIES[city] ?? CITIES['광주'];
+  const url =
+    `https://air-quality-api.open-meteo.com/v1/air-quality` +
+    `?latitude=${lat}&longitude=${lon}` +
+    `&current=pm2_5` +
+    `&timezone=Asia%2FSeoul`;
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('미세먼지 API 실패');
+  const data = await res.json();
+
+  const pm25: number = Math.round(data.current.pm2_5 ?? 0);
+  return { pm25, ...classifyPm25(pm25) };
+}
+
+function classifyPm25(pm25: number): Omit<AirQualityData, 'pm25'> {
+  if (pm25 <= 15)  return { level: 'good',     label: '좋음',   emoji: '😊' };
+  if (pm25 <= 35)  return { level: 'moderate', label: '보통',   emoji: '🙂' };
+  if (pm25 <= 75)  return { level: 'bad',      label: '나쁨',   emoji: '😷' };
+  return             { level: 'very_bad',  label: '매우나쁨', emoji: '🤢' };
+}
+
 export function getWeatherEmoji(code: number): string {
-  if (code === 0) return '☀️';
-  if (code <= 3) return '🌤️';
-  if (code <= 48) return '🌫️';
-  if (code <= 67) return '🌧️';
-  if (code <= 77) return '❄️';
-  if (code <= 82) return '🌧️';
+  if (code === 0)  return '☀️';
+  if (code <= 3)   return '🌤️';
+  if (code <= 48)  return '🌫️';
+  if (code <= 67)  return '🌧️';
+  if (code <= 77)  return '❄️';
+  if (code <= 82)  return '🌧️';
   return '⛈️';
 }
 
@@ -46,6 +69,6 @@ export function getOutfitTip(temp: number): string {
   if (temp >= 23) return '얇은 셔츠면 충분해요 👕';
   if (temp >= 17) return '긴팔 + 얇은 카디건 추천 🧥';
   if (temp >= 12) return '재킷 또는 가디건 챙기세요 🧣';
-  if (temp >= 5) return '코트 또는 패딩 필수예요 🧥';
+  if (temp >= 5)  return '코트 또는 패딩 필수예요 🧥';
   return '두꺼운 패딩 + 목도리 무장 🧤';
 }

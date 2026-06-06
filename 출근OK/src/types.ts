@@ -12,6 +12,13 @@ export interface WeatherData {
   weatherCode: number;
 }
 
+export interface AirQualityData {
+  pm25: number; // µg/m³
+  level: 'good' | 'moderate' | 'bad' | 'very_bad';
+  label: string;
+  emoji: string;
+}
+
 export interface StreakData {
   count: number;
   lastCompletedDate: string | null; // "YYYY-MM-DD"
