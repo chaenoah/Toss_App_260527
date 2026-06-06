@@ -7,15 +7,27 @@ import { WeatherTip } from './components/WeatherTip';
 import { Checklist } from './components/Checklist';
 import { StreakFooter } from './components/StreakFooter';
 import { CompletionModal } from './components/CompletionModal';
+import { CalendarView } from './components/CalendarView';
+import { SettingsView } from './components/SettingsView';
+import { BottomNav } from './components/BottomNav';
+import { loadCommuteTime, saveCommuteTime } from './lib/storage';
+import type { ViewType } from './types';
 import './App.css';
 
 export default function App() {
-  const { items, toggle, addItem, removeItem, syncUmbrella, syncMask, allChecked, checkedCount, total } =
-    useChecklist();
-  const { city, weather, airQuality, loading, error, needsUmbrella, needsMask } = useWeather();
-  const { streak, markComplete } = useStreak();
+  const {
+    items, toggle, addItem, removeItem,
+    syncUmbrella, syncMask,
+    toggleRequired, moveItem,
+    allChecked, checkedCount, total,
+  } = useChecklist();
 
+  const { city, weather, airQuality, loading, error, needsUmbrella, needsMask } = useWeather();
+  const { streak, markComplete, isMilestone } = useStreak();
+
+  const [view, setView] = useState<ViewType>('home');
   const [showModal, setShowModal] = useState(false);
+  const [commuteTime, setCommuteTime] = useState(() => loadCommuteTime());
   const [modalShownToday, setModalShownToday] = useState(() => {
     return localStorage.getItem('modal_shown_date') === new Date().toISOString().slice(0, 10);
   });
@@ -28,7 +40,7 @@ export default function App() {
     }
   }, [needsUmbrella, needsMask, loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 전체 체크 완료 시 모달 표출 (오늘 최초 1회)
+  // 전체 체크 완료 시 모달 (오늘 최초 1회)
   useEffect(() => {
     if (allChecked && !modalShownToday) {
       markComplete();
@@ -39,8 +51,40 @@ export default function App() {
     }
   }, [allChecked]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return (
-    <div className="app">
+  function handleCommuteTimeChange(t: string) {
+    setCommuteTime(t);
+    saveCommuteTime(t);
+  }
+
+  // ── 뷰 렌더 ─────────────────────────────────────────────────────────────────
+  const renderView = () => {
+    if (view === 'calendar') {
+      return (
+        <CalendarView
+          streak={streak}
+          onBack={() => setView('home')}
+        />
+      );
+    }
+
+    if (view === 'settings') {
+      return (
+        <SettingsView
+          items={items}
+          onBack={() => setView('home')}
+          onAddItem={addItem}
+          onRemoveItem={removeItem}
+          onToggleRequired={toggleRequired}
+          onMoveItem={moveItem}
+          onCityChange={() => window.location.reload()}
+          commuteTime={commuteTime}
+          onCommuteTimeChange={handleCommuteTimeChange}
+        />
+      );
+    }
+
+    // 홈 뷰
+    return (
       <div className="app__inner">
         <header className="app__header">
           <h1 className="app__logo">출근 OK 🫡</h1>
@@ -78,12 +122,24 @@ export default function App() {
 
         <StreakFooter
           streak={streak.count}
-          onCalendarClick={() => alert('📅 캘린더는 3단계에서 오픈 예정이에요!')}
+          onCalendarClick={() => setView('calendar')}
         />
       </div>
+    );
+  };
+
+  return (
+    <div className="app">
+      {renderView()}
+
+      <BottomNav current={view} onChange={setView} />
 
       {showModal && (
-        <CompletionModal streak={streak.count} onClose={() => setShowModal(false)} />
+        <CompletionModal
+          streak={streak.count}
+          isMilestone={isMilestone}
+          onClose={() => setShowModal(false)}
+        />
       )}
     </div>
   );

@@ -450,3 +450,403 @@ body { background: var(--toss-gray-100); }
 }
 
 .modal__close-btn:hover { background: var(--toss-gray-200); }
+
+/* ── 하단 내비게이션 ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  background: #fff;
+  border-top: 1px solid var(--toss-gray-200);
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.bottom-nav__tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 0 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--toss-gray-500);
+  transition: color 0.15s;
+}
+
+.bottom-nav__tab--active { color: var(--toss-blue); }
+
+.bottom-nav__icon { font-size: 22px; line-height: 1; }
+.bottom-nav__label { font-size: 11px; font-weight: 600; }
+
+/* ── 캘린더 뷰 ── */
+.calendar-view {
+  padding: 0 0 100px;
+}
+
+.calendar-view__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 20px 12px;
+  background: #fff;
+  border-bottom: 1px solid var(--toss-gray-200);
+}
+
+.calendar-view__back {
+  background: none;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--toss-blue);
+  cursor: pointer;
+  padding: 0;
+}
+
+.calendar-view__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--toss-gray-900);
+}
+
+.calendar-summary {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  margin: 12px 16px;
+  border-radius: var(--radius);
+  padding: 20px;
+  gap: 0;
+}
+
+.calendar-summary__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.calendar-summary__num {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--toss-blue);
+}
+
+.calendar-summary__label {
+  font-size: 12px;
+  color: var(--toss-gray-600);
+}
+
+.calendar-summary__divider {
+  width: 1px;
+  height: 40px;
+  background: var(--toss-gray-200);
+}
+
+.calendar-grid {
+  background: #fff;
+  margin: 0 16px;
+  border-radius: var(--radius);
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-grid__weekday {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--toss-gray-500);
+  padding: 6px 0;
+}
+
+.calendar-grid__weekday--sun { color: #f04452; }
+.calendar-grid__weekday--sat { color: var(--toss-blue); }
+
+.calendar-grid__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 8px;
+  gap: 2px;
+  padding: 4px 0;
+}
+
+.calendar-grid__cell--today {
+  background: var(--toss-blue-light);
+}
+
+.calendar-grid__cell--completed { background: #e6faf1; }
+.calendar-grid__cell--missed    { background: var(--toss-gray-100); }
+.calendar-grid__cell--weekend   { opacity: 0.4; }
+
+.calendar-grid__day {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--toss-gray-800);
+}
+
+.calendar-grid__cell--today .calendar-grid__day { color: var(--toss-blue); font-weight: 700; }
+
+.calendar-grid__emoji { font-size: 14px; line-height: 1; }
+
+.calendar-legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--toss-gray-600);
+}
+
+/* ── 설정 뷰 ── */
+.settings-view {
+  padding: 0 0 100px;
+}
+
+.settings-view__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 20px 12px;
+  background: #fff;
+  border-bottom: 1px solid var(--toss-gray-200);
+}
+
+.settings-view__back {
+  background: none;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--toss-blue);
+  cursor: pointer;
+  padding: 0;
+}
+
+.settings-view__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--toss-gray-900);
+}
+
+.settings-section {
+  background: #fff;
+  margin: 12px 16px;
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.settings-section__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--toss-gray-900);
+  margin-bottom: 12px;
+}
+
+.settings-section__desc {
+  font-size: 13px;
+  color: var(--toss-gray-600);
+  margin-bottom: 12px;
+}
+
+.settings-city-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.settings-city-btn {
+  padding: 10px 0;
+  border: 1.5px solid var(--toss-gray-300);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--toss-gray-700);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.settings-city-btn--active {
+  border-color: var(--toss-blue);
+  background: var(--toss-blue-light);
+  color: var(--toss-blue);
+}
+
+.settings-time-input {
+  border: 1.5px solid var(--toss-gray-300);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--toss-gray-900);
+  outline: none;
+  width: 160px;
+}
+
+.settings-time-input:focus { border-color: var(--toss-blue); }
+
+.settings-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--toss-gray-100);
+}
+
+.settings-item:last-child { border-bottom: none; }
+
+.settings-item__order {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-item__order-btn {
+  background: none;
+  border: 1px solid var(--toss-gray-300);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 10px;
+  cursor: pointer;
+  color: var(--toss-gray-600);
+  line-height: 1;
+}
+
+.settings-item__order-btn:disabled { opacity: 0.3; cursor: default; }
+
+.settings-item__label {
+  flex: 1;
+  font-size: 15px;
+  color: var(--toss-gray-900);
+}
+
+.settings-item__required-btn {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1.5px solid var(--toss-gray-300);
+  background: #fff;
+  color: var(--toss-gray-600);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.settings-item__required-btn--on {
+  border-color: var(--toss-red);
+  color: var(--toss-red);
+  background: #fff5f5;
+}
+
+.settings-item__remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--toss-gray-400);
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.settings-item__remove:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.settings-item__remove:not(:disabled):hover { color: var(--toss-red); }
+
+.settings-add {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-add__input {
+  flex: 1;
+  border: 1.5px solid var(--toss-gray-300);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 14px;
+  outline: none;
+  color: var(--toss-gray-900);
+}
+
+.settings-add__input:focus { border-color: var(--toss-blue); }
+.settings-add__input::placeholder { color: var(--toss-gray-500); }
+
+.settings-add__btn {
+  background: var(--toss-blue);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── 완료 모달 마일스톤 추가 ── */
+.modal--milestone { border-top: 4px solid #f5a623; }
+
+.modal__milestone-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #f5a623, #f53d3d);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.05); }
+}
+
+.modal__streak--milestone {
+  background: linear-gradient(135deg, #fff4e0, #ffe0b2);
+  color: #d96d00;
+  font-weight: 700;
+}
+
+.modal__share-card {
+  background: var(--toss-blue-light);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.modal__share-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--toss-blue);
+  margin-bottom: 4px;
+}
+
+.modal__share-card-body {
+  font-size: 13px;
+  color: var(--toss-gray-700);
+  line-height: 1.5;
+  white-space: pre-line;
+}

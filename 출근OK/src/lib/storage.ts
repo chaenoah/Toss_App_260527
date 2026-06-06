@@ -4,6 +4,7 @@ const KEYS = {
   APP: 'chulgeun_ok_app',
   STREAK: 'chulgeun_ok_streak',
   CITY: 'chulgeun_ok_city',
+  COMMUTE_TIME: 'chulgeun_ok_commute_time',
 } as const;
 
 export const DEFAULT_ITEMS = [
@@ -71,4 +72,12 @@ export function loadCity(): string {
 
 export function saveCity(city: string): void {
   localStorage.setItem(KEYS.CITY, city);
+}
+
+export function loadCommuteTime(): string {
+  return localStorage.getItem(KEYS.COMMUTE_TIME) ?? '08:00';
+}
+
+export function saveCommuteTime(time: string): void {
+  localStorage.setItem(KEYS.COMMUTE_TIME, time);
 }

@@ -116,6 +116,33 @@ export function useChecklist() {
     [state, update]
   );
 
+  // 필수/선택 토글
+  const toggleRequired = useCallback(
+    (id: string) => {
+      update({
+        ...state,
+        items: state.items.map((i) =>
+          i.id === id ? { ...i, required: !i.required } : i
+        ),
+      });
+    },
+    [state, update]
+  );
+
+  // 항목 순서 이동 (autoAdded 제외 범위 안에서)
+  const moveItem = useCallback(
+    (id: string, dir: 'up' | 'down') => {
+      const arr = [...state.items];
+      const idx = arr.findIndex((i) => i.id === id);
+      if (idx < 0) return;
+      const swapIdx = dir === 'up' ? idx - 1 : idx + 1;
+      if (swapIdx < 0 || swapIdx >= arr.length) return;
+      [arr[idx], arr[swapIdx]] = [arr[swapIdx], arr[idx]];
+      update({ ...state, items: arr });
+    },
+    [state, update]
+  );
+
   const allChecked =
     state.items.length > 0 && state.items.every((i) => i.checked);
   const requiredAllChecked =
@@ -129,6 +156,8 @@ export function useChecklist() {
     removeItem,
     syncUmbrella,
     syncMask,
+    toggleRequired,
+    moveItem,
     allChecked,
     requiredAllChecked,
     checkedCount,
