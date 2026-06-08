@@ -3,485 +3,802 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>출근 OK — UX 프리뷰</title>
+<title>출근 OK — UX Preview</title>
 <style>
-:root {
-  --blue: #3182f6; --blue-light: #ebf3fe;
-  --green: #00c851; --green-light: #e6faf1;
-  --red: #f04452;
-  --g100: #f9fafb; --g200: #f2f4f6; --g300: #e5e8eb;
-  --g400: #d1d6db; --g500: #b0b8c1; --g600: #8b95a1;
-  --g700: #6b7684; --g800: #4e5968; --g900: #191f28;
-  --r: 16px; --rsm: 10px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:#e8eaed;padding:32px 16px;display:flex;flex-direction:column;gap:32px;align-items:center;}
-h1{font-size:20px;color:#333;text-align:center;font-weight:700;margin-bottom:8px;}
-.label{font-size:13px;color:#666;text-align:center;margin-bottom:12px;}
-.screens{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;width:100%;max-width:1600px;}
-.screen-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;}
-.screen-title{font-size:13px;font-weight:700;color:#555;background:#fff;padding:4px 12px;border-radius:20px;}
-.phone{width:390px;min-height:844px;background:#f2f4f6;border-radius:40px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;position:relative;border:8px solid #222;}
-.phone-inner{width:100%;height:100%;overflow-y:auto;overflow-x:hidden;padding-bottom:70px;}
+/* ── 리셋 & 기본 ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── 공통 헤더 ── */
-.app-header{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px;background:#fff;}
-.logo{font-size:22px;font-weight:700;color:var(--g900);letter-spacing:-.5px;}
-.date-text{font-size:13px;color:var(--g600);}
+:root {
+  --toss-blue: #3182f6;
+  --toss-blue-light: #ebf3fe;
+  --toss-green: #00c851;
+  --toss-green-light: #e6faf1;
+  --toss-red: #f04452;
+  --toss-gray-100: #f9fafb;
+  --toss-gray-200: #f2f4f6;
+  --toss-gray-300: #e5e8eb;
+  --toss-gray-400: #d1d6db;
+  --toss-gray-500: #b0b8c1;
+  --toss-gray-600: #8b95a1;
+  --toss-gray-700: #6b7684;
+  --toss-gray-800: #4e5968;
+  --toss-gray-900: #191f28;
+  --radius: 16px;
+  --radius-sm: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans KR', sans-serif;
+}
+
+body {
+  background: #e0e6ef;
+  padding: 40px 20px 80px;
+  min-height: 100vh;
+}
+
+/* ── 갤러리 ── */
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 36px;
+  justify-content: center;
+  max-width: 1700px;
+  margin: 0 auto;
+}
+
+.phone-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.phone-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* 폰 프레임 */
+.phone {
+  width: 375px;
+  height: 800px;
+  background: var(--toss-gray-100);
+  border-radius: 44px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.22), 0 0 0 10px #1c1c1e, 0 0 0 12px #3a3a3c;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* status bar 높이 */
+.phone-statusbar {
+  height: 50px;
+  background: #fff;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Dynamic Island */
+.phone-statusbar::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 118px;
+  height: 34px;
+  background: #1c1c1e;
+  border-radius: 20px;
+}
+
+.phone-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  background: var(--toss-gray-100);
+  position: relative;
+}
+.phone-content::-webkit-scrollbar { display: none; }
+
+/* ── 앱 레이아웃 ── */
+.app-inner {
+  padding: 0 0 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 12px;
+  background: #fff;
+}
+.app-logo { font-size: 22px; font-weight: 700; color: var(--toss-gray-900); letter-spacing: -0.5px; }
+.app-date  { font-size: 13px; color: var(--toss-gray-600); }
 
 /* ── 날씨 카드 ── */
-.weather-card{background:linear-gradient(135deg,#3182f6,#5ca5ff);color:#fff;border-radius:var(--r);margin:0 16px;padding:20px;}
-.wcity{font-size:13px;opacity:.85;margin-bottom:8px;}
-.wmain{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
-.wemoji{font-size:36px;}
-.wtemp{font-size:52px;font-weight:700;letter-spacing:-2px;line-height:1;}
-.wmeta{display:flex;flex-wrap:wrap;gap:8px;font-size:13px;opacity:.85;margin-bottom:8px;}
-.wpm25{font-weight:600;opacity:1;padding:2px 8px;border-radius:20px;font-size:12px;background:rgba(255,255,255,.25);}
-.wpm25.bad{background:rgba(255,120,0,.4);}
-.woutfit{background:rgba(255,255,255,.2);border-radius:8px;padding:8px 12px;font-size:14px;font-weight:500;}
+.weather-card {
+  background: linear-gradient(135deg, #3182f6 0%, #5ca5ff 100%);
+  color: #fff; border-radius: var(--radius); margin: 0 16px; padding: 20px;
+}
+.weather-card__city { font-size: 13px; opacity: 0.85; margin-bottom: 8px; }
+.weather-card__main { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.weather-card__emoji { font-size: 36px; }
+.weather-card__temp  { font-size: 52px; font-weight: 700; letter-spacing: -2px; line-height: 1; }
+.weather-card__meta  { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; opacity: 0.85; margin-bottom: 8px; }
+.weather-card__meta-item { white-space: nowrap; }
+.weather-card__pm25 {
+  font-weight: 600; opacity: 1; padding: 2px 8px; border-radius: 20px; font-size: 12px;
+}
+.weather-card__pm25--good     { background: rgba(255,255,255,0.25); }
+.weather-card__pm25--moderate { background: rgba(255,220,0,0.35); }
+.weather-card__pm25--bad      { background: rgba(255,120,0,0.4); }
+.weather-card__outfit {
+  background: rgba(255,255,255,0.2); border-radius: 8px; padding: 8px 12px;
+  font-size: 14px; font-weight: 500;
+}
 
 /* ── 날씨 팁 ── */
-.tips{display:flex;flex-direction:column;gap:8px;margin:0 16px;}
-.tip{display:flex;align-items:center;gap:8px;border-radius:var(--rsm);padding:12px 16px;font-size:14px;font-weight:500;}
-.tip.blue{background:var(--blue-light);color:var(--blue);}
-.tip.orange{background:#fff4e5;color:#d96d00;}
+.weather-tips { display: flex; flex-direction: column; gap: 8px; margin: 0 16px; }
+.weather-tip {
+  display: flex; align-items: center; gap: 8px; border-radius: var(--radius-sm);
+  padding: 12px 16px; font-size: 14px; font-weight: 500;
+}
+.weather-tip--blue   { background: #ebf3fe; color: var(--toss-blue); }
+.weather-tip--orange { background: #fff4e5; color: #d96d00; }
+.weather-tip__icon   { font-size: 18px; }
 
 /* ── 체크리스트 ── */
-.checklist{background:#fff;border-radius:var(--r);margin:0 16px;padding:20px;}
-.checklist.done{border:2px solid var(--green);}
-.cl-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.cl-title{font-size:17px;font-weight:700;color:var(--g900);}
-.cl-prog{font-size:14px;font-weight:600;color:var(--blue);}
-.cl-prog.done{color:var(--green);}
-.pbar{height:4px;background:var(--g200);border-radius:2px;margin-bottom:16px;overflow:hidden;}
-.pfill{height:100%;border-radius:2px;transition:width .3s;}
-.pfill.blue{background:var(--blue);}
-.pfill.green{background:var(--green);}
-.cl-items{display:flex;flex-direction:column;gap:0;margin-bottom:12px;}
-.cl-item{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--g100);min-height:52px;padding:10px 0;}
-.cl-item:last-child{border-bottom:none;}
-.cl-toggle{display:flex;align-items:center;gap:12px;flex:1;}
-.cb{font-size:22px;}
-.ilabel{font-size:16px;color:var(--g900);}
-.ilabel.done{text-decoration:line-through;color:var(--g500);}
-.req{color:var(--red);font-size:12px;}
-.abadge{background:var(--blue-light);color:var(--blue);font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;margin-left:4px;}
-.rm{color:var(--g400);font-size:13px;padding:4px 8px;}
-.done-banner{background:var(--green-light);border-radius:var(--rsm);padding:12px 16px;font-size:14px;font-weight:600;color:#007a3d;text-align:center;margin-bottom:12px;}
-.empty{padding:24px 0;text-align:center;font-size:14px;color:var(--g500);}
-.cl-add{display:flex;gap:8px;margin-top:4px;}
-.cl-add input{flex:1;border:1.5px solid var(--g300);border-radius:var(--rsm);padding:10px 14px;font-size:14px;color:var(--g900);}
-.cl-add button{background:var(--blue);color:#fff;border:none;border-radius:var(--rsm);padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;}
+.checklist {
+  background: #fff; border-radius: var(--radius); margin: 0 16px; padding: 20px;
+}
+.checklist--done { border: 2px solid var(--toss-green); }
+.checklist__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.checklist__title { font-size: 17px; font-weight: 700; color: var(--toss-gray-900); }
+.checklist__progress { font-size: 14px; font-weight: 600; color: var(--toss-blue); }
+.checklist__progress--done { color: var(--toss-green); }
+.checklist__progress-bar {
+  height: 4px; background: var(--toss-gray-200); border-radius: 2px; margin-bottom: 16px; overflow: hidden;
+}
+.checklist__progress-fill { height: 100%; background: var(--toss-blue); border-radius: 2px; }
+.checklist__progress-fill--done { background: var(--toss-green); }
+.checklist__done-banner {
+  background: var(--toss-green-light); border-radius: var(--radius-sm); padding: 12px 16px;
+  font-size: 14px; font-weight: 600; color: #007a3d; text-align: center; margin-bottom: 16px;
+}
+.checklist__items { display: flex; flex-direction: column; gap: 2px; margin-bottom: 16px; }
+.checklist-item {
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--toss-gray-100); min-height: 52px;
+}
+.checklist-item:last-child { border-bottom: none; }
+.checklist-item__toggle {
+  display: flex; align-items: center; gap: 12px; background: none; border: none;
+  cursor: pointer; flex: 1; text-align: left; padding: 14px 0; min-height: 52px;
+}
+.checklist-item__checkbox { font-size: 22px; flex-shrink: 0; }
+.checklist-item__label { font-size: 16px; color: var(--toss-gray-900); display: flex; align-items: center; gap: 6px; }
+.checklist-item__label--done { text-decoration: line-through; color: var(--toss-gray-500); }
+.checklist-item__required { color: var(--toss-red); font-size: 12px; }
+.checklist-item__badge {
+  background: var(--toss-blue-light); color: var(--toss-blue);
+  font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px;
+}
+.checklist-item__remove {
+  background: none; border: none; cursor: pointer; color: var(--toss-gray-400);
+  font-size: 14px; padding: 4px 8px; border-radius: 4px;
+}
+.checklist__add { display: flex; gap: 8px; }
+.checklist__add-input {
+  flex: 1; border: 1.5px solid var(--toss-gray-300); border-radius: var(--radius-sm);
+  padding: 10px 14px; font-size: 14px; outline: none; color: var(--toss-gray-900);
+}
+.checklist__add-input::placeholder { color: var(--toss-gray-500); }
+.checklist__add-btn {
+  background: var(--toss-blue); color: #fff; border: none; border-radius: var(--radius-sm);
+  padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer;
+}
 
-/* ── streak footer ── */
-.sf{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:var(--r);margin:0 16px;padding:16px 20px;}
-.sf-label{font-size:15px;font-weight:600;color:var(--g900);}
-.sf-btn{background:var(--g100);border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--g700);cursor:pointer;}
+/* ── Streak 푸터 ── */
+.streak-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #fff; border-radius: var(--radius); margin: 0 16px; padding: 16px 20px;
+}
+.streak-footer__label { font-size: 15px; font-weight: 600; color: var(--toss-gray-900); }
+.streak-footer__btn {
+  background: var(--toss-gray-100); border: none; border-radius: 8px;
+  padding: 8px 14px; font-size: 13px; font-weight: 600; color: var(--toss-gray-700); cursor: pointer;
+}
 
-/* ── 하단 내비 ── */
-.bnav{position:sticky;bottom:0;left:0;right:0;display:flex;background:#fff;border-top:1px solid var(--g200);z-index:100;}
-.btab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 12px;border:none;background:none;cursor:pointer;color:var(--g500);}
-.btab.active{color:var(--blue);}
-.bicon{font-size:22px;line-height:1;}
-.blabel{font-size:11px;font-weight:600;}
+/* ── 하단 내비게이션 ── */
+.bottom-nav {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  display: flex; background: #fff; border-top: 1px solid var(--toss-gray-200); z-index: 100;
+  padding-bottom: 10px;
+}
+.bottom-nav__tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 10px 0 2px; background: none; border: none; cursor: pointer; color: var(--toss-gray-500);
+}
+.bottom-nav__tab--active { color: var(--toss-blue); }
+.bottom-nav__icon  { font-size: 22px; line-height: 1; }
+.bottom-nav__label { font-size: 11px; font-weight: 600; }
 
-/* ── 완료 모달 ── */
-.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;z-index:200;}
-.modal{background:#fff;border-radius:24px 24px 0 0;padding:28px 24px 44px;width:100%;text-align:center;}
-.modal.milestone{border-top:4px solid #f5a623;}
-.m-badge{display:inline-block;background:linear-gradient(135deg,#f5a623,#f53d3d);color:#fff;font-size:13px;font-weight:700;padding:6px 16px;border-radius:20px;margin-bottom:12px;}
-.m-conf{font-size:44px;margin-bottom:12px;}
-.m-title{font-size:20px;font-weight:700;color:var(--g900);margin-bottom:8px;letter-spacing:-.5px;}
-.m-sub{font-size:14px;color:var(--g700);line-height:1.6;margin-bottom:14px;}
-.m-streak{display:inline-block;background:var(--g100);border-radius:20px;padding:8px 20px;font-size:14px;font-weight:700;color:var(--g900);margin-bottom:16px;}
-.m-streak.green{background:linear-gradient(135deg,#e8faf0,#c8f5d8);color:#007a3d;}
-.m-card{background:var(--blue-light);border-radius:var(--rsm);padding:12px 14px;margin-bottom:16px;text-align:left;}
-.m-card-t{font-size:12px;font-weight:700;color:var(--blue);margin-bottom:3px;}
-.m-card-b{font-size:12px;color:var(--g700);line-height:1.5;}
-.m-actions{display:flex;flex-direction:column;gap:8px;}
-.m-share{background:var(--blue);color:#fff;border:none;border-radius:var(--rsm);padding:14px;font-size:15px;font-weight:700;cursor:pointer;width:100%;}
-.m-close{background:var(--g100);color:var(--g700);border:none;border-radius:var(--rsm);padding:14px;font-size:15px;font-weight:600;cursor:pointer;width:100%;}
+/* ── 모달 ── */
+.modal-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.5);
+  display: flex; align-items: flex-end; justify-content: center; z-index: 1000;
+}
+.modal {
+  background: #fff; border-radius: 24px 24px 0 0;
+  padding: 32px 24px 40px; width: 100%; text-align: center;
+}
+.modal--milestone { border-top: 4px solid #f5a623; }
+.modal__confetti  { font-size: 48px; margin-bottom: 16px; }
+.modal__milestone-badge {
+  display: inline-block; background: linear-gradient(135deg, #f5a623, #f53d3d);
+  color: #fff; font-size: 13px; font-weight: 700;
+  padding: 6px 16px; border-radius: 20px; margin-bottom: 12px;
+}
+.modal__title { font-size: 22px; font-weight: 700; color: var(--toss-gray-900); margin-bottom: 10px; }
+.modal__sub   { font-size: 15px; color: var(--toss-gray-700); line-height: 1.6; margin-bottom: 16px; }
+.modal__streak {
+  display: inline-block; background: var(--toss-gray-100);
+  border-radius: 20px; padding: 8px 20px; font-size: 15px; font-weight: 700;
+  color: var(--toss-gray-900); margin-bottom: 16px;
+}
+.modal__streak--milestone { background: linear-gradient(135deg,#fff4e0,#ffe0b2); color: #d96d00; }
+.modal__share-card {
+  background: var(--toss-blue-light); border-radius: var(--radius-sm);
+  padding: 14px 16px; margin-bottom: 16px; text-align: left;
+}
+.modal__share-card-title { font-size: 13px; font-weight: 700; color: var(--toss-blue); margin-bottom: 4px; }
+.modal__share-card-body  { font-size: 13px; color: var(--toss-gray-700); line-height: 1.5; white-space: pre-line; }
+.modal__actions  { display: flex; flex-direction: column; gap: 10px; }
+.modal__share-btn {
+  background: var(--toss-blue); color: #fff; border: none;
+  border-radius: var(--radius-sm); padding: 16px; font-size: 16px; font-weight: 700; cursor: pointer;
+}
+.modal__close-btn {
+  background: var(--toss-gray-100); color: var(--toss-gray-700); border: none;
+  border-radius: var(--radius-sm); padding: 16px; font-size: 16px; font-weight: 600; cursor: pointer;
+}
 
-/* ── 캘린더 ── */
-.cal-header{display:flex;align-items:center;gap:12px;padding:20px 20px 12px;background:#fff;border-bottom:1px solid var(--g200);}
-.cal-back{background:none;border:none;font-size:15px;font-weight:600;color:var(--blue);cursor:pointer;}
-.cal-title{font-size:18px;font-weight:700;color:var(--g900);}
-.cal-summary{display:flex;align-items:center;background:#fff;margin:12px 16px;border-radius:var(--r);padding:20px;}
-.cs-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
-.cs-num{font-size:32px;font-weight:700;color:var(--blue);}
-.cs-label{font-size:12px;color:var(--g600);}
-.cs-div{width:1px;height:40px;background:var(--g200);}
-.cal-grid{background:#fff;margin:0 16px;border-radius:var(--r);padding:16px;display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
-.wday{text-align:center;font-size:12px;font-weight:700;color:var(--g500);padding:6px 0;}
-.wday.sun{color:var(--red);}
-.wday.sat{color:var(--blue);}
-.cell{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:44px;border-radius:8px;gap:2px;padding:4px 0;}
-.cell.today{background:var(--blue-light);}
-.cell.completed{background:var(--green-light);}
-.cell.missed{background:var(--g100);}
-.cell.weekend{opacity:.35;}
-.cday{font-size:13px;font-weight:600;color:var(--g800);}
-.cell.today .cday{color:var(--blue);font-weight:700;}
-.cemoji{font-size:13px;line-height:1;}
-.cal-legend{display:flex;gap:16px;justify-content:center;padding:12px 16px;font-size:12px;color:var(--g600);}
+/* ── 캘린더 뷰 ── */
+.calendar-view { padding: 0 0 90px; }
+.calendar-view__header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 20px 20px 12px; background: #fff; border-bottom: 1px solid var(--toss-gray-200);
+}
+.calendar-view__back {
+  background: none; border: none; font-size: 15px; font-weight: 600; color: var(--toss-blue); cursor: pointer;
+}
+.calendar-view__title { font-size: 18px; font-weight: 700; color: var(--toss-gray-900); }
+.calendar-summary {
+  display: flex; align-items: center; background: #fff;
+  margin: 12px 16px; border-radius: var(--radius); padding: 20px;
+}
+.calendar-summary__item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.calendar-summary__num   { font-size: 32px; font-weight: 700; color: var(--toss-blue); }
+.calendar-summary__label { font-size: 12px; color: var(--toss-gray-600); }
+.calendar-summary__divider { width: 1px; height: 40px; background: var(--toss-gray-200); }
+.calendar-grid {
+  background: #fff; margin: 0 16px; border-radius: var(--radius); padding: 16px;
+  display: grid; grid-template-columns: repeat(7,1fr); gap: 4px;
+}
+.calendar-grid__weekday {
+  text-align: center; font-size: 12px; font-weight: 700; color: var(--toss-gray-500); padding: 6px 0;
+}
+.calendar-grid__weekday--sun { color: #f04452; }
+.calendar-grid__weekday--sat { color: var(--toss-blue); }
+.calendar-grid__cell {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 44px; border-radius: 8px; gap: 2px; padding: 4px 0;
+}
+.calendar-grid__cell--today     { background: var(--toss-blue-light); }
+.calendar-grid__cell--completed { background: #e6faf1; }
+.calendar-grid__cell--missed    { background: var(--toss-gray-100); }
+.calendar-grid__cell--weekend   { opacity: 0.35; }
+.calendar-grid__day { font-size: 13px; font-weight: 600; color: var(--toss-gray-800); }
+.calendar-grid__cell--today .calendar-grid__day { color: var(--toss-blue); font-weight: 700; }
+.calendar-grid__emoji { font-size: 14px; line-height: 1; }
+.calendar-legend {
+  display: flex; gap: 16px; justify-content: center;
+  padding: 12px 16px; font-size: 12px; color: var(--toss-gray-600);
+}
 
-/* ── 설정 ── */
-.set-header{display:flex;align-items:center;gap:12px;padding:20px 20px 12px;background:#fff;border-bottom:1px solid var(--g200);}
-.set-back{background:none;border:none;font-size:15px;font-weight:600;color:var(--blue);}
-.set-title{font-size:18px;font-weight:700;color:var(--g900);}
-.set-sec{background:#fff;margin:12px 16px;border-radius:var(--r);padding:20px;}
-.set-sec h3{font-size:16px;font-weight:700;color:var(--g900);margin-bottom:12px;}
-.set-sec p{font-size:13px;color:var(--g600);margin-bottom:12px;}
-.city-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.city-btn{padding:10px 0;border:1.5px solid var(--g300);border-radius:var(--rsm);background:#fff;font-size:14px;font-weight:600;color:var(--g700);cursor:pointer;}
-.city-btn.active{border-color:var(--blue);background:var(--blue-light);color:var(--blue);}
-.time-input{border:1.5px solid var(--g300);border-radius:var(--rsm);padding:10px 14px;font-size:16px;font-weight:600;color:var(--g900);width:160px;}
-.set-items{display:flex;flex-direction:column;gap:4px;margin-bottom:16px;}
-.set-item{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--g100);}
-.set-item:last-child{border:none;}
-.sorder{display:flex;flex-direction:column;gap:2px;}
-.sorder button{background:none;border:1px solid var(--g300);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--g600);cursor:pointer;}
-.slabel{flex:1;font-size:15px;color:var(--g900);}
-.sreq{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;border:1.5px solid var(--g300);background:#fff;color:var(--g600);}
-.sreq.on{border-color:var(--red);color:var(--red);background:#fff5f5;}
-.srm{background:none;border:none;color:var(--g400);font-size:13px;padding:4px 8px;}
-.set-add{display:flex;gap:8px;}
-.set-add input{flex:1;border:1.5px solid var(--g300);border-radius:var(--rsm);padding:10px 14px;font-size:14px;color:var(--g900);}
-.set-add button{background:var(--blue);color:#fff;border:none;border-radius:var(--rsm);padding:10px 18px;font-size:14px;font-weight:600;}
+/* ── 설정 뷰 ── */
+.settings-view { padding: 0 0 90px; }
+.settings-view__header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 20px 20px 12px; background: #fff; border-bottom: 1px solid var(--toss-gray-200);
+}
+.settings-view__back {
+  background: none; border: none; font-size: 15px; font-weight: 600; color: var(--toss-blue); cursor: pointer;
+}
+.settings-view__title { font-size: 18px; font-weight: 700; color: var(--toss-gray-900); }
+.settings-section {
+  background: #fff; margin: 12px 16px; border-radius: var(--radius); padding: 20px;
+}
+.settings-section__title { font-size: 16px; font-weight: 700; color: var(--toss-gray-900); margin-bottom: 12px; }
+.settings-section__desc  { font-size: 13px; color: var(--toss-gray-600); margin-bottom: 12px; }
+.settings-city-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.settings-city-btn {
+  padding: 10px 0; border: 1.5px solid var(--toss-gray-300); border-radius: var(--radius-sm);
+  background: #fff; font-size: 14px; font-weight: 600; color: var(--toss-gray-700); cursor: pointer;
+}
+.settings-city-btn--active {
+  border-color: var(--toss-blue); background: var(--toss-blue-light); color: var(--toss-blue);
+}
+.settings-time-input {
+  border: 1.5px solid var(--toss-gray-300); border-radius: var(--radius-sm);
+  padding: 10px 14px; font-size: 16px; font-weight: 600; color: var(--toss-gray-900); outline: none; width: 160px;
+}
+.alarm-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.alarm-toggle {
+  flex-shrink: 0; width: 64px; height: 36px; border-radius: 18px; border: none;
+  background: var(--toss-gray-200); color: var(--toss-gray-500); font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.alarm-toggle--on { background: var(--toss-blue); color: #fff; }
+.settings-items { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+.settings-item {
+  display: flex; align-items: center; gap: 8px; padding: 10px 0;
+  border-bottom: 1px solid var(--toss-gray-100);
+}
+.settings-item:last-child { border-bottom: none; }
+.settings-item__order { display: flex; flex-direction: column; gap: 2px; }
+.settings-item__order-btn {
+  background: none; border: 1px solid var(--toss-gray-300); border-radius: 4px;
+  padding: 2px 6px; font-size: 10px; cursor: pointer; color: var(--toss-gray-600); line-height: 1;
+}
+.settings-item__order-btn:disabled { opacity: 0.3; }
+.settings-item__label { flex: 1; font-size: 15px; color: var(--toss-gray-900); }
+.settings-item__required-btn {
+  font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+  border: 1.5px solid var(--toss-gray-300); background: #fff; color: var(--toss-gray-600); cursor: pointer; white-space: nowrap;
+}
+.settings-item__required-btn--on {
+  border-color: var(--toss-red); color: var(--toss-red); background: #fff5f5;
+}
+.settings-item__remove {
+  background: none; border: none; cursor: pointer; color: var(--toss-gray-400);
+  font-size: 14px; padding: 4px 8px; border-radius: 4px;
+}
+.settings-item__remove:disabled { opacity: 0.2; cursor: default; }
+.settings-add { display: flex; gap: 8px; }
+.settings-add__input {
+  flex: 1; border: 1.5px solid var(--toss-gray-300); border-radius: var(--radius-sm);
+  padding: 10px 14px; font-size: 14px; outline: none; color: var(--toss-gray-900);
+}
+.settings-add__input::placeholder { color: var(--toss-gray-500); }
+.settings-add__btn {
+  background: var(--toss-blue); color: #fff; border: none; border-radius: var(--radius-sm);
+  padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+
+/* ── 페이지 헤더 ── */
+.page-header { text-align: center; margin-bottom: 36px; }
+.page-header h1 { font-size: 30px; font-weight: 800; color: #191f28; letter-spacing: -1px; }
+.page-header p  { font-size: 14px; color: #8b95a1; margin-top: 8px; }
 </style>
 </head>
 <body>
 
-<h1>출근 OK — UX 프리뷰 (390×844 모바일 기준)</h1>
-<p class="label">4개 화면 나란히 확인 • 실제 앱과 동일한 레이아웃</p>
+<div class="page-header">
+  <h1>출근 OK 🫡</h1>
+  <p>UX Preview — 전체 화면 6종 · 알람 기능 포함</p>
+</div>
 
-<div class="screens">
+<div class="gallery">
 
-  <!-- ── 화면 1: 홈 (미체크 상태) ── -->
-  <div class="screen-wrap">
-    <div class="screen-title">화면 1-A · 홈 (출근 전)</div>
-    <div class="phone">
-      <div class="phone-inner">
+<!-- ────────────────────────── ① 홈 · 출근 전 ────────────────────────── -->
+<div class="phone-wrap">
+  <div class="phone-label">① 홈 · 출근 전</div>
+  <div class="phone">
+    <div class="phone-statusbar"></div>
+    <div class="phone-content">
+      <div class="app-inner">
         <div class="app-header">
-          <span class="logo">출근 OK 🫡</span>
-          <span class="date-text">6월 6일 (금)</span>
+          <span class="app-logo">출근 OK 🫡</span>
+          <span class="app-date">6월 8일 (월)</span>
         </div>
-        <div class="weather-card" style="margin-top:0;">
-          <div class="wcity">광주</div>
-          <div class="wmain">
-            <span class="wemoji">🌤️</span>
-            <span class="wtemp">24°</span>
-          </div>
-          <div class="wmeta">
-            <span>🌧️ 강수확률 12%</span>
-            <span class="wpm25">😊 미세먼지 좋음 (9㎍/㎥)</span>
-          </div>
-          <div class="woutfit">얇은 셔츠면 충분해요 👕</div>
-        </div>
-        <!-- 배너 없음 (맑음·미세먼지 좋음) -->
-        <div class="checklist" style="margin-top:12px;">
-          <div class="cl-header">
-            <span class="cl-title">출근 준비물</span>
-            <span class="cl-prog">2/9</span>
-          </div>
-          <div class="pbar"><div class="pfill blue" style="width:22%"></div></div>
-          <div class="cl-items">
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">✅</span><span class="ilabel done">지갑<span class="req"> *</span></span></div></div>
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">✅</span><span class="ilabel done">핸드폰<span class="req"> *</span></span></div></div>
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">⬜</span><span class="ilabel">사원증<span class="req"> *</span></span></div></div>
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">⬜</span><span class="ilabel">교통카드<span class="req"> *</span></span></div></div>
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">⬜</span><span class="ilabel">이어폰</span></div><span class="rm">✕</span></div>
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">⬜</span><span class="ilabel">충전기</span></div><span class="rm">✕</span></div>
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">⬜</span><span class="ilabel">노트북</span></div><span class="rm">✕</span></div>
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">⬜</span><span class="ilabel">도시락</span></div><span class="rm">✕</span></div>
-          </div>
-          <div class="cl-add">
-            <input placeholder="항목 추가 (예: 텀블러)" readonly>
-            <button>추가</button>
-          </div>
-        </div>
-        <div class="sf" style="margin-top:12px;">
-          <span class="sf-label">5일 연속 출근 🔥</span>
-          <button class="sf-btn">📅 캘린더</button>
-        </div>
-        <div style="height:12px;"></div>
-      </div>
-      <div class="bnav">
-        <button class="btab active"><span class="bicon">🏠</span><span class="blabel">홈</span></button>
-        <button class="btab"><span class="bicon">📅</span><span class="blabel">캘린더</span></button>
-        <button class="btab"><span class="bicon">⚙️</span><span class="blabel">설정</span></button>
-      </div>
-    </div>
-  </div>
 
-  <!-- ── 화면 1-B: 홈 (우산+마스크 배너, 완료 상태) ── -->
-  <div class="screen-wrap">
-    <div class="screen-title">화면 1-B · 홈 (비·미세먼지+완료)</div>
-    <div class="phone">
-      <div class="phone-inner">
-        <div class="app-header">
-          <span class="logo">출근 OK 🫡</span>
-          <span class="date-text">6월 6일 (금)</span>
-        </div>
         <div class="weather-card">
-          <div class="wcity">서울</div>
-          <div class="wmain">
-            <span class="wemoji">🌧️</span>
-            <span class="wtemp">18°</span>
+          <div class="weather-card__city">📍 광주</div>
+          <div class="weather-card__main">
+            <span class="weather-card__emoji">⛅</span>
+            <span class="weather-card__temp">24°</span>
           </div>
-          <div class="wmeta">
-            <span>🌧️ 강수확률 75%</span>
-            <span class="wpm25 bad">😷 미세먼지 나쁨 (52㎍/㎥)</span>
+          <div class="weather-card__meta">
+            <span class="weather-card__meta-item">☂ 강수 22%</span>
+            <span class="weather-card__pm25 weather-card__pm25--moderate">미세먼지 보통</span>
           </div>
-          <div class="woutfit">긴팔 + 얇은 카디건 추천 🧥</div>
+          <div class="weather-card__outfit">🧥 얇은 가디건 or 긴팔 추천해요</div>
         </div>
-        <div class="tips" style="margin-top:12px;">
-          <div class="tip blue">☂️ 오늘 비 소식 있어요 ☂️ 우산 챙기세요</div>
-          <div class="tip orange">😷 미세먼지 나쁨 😷 마스크 챙기세요</div>
-        </div>
-        <div class="checklist done" style="margin-top:12px;">
-          <div class="cl-header">
-            <span class="cl-title">출근 준비물</span>
-            <span class="cl-prog done">9/9</span>
-          </div>
-          <div class="pbar"><div class="pfill green" style="width:100%"></div></div>
-          <div class="cl-items">
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">✅</span><span class="ilabel done">우산<span class="abadge">자동</span></span></div></div>
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">✅</span><span class="ilabel done">마스크<span class="abadge">자동</span></span></div></div>
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">✅</span><span class="ilabel done">지갑<span class="req"> *</span></span></div></div>
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">✅</span><span class="ilabel done">핸드폰<span class="req"> *</span></span></div></div>
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">✅</span><span class="ilabel done">사원증<span class="req"> *</span></span></div></div>
-            <div class="cl-item"><div class="cl-toggle"><span class="cb">✅</span><span class="ilabel done">교통카드<span class="req"> *</span></span></div></div>
-          </div>
-          <div class="done-banner">✅ 출근 준비 완료! 오늘도 화이팅이에요</div>
-          <div class="cl-add">
-            <input placeholder="항목 추가 (예: 텀블러)" readonly>
-            <button>추가</button>
+
+        <div class="weather-tips">
+          <div class="weather-tip weather-tip--orange">
+            <span class="weather-tip__icon">😷</span>
+            <span>미세먼지 보통 — 마스크가 자동 추가됐어요</span>
           </div>
         </div>
-        <div class="sf" style="margin-top:12px;">
-          <span class="sf-label">6일 연속 출근 🔥</span>
-          <button class="sf-btn">📅 캘린더</button>
+
+        <div class="checklist">
+          <div class="checklist__header">
+            <span class="checklist__title">출근 준비물</span>
+            <span class="checklist__progress">2 / 8</span>
+          </div>
+          <div class="checklist__progress-bar">
+            <div class="checklist__progress-fill" style="width:25%"></div>
+          </div>
+          <div class="checklist__items">
+            <div class="checklist-item">
+              <button class="checklist-item__toggle"><span class="checklist-item__checkbox">✅</span><span class="checklist-item__label checklist-item__label--done">지갑 <span class="checklist-item__required">*</span></span></button>
+            </div>
+            <div class="checklist-item">
+              <button class="checklist-item__toggle"><span class="checklist-item__checkbox">✅</span><span class="checklist-item__label checklist-item__label--done">핸드폰 <span class="checklist-item__required">*</span></span></button>
+            </div>
+            <div class="checklist-item">
+              <button class="checklist-item__toggle"><span class="checklist-item__checkbox">⬜</span><span class="checklist-item__label">사원증 <span class="checklist-item__required">*</span></span></button>
+            </div>
+            <div class="checklist-item">
+              <button class="checklist-item__toggle"><span class="checklist-item__checkbox">⬜</span><span class="checklist-item__label">교통카드 <span class="checklist-item__required">*</span></span></button>
+            </div>
+            <div class="checklist-item">
+              <button class="checklist-item__toggle"><span class="checklist-item__checkbox">⬜</span><span class="checklist-item__label">마스크 <span class="checklist-item__badge">자동</span></span></button>
+              <button class="checklist-item__remove">✕</button>
+            </div>
+            <div class="checklist-item">
+              <button class="checklist-item__toggle"><span class="checklist-item__checkbox">⬜</span><span class="checklist-item__label">이어폰</span></button>
+              <button class="checklist-item__remove">✕</button>
+            </div>
+            <div class="checklist-item">
+              <button class="checklist-item__toggle"><span class="checklist-item__checkbox">⬜</span><span class="checklist-item__label">충전기</span></button>
+              <button class="checklist-item__remove">✕</button>
+            </div>
+            <div class="checklist-item">
+              <button class="checklist-item__toggle"><span class="checklist-item__checkbox">⬜</span><span class="checklist-item__label">노트북</span></button>
+              <button class="checklist-item__remove">✕</button>
+            </div>
+          </div>
+          <div class="checklist__add">
+            <input class="checklist__add-input" placeholder="항목 추가 (예: 텀블러)">
+            <button class="checklist__add-btn">추가</button>
+          </div>
         </div>
-        <div style="height:12px;"></div>
+
+        <div class="streak-footer">
+          <span class="streak-footer__label">🔥 5일 연속 출근 중</span>
+          <button class="streak-footer__btn">캘린더 📅</button>
+        </div>
       </div>
-      <div class="bnav">
-        <button class="btab active"><span class="bicon">🏠</span><span class="blabel">홈</span></button>
-        <button class="btab"><span class="bicon">📅</span><span class="blabel">캘린더</span></button>
-        <button class="btab"><span class="bicon">⚙️</span><span class="blabel">설정</span></button>
+
+      <div class="bottom-nav">
+        <button class="bottom-nav__tab bottom-nav__tab--active"><span class="bottom-nav__icon">🏠</span><span class="bottom-nav__label">홈</span></button>
+        <button class="bottom-nav__tab"><span class="bottom-nav__icon">📅</span><span class="bottom-nav__label">캘린더</span></button>
+        <button class="bottom-nav__tab"><span class="bottom-nav__icon">⚙️</span><span class="bottom-nav__label">설정</span></button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- ── 화면 2: 완료 모달 (일반 / 마일스톤) ── -->
-  <div class="screen-wrap">
-    <div class="screen-title">화면 2-A · 완료 모달 (일반)</div>
-    <div class="phone">
-      <div class="phone-inner" style="position:relative;">
-        <div class="modal-bg">
-          <div class="modal">
-            <div class="m-conf">🎉</div>
-            <h2 class="m-title">5일째 무탈 출근 ✅</h2>
-            <p class="m-sub">오늘도 출근하셨군요. 오늘의 MVP 직장인으로 선정되셨습니다.</p>
-            <div class="m-streak">🔥 5일 연속 출근</div>
-            <div class="m-card">
-              <div class="m-card-t">출근 OK 🫡</div>
-              <div class="m-card-b">오늘도 출근 준비 완료 ✅<br>#출근OK 로 아침을 시작했습니다.</div>
-            </div>
-            <div class="m-actions">
-              <button class="m-share">공유하기 📤</button>
-              <button class="m-close">확인</button>
-            </div>
+<!-- ────────────────────────── ② 홈 · 전부 완료 ────────────────────────── -->
+<div class="phone-wrap">
+  <div class="phone-label">② 홈 · 전부 완료</div>
+  <div class="phone">
+    <div class="phone-statusbar"></div>
+    <div class="phone-content">
+      <div class="app-inner">
+        <div class="app-header">
+          <span class="app-logo">출근 OK 🫡</span>
+          <span class="app-date">6월 8일 (월)</span>
+        </div>
+
+        <div class="weather-card">
+          <div class="weather-card__city">📍 광주</div>
+          <div class="weather-card__main">
+            <span class="weather-card__emoji">☀️</span>
+            <span class="weather-card__temp">27°</span>
+          </div>
+          <div class="weather-card__meta">
+            <span class="weather-card__meta-item">☂ 강수 5%</span>
+            <span class="weather-card__pm25 weather-card__pm25--good">미세먼지 좋음</span>
+          </div>
+          <div class="weather-card__outfit">👕 반팔·반바지도 OK!</div>
+        </div>
+
+        <div class="checklist checklist--done">
+          <div class="checklist__header">
+            <span class="checklist__title">출근 준비물</span>
+            <span class="checklist__progress checklist__progress--done">7 / 7 ✓</span>
+          </div>
+          <div class="checklist__progress-bar">
+            <div class="checklist__progress-fill checklist__progress-fill--done" style="width:100%"></div>
+          </div>
+          <div class="checklist__done-banner">✅ 오늘도 완벽 준비 완료!</div>
+          <div class="checklist__items">
+            <div class="checklist-item"><button class="checklist-item__toggle"><span class="checklist-item__checkbox">✅</span><span class="checklist-item__label checklist-item__label--done">지갑 <span class="checklist-item__required">*</span></span></button></div>
+            <div class="checklist-item"><button class="checklist-item__toggle"><span class="checklist-item__checkbox">✅</span><span class="checklist-item__label checklist-item__label--done">핸드폰 <span class="checklist-item__required">*</span></span></button></div>
+            <div class="checklist-item"><button class="checklist-item__toggle"><span class="checklist-item__checkbox">✅</span><span class="checklist-item__label checklist-item__label--done">사원증 <span class="checklist-item__required">*</span></span></button></div>
+            <div class="checklist-item"><button class="checklist-item__toggle"><span class="checklist-item__checkbox">✅</span><span class="checklist-item__label checklist-item__label--done">교통카드 <span class="checklist-item__required">*</span></span></button></div>
+            <div class="checklist-item"><button class="checklist-item__toggle"><span class="checklist-item__checkbox">✅</span><span class="checklist-item__label checklist-item__label--done">이어폰</span></button><button class="checklist-item__remove">✕</button></div>
+            <div class="checklist-item"><button class="checklist-item__toggle"><span class="checklist-item__checkbox">✅</span><span class="checklist-item__label checklist-item__label--done">충전기</span></button><button class="checklist-item__remove">✕</button></div>
+            <div class="checklist-item"><button class="checklist-item__toggle"><span class="checklist-item__checkbox">✅</span><span class="checklist-item__label checklist-item__label--done">노트북</span></button><button class="checklist-item__remove">✕</button></div>
+          </div>
+          <div class="checklist__add">
+            <input class="checklist__add-input" placeholder="항목 추가 (예: 텀블러)">
+            <button class="checklist__add-btn">추가</button>
+          </div>
+        </div>
+
+        <div class="streak-footer">
+          <span class="streak-footer__label">🔥 6일 연속 출근 중</span>
+          <button class="streak-footer__btn">캘린더 📅</button>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <button class="bottom-nav__tab bottom-nav__tab--active"><span class="bottom-nav__icon">🏠</span><span class="bottom-nav__label">홈</span></button>
+        <button class="bottom-nav__tab"><span class="bottom-nav__icon">📅</span><span class="bottom-nav__label">캘린더</span></button>
+        <button class="bottom-nav__tab"><span class="bottom-nav__icon">⚙️</span><span class="bottom-nav__label">설정</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────────────── ③ 완료 모달 · 일반 ────────────────────────── -->
+<div class="phone-wrap">
+  <div class="phone-label">③ 완료 모달 · 일반</div>
+  <div class="phone">
+    <div class="phone-statusbar"></div>
+    <div class="phone-content" style="background:#fff;">
+      <div class="app-header">
+        <span class="app-logo">출근 OK 🫡</span>
+        <span class="app-date">6월 8일 (월)</span>
+      </div>
+      <div class="modal-overlay">
+        <div class="modal">
+          <div class="modal__confetti">🎉</div>
+          <div class="modal__title">오늘도 완벽 출근!</div>
+          <div class="modal__sub">준비물 빠짐없이 챙겼어요.<br>오늘 하루도 무탈하게! 🫡</div>
+          <div class="modal__streak">🔥 6일 연속</div>
+          <div class="modal__share-card">
+            <div class="modal__share-card-title">📣 공유 문구 미리보기</div>
+            <div class="modal__share-card-body">출근 OK 6일 연속 달성! 🔥
+오늘도 지갑·폰·사원증 다 챙겼어요 🫡
+#출근OK #출근준비 #연속출근</div>
+          </div>
+          <div class="modal__actions">
+            <button class="modal__share-btn">📤 공유하기</button>
+            <button class="modal__close-btn">닫기</button>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <div class="screen-wrap">
-    <div class="screen-title">화면 2-B · 완료 모달 (30일 마일스톤)</div>
-    <div class="phone">
-      <div class="phone-inner" style="position:relative;">
-        <div class="modal-bg">
-          <div class="modal milestone">
-            <div class="m-badge">🎊 마일스톤 달성!</div>
-            <div class="m-conf">🎊</div>
-            <h2 class="m-title">30일 연속 개근 🫡</h2>
-            <p class="m-sub">30일 연속 무탈 출근, 이쯤이면 인사고과 +1 받아야 하는 거 아닙니까?</p>
-            <div class="m-streak green">🔥 30일 연속 출근</div>
-            <div class="m-card">
-              <div class="m-card-t">출근 OK 🫡</div>
-              <div class="m-card-b">30일 연속 무탈 출근 🫡<br>직장인 개근상 수상 자격 충분합니다.</div>
-            </div>
-            <div class="m-actions">
-              <button class="m-share">공유하기 📤</button>
-              <button class="m-close">확인</button>
-            </div>
+<!-- ────────────────────────── ④ 완료 모달 · 마일스톤 ────────────────────────── -->
+<div class="phone-wrap">
+  <div class="phone-label">④ 완료 모달 · 마일스톤 7일</div>
+  <div class="phone">
+    <div class="phone-statusbar"></div>
+    <div class="phone-content" style="background:#fff;">
+      <div class="app-header">
+        <span class="app-logo">출근 OK 🫡</span>
+        <span class="app-date">6월 8일 (월)</span>
+      </div>
+      <div class="modal-overlay">
+        <div class="modal modal--milestone">
+          <div class="modal__confetti">🏆</div>
+          <div class="modal__milestone-badge">🎖️ 7일 달성!</div>
+          <div class="modal__title">일주일 연속 출근!</div>
+          <div class="modal__sub">딱 일주일! 대단한 루틴이에요 💪<br>이 기세 그대로 쭉 가봐요!</div>
+          <div class="modal__streak modal__streak--milestone">🏆 7일 연속</div>
+          <div class="modal__share-card">
+            <div class="modal__share-card-title">📣 공유 문구 미리보기</div>
+            <div class="modal__share-card-body">출근 OK 7일 연속 달성! 🏆
+일주일 개근 성공했어요 🎖️
+#출근OK #7일연속 #개근왕</div>
+          </div>
+          <div class="modal__actions">
+            <button class="modal__share-btn">📤 공유하기</button>
+            <button class="modal__close-btn">닫기</button>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- ── 화면 3: 캘린더 ── -->
-  <div class="screen-wrap">
-    <div class="screen-title">화면 3 · 캘린더</div>
-    <div class="phone">
-      <div class="phone-inner">
-        <div class="cal-header">
-          <button class="cal-back">← 뒤로</button>
-          <h2 class="cal-title">2026년 6월 출근 기록</h2>
+<!-- ────────────────────────── ⑤ 캘린더 뷰 ────────────────────────── -->
+<div class="phone-wrap">
+  <div class="phone-label">⑤ 캘린더 뷰</div>
+  <div class="phone">
+    <div class="phone-statusbar"></div>
+    <div class="phone-content">
+      <div class="calendar-view">
+        <div class="calendar-view__header">
+          <button class="calendar-view__back">← 뒤로</button>
+          <span class="calendar-view__title">2025년 6월</span>
         </div>
-        <div class="cal-summary">
-          <div class="cs-item">
-            <span class="cs-num">18</span>
-            <span class="cs-label">이번달 완벽 출근</span>
+        <div class="calendar-summary">
+          <div class="calendar-summary__item">
+            <span class="calendar-summary__num">18</span>
+            <span class="calendar-summary__label">이번 달 완료</span>
           </div>
-          <div class="cs-div"></div>
-          <div class="cs-item">
-            <span class="cs-num">22</span>
-            <span class="cs-label">누적 streak</span>
+          <div class="calendar-summary__divider"></div>
+          <div class="calendar-summary__item">
+            <span class="calendar-summary__num">6</span>
+            <span class="calendar-summary__label">연속 출근 🔥</span>
           </div>
         </div>
-        <div class="cal-grid">
-          <div class="wday sun">일</div><div class="wday">월</div><div class="wday">화</div><div class="wday">수</div><div class="wday">목</div><div class="wday">금</div><div class="wday sat">토</div>
-          <!-- 6월 1일 = 월요일, 빈칸 1개 -->
-          <div class="cell weekend"><span class="cday" style="color:#f04452"></span></div>
-          <div class="cell completed"><span class="cday">1</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">2</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">3</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">4</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">5</span><span class="cemoji">⭕</span></div>
-          <div class="cell weekend"><span class="cday">6</span></div>
-          <div class="cell weekend"><span class="cday">7</span></div>
-          <div class="cell completed"><span class="cday">8</span><span class="cemoji">⭕</span></div>
-          <div class="cell missed"><span class="cday">9</span><span class="cemoji">⚪</span></div>
-          <div class="cell completed"><span class="cday">10</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">11</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">12</span><span class="cemoji">⭕</span></div>
-          <div class="cell weekend"><span class="cday">13</span></div>
-          <div class="cell weekend"><span class="cday">14</span></div>
-          <div class="cell completed"><span class="cday">15</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">16</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">17</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">18</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">19</span><span class="cemoji">⭕</span></div>
-          <div class="cell weekend"><span class="cday">20</span></div>
-          <div class="cell weekend"><span class="cday">21</span></div>
-          <div class="cell completed"><span class="cday">22</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">23</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">24</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">25</span><span class="cemoji">⭕</span></div>
-          <div class="cell completed"><span class="cday">26</span><span class="cemoji">⭕</span></div>
-          <div class="cell weekend"><span class="cday">27</span></div>
-          <div class="cell weekend"><span class="cday">28</span></div>
-          <div class="cell completed"><span class="cday">29</span><span class="cemoji">⭕</span></div>
-          <div class="cell today"><span class="cday">30</span></div>
+        <div class="calendar-grid">
+          <div class="calendar-grid__weekday calendar-grid__weekday--sun">일</div>
+          <div class="calendar-grid__weekday">월</div>
+          <div class="calendar-grid__weekday">화</div>
+          <div class="calendar-grid__weekday">수</div>
+          <div class="calendar-grid__weekday">목</div>
+          <div class="calendar-grid__weekday">금</div>
+          <div class="calendar-grid__weekday calendar-grid__weekday--sat">토</div>
+          <!-- 1주 -->
+          <div class="calendar-grid__cell calendar-grid__cell--weekend"><span class="calendar-grid__day">1</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">2</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">3</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">4</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">5</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">6</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--weekend"><span class="calendar-grid__day">7</span></div>
+          <!-- 2주 -->
+          <div class="calendar-grid__cell calendar-grid__cell--weekend"><span class="calendar-grid__day">8</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">9</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--missed"><span class="calendar-grid__day">10</span><span class="calendar-grid__emoji">⚪</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">11</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">12</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">13</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--weekend"><span class="calendar-grid__day">14</span></div>
+          <!-- 3주 -->
+          <div class="calendar-grid__cell calendar-grid__cell--weekend"><span class="calendar-grid__day">15</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">16</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">17</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">18</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">19</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">20</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--weekend"><span class="calendar-grid__day">21</span></div>
+          <!-- 4주 -->
+          <div class="calendar-grid__cell calendar-grid__cell--weekend"><span class="calendar-grid__day">22</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">23</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">24</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">25</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">26</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">27</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--weekend"><span class="calendar-grid__day">28</span></div>
+          <!-- 5주 -->
+          <div class="calendar-grid__cell calendar-grid__cell--weekend"><span class="calendar-grid__day">29</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--completed"><span class="calendar-grid__day">30</span><span class="calendar-grid__emoji">⭕</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--today"><span class="calendar-grid__day">1</span></div>
+          <div class="calendar-grid__cell"><span class="calendar-grid__day">2</span></div>
+          <div class="calendar-grid__cell"><span class="calendar-grid__day">3</span></div>
+          <div class="calendar-grid__cell"><span class="calendar-grid__day">4</span></div>
+          <div class="calendar-grid__cell calendar-grid__cell--weekend"><span class="calendar-grid__day">5</span></div>
         </div>
-        <div class="cal-legend">
+        <div class="calendar-legend">
           <span>⭕ 완료</span>
-          <span>⚪ 미체크</span>
-          <span>&nbsp;&nbsp;주말 제외</span>
+          <span>⚪ 미완료</span>
+          <span style="opacity:0.4">주말</span>
         </div>
       </div>
-      <div class="bnav">
-        <button class="btab"><span class="bicon">🏠</span><span class="blabel">홈</span></button>
-        <button class="btab active"><span class="bicon">📅</span><span class="blabel">캘린더</span></button>
-        <button class="btab"><span class="bicon">⚙️</span><span class="blabel">설정</span></button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── 화면 4: 설정 ── -->
-  <div class="screen-wrap">
-    <div class="screen-title">화면 4 · 설정</div>
-    <div class="phone">
-      <div class="phone-inner">
-        <div class="set-header">
-          <button class="set-back">← 뒤로</button>
-          <h2 class="set-title">설정</h2>
-        </div>
-        <div class="set-sec">
-          <h3>📍 내 출근 도시</h3>
-          <div class="city-grid">
-            <button class="city-btn">서울</button>
-            <button class="city-btn">부산</button>
-            <button class="city-btn">대구</button>
-            <button class="city-btn">인천</button>
-            <button class="city-btn active">광주</button>
-            <button class="city-btn">대전</button>
-            <button class="city-btn">울산</button>
-            <button class="city-btn">세종</button>
-          </div>
-        </div>
-        <div class="set-sec">
-          <h3>⏰ 출근 시간</h3>
-          <p>알림 기준 시간 (현재는 참고용)</p>
-          <input type="time" class="time-input" value="08:00" readonly>
-        </div>
-        <div class="set-sec">
-          <h3>📋 항목 관리</h3>
-          <p>* 필수 항목은 삭제 불가 · ▲▼로 순서 변경</p>
-          <div class="set-items">
-            <div class="set-item">
-              <div class="sorder"><button>▲</button><button>▼</button></div>
-              <span class="slabel">지갑</span>
-              <button class="sreq on">필수 *</button>
-              <button class="srm" disabled style="opacity:.2;">✕</button>
-            </div>
-            <div class="set-item">
-              <div class="sorder"><button>▲</button><button>▼</button></div>
-              <span class="slabel">핸드폰</span>
-              <button class="sreq on">필수 *</button>
-              <button class="srm" disabled style="opacity:.2;">✕</button>
-            </div>
-            <div class="set-item">
-              <div class="sorder"><button>▲</button><button>▼</button></div>
-              <span class="slabel">사원증</span>
-              <button class="sreq on">필수 *</button>
-              <button class="srm" disabled style="opacity:.2;">✕</button>
-            </div>
-            <div class="set-item">
-              <div class="sorder"><button>▲</button><button>▼</button></div>
-              <span class="slabel">교통카드</span>
-              <button class="sreq on">필수 *</button>
-              <button class="srm" disabled style="opacity:.2;">✕</button>
-            </div>
-            <div class="set-item">
-              <div class="sorder"><button>▲</button><button>▼</button></div>
-              <span class="slabel">이어폰</span>
-              <button class="sreq">선택</button>
-              <button class="srm">✕</button>
-            </div>
-            <div class="set-item">
-              <div class="sorder"><button>▲</button><button>▼</button></div>
-              <span class="slabel">충전기</span>
-              <button class="sreq">선택</button>
-              <button class="srm">✕</button>
-            </div>
-            <div class="set-item">
-              <div class="sorder"><button>▲</button><button>▼</button></div>
-              <span class="slabel">노트북</span>
-              <button class="sreq">선택</button>
-              <button class="srm">✕</button>
-            </div>
-          </div>
-          <div class="set-add">
-            <input placeholder="새 항목 추가 (예: 텀블러)" readonly>
-            <button>추가</button>
-          </div>
-        </div>
-        <div style="height:12px;"></div>
-      </div>
-      <div class="bnav">
-        <button class="btab"><span class="bicon">🏠</span><span class="blabel">홈</span></button>
-        <button class="btab"><span class="bicon">📅</span><span class="blabel">캘린더</span></button>
-        <button class="btab active"><span class="bicon">⚙️</span><span class="blabel">설정</span></button>
+      <div class="bottom-nav">
+        <button class="bottom-nav__tab"><span class="bottom-nav__icon">🏠</span><span class="bottom-nav__label">홈</span></button>
+        <button class="bottom-nav__tab bottom-nav__tab--active"><span class="bottom-nav__icon">📅</span><span class="bottom-nav__label">캘린더</span></button>
+        <button class="bottom-nav__tab"><span class="bottom-nav__icon">⚙️</span><span class="bottom-nav__label">설정</span></button>
       </div>
     </div>
   </div>
+</div>
 
-</div><!-- /screens -->
+<!-- ────────────────────────── ⑥ 설정 뷰 ────────────────────────── -->
+<div class="phone-wrap">
+  <div class="phone-label">⑥ 설정 뷰 (알람 ON)</div>
+  <div class="phone">
+    <div class="phone-statusbar"></div>
+    <div class="phone-content">
+      <div class="settings-view">
+        <div class="settings-view__header">
+          <button class="settings-view__back">← 뒤로</button>
+          <span class="settings-view__title">설정</span>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section__title">📍 내 출근 도시</div>
+          <div class="settings-city-grid">
+            <button class="settings-city-btn settings-city-btn--active">광주</button>
+            <button class="settings-city-btn">서울</button>
+            <button class="settings-city-btn">부산</button>
+            <button class="settings-city-btn">대구</button>
+            <button class="settings-city-btn">인천</button>
+            <button class="settings-city-btn">대전</button>
+            <button class="settings-city-btn">울산</button>
+            <button class="settings-city-btn">수원</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section__title">⏰ 출근 시간</div>
+          <div class="settings-section__desc">날씨 기준 출근 시간</div>
+          <input type="time" class="settings-time-input" value="08:30">
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section__title">🔔 아침 알람</div>
+          <div class="settings-section__desc">2시간 15분 후 알람</div>
+          <div class="alarm-row">
+            <input type="time" class="settings-time-input" value="07:30">
+            <button class="alarm-toggle alarm-toggle--on">ON</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section__title">📋 항목 관리</div>
+          <div class="settings-section__desc">* 필수 항목은 삭제 불가 · ▲▼로 순서 변경</div>
+          <div class="settings-items">
+            <div class="settings-item">
+              <div class="settings-item__order"><button class="settings-item__order-btn" disabled>▲</button><button class="settings-item__order-btn">▼</button></div>
+              <span class="settings-item__label">지갑</span>
+              <button class="settings-item__required-btn settings-item__required-btn--on">필수 *</button>
+              <button class="settings-item__remove" disabled>✕</button>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item__order"><button class="settings-item__order-btn">▲</button><button class="settings-item__order-btn">▼</button></div>
+              <span class="settings-item__label">핸드폰</span>
+              <button class="settings-item__required-btn settings-item__required-btn--on">필수 *</button>
+              <button class="settings-item__remove" disabled>✕</button>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item__order"><button class="settings-item__order-btn">▲</button><button class="settings-item__order-btn">▼</button></div>
+              <span class="settings-item__label">사원증</span>
+              <button class="settings-item__required-btn settings-item__required-btn--on">필수 *</button>
+              <button class="settings-item__remove" disabled>✕</button>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item__order"><button class="settings-item__order-btn">▲</button><button class="settings-item__order-btn">▼</button></div>
+              <span class="settings-item__label">이어폰</span>
+              <button class="settings-item__required-btn">선택</button>
+              <button class="settings-item__remove">✕</button>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item__order"><button class="settings-item__order-btn">▲</button><button class="settings-item__order-btn" disabled>▼</button></div>
+              <span class="settings-item__label">충전기</span>
+              <button class="settings-item__required-btn">선택</button>
+              <button class="settings-item__remove">✕</button>
+            </div>
+          </div>
+          <div class="settings-add">
+            <input class="settings-add__input" placeholder="새 항목 추가 (예: 텀블러)">
+            <button class="settings-add__btn">추가</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <button class="bottom-nav__tab"><span class="bottom-nav__icon">🏠</span><span class="bottom-nav__label">홈</span></button>
+        <button class="bottom-nav__tab"><span class="bottom-nav__icon">📅</span><span class="bottom-nav__label">캘린더</span></button>
+        <button class="bottom-nav__tab bottom-nav__tab--active"><span class="bottom-nav__icon">⚙️</span><span class="bottom-nav__label">설정</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /gallery -->
 </body>
 </html>
