@@ -919,3 +919,30 @@ body { background: var(--toss-gray-100); }
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ── 위치 자동감지 버튼 ── */
+.settings-detect-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 11px 0;
+  margin-bottom: 12px;
+  background: var(--toss-blue-light);
+  color: var(--toss-blue);
+  border: 1.5px solid var(--toss-blue);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.settings-detect-btn:hover:not(:disabled) {
+  background: #d6e9fd;
+}
+
+.settings-detect-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

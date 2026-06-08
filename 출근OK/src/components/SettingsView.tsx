@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ChecklistItem } from '../types';
-import { CITIES } from '../lib/weather';
+import { CITIES, detectCity } from '../lib/weather';
 import { useAlarm } from '../hooks/useAlarm';
 import { nextAlarmLabel } from '../lib/alarm';
 
@@ -30,6 +30,19 @@ export function SettingsView({
   onCommuteTimeChange,
 }: Props) {
   const { enabled, alarmTime, permission, requesting, toggle, updateTime } = useAlarm();
+  const [detecting, setDetecting] = useState(false);
+
+  async function handleDetect() {
+    setDetecting(true);
+    try {
+      const city = await detectCity();
+      onCityChange(city);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : '위치를 가져올 수 없어요');
+    } finally {
+      setDetecting(false);
+    }
+  }
   const [newLabel, setNewLabel] = useState('');
 
   function handleAdd() {
@@ -50,6 +63,13 @@ export function SettingsView({
       {/* 도시 설정 */}
       <section className="settings-section">
         <h3 className="settings-section__title">📍 내 출근 도시</h3>
+        <button
+          className="settings-detect-btn"
+          onClick={handleDetect}
+          disabled={detecting}
+        >
+          {detecting ? '위치 감지 중…' : '📡 현재 위치로 자동 설정'}
+        </button>
         <div className="settings-city-grid">
           {Object.keys(CITIES).map((c) => (
             <button

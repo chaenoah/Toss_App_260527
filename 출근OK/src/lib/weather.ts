@@ -11,6 +11,32 @@ export const CITIES: Record<string, { lat: number; lon: number }> = {
   세종: { lat: 36.4801, lon: 127.2882 },
 };
 
+/** 위도/경도로 가장 가까운 도시 이름 반환 */
+export function nearestCity(lat: number, lon: number): string {
+  let best = '';
+  let bestDist = Infinity;
+  for (const [name, coord] of Object.entries(CITIES)) {
+    const d =
+      (coord.lat - lat) ** 2 + (coord.lon - lon) ** 2;
+    if (d < bestDist) { bestDist = d; best = name; }
+  }
+  return best;
+}
+
+export async function detectCity(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('위치 정보를 지원하지 않아요'));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve(nearestCity(pos.coords.latitude, pos.coords.longitude)),
+      () => reject(new Error('위치 권한이 거부됐어요')),
+      { timeout: 8000 }
+    );
+  });
+}
+
 export async function fetchWeather(city: string): Promise<WeatherData> {
   const { lat, lon } = CITIES[city] ?? CITIES['광주'];
   const url =
