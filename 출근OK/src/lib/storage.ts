@@ -5,6 +5,8 @@ const KEYS = {
   STREAK: 'chulgeun_ok_streak',
   CITY: 'chulgeun_ok_city',
   COMMUTE_TIME: 'chulgeun_ok_commute_time',
+  ALARM_ENABLED: 'chulgeun_ok_alarm_enabled',
+  ALARM_TIME: 'chulgeun_ok_alarm_time',
 } as const;
 
 export const DEFAULT_ITEMS = [
@@ -80,4 +82,20 @@ export function loadCommuteTime(): string {
 
 export function saveCommuteTime(time: string): void {
   localStorage.setItem(KEYS.COMMUTE_TIME, time);
+}
+
+export function loadAlarmEnabled(): boolean {
+  return localStorage.getItem(KEYS.ALARM_ENABLED) === 'true';
+}
+
+export function saveAlarmEnabled(v: boolean): void {
+  localStorage.setItem(KEYS.ALARM_ENABLED, String(v));
+}
+
+export function loadAlarmTime(): string {
+  return localStorage.getItem(KEYS.ALARM_TIME) ?? '07:30';
+}
+
+export function saveAlarmTime(time: string): void {
+  localStorage.setItem(KEYS.ALARM_TIME, time);
 }

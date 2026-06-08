@@ -10,7 +10,8 @@ import { CompletionModal } from './components/CompletionModal';
 import { CalendarView } from './components/CalendarView';
 import { SettingsView } from './components/SettingsView';
 import { BottomNav } from './components/BottomNav';
-import { loadCity, saveCity, loadCommuteTime, saveCommuteTime } from './lib/storage';
+import { loadCity, saveCity, loadCommuteTime, saveCommuteTime, loadAlarmEnabled, loadAlarmTime } from './lib/storage';
+import { registerSW, scheduleAlarm } from './lib/alarm';
 import type { ViewType } from './types';
 import './App.css';
 
@@ -32,6 +33,15 @@ export default function App() {
   const [modalShownToday, setModalShownToday] = useState(() => {
     return localStorage.getItem('modal_shown_date') === new Date().toISOString().slice(0, 10);
   });
+
+  useEffect(() => {
+    // Re-register SW and re-schedule alarm on every app open (SW timer lost on browser restart)
+    registerSW().then(() => {
+      if (loadAlarmEnabled()) {
+        scheduleAlarm(loadAlarmTime(), true);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (!loading) {

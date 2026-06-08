@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { ChecklistItem } from '../types';
 import { CITIES } from '../lib/weather';
+import { useAlarm } from '../hooks/useAlarm';
+import { nextAlarmLabel } from '../lib/alarm';
 
 interface Props {
   items: ChecklistItem[];
@@ -27,6 +29,7 @@ export function SettingsView({
   commuteTime,
   onCommuteTimeChange,
 }: Props) {
+  const { enabled, alarmTime, permission, requesting, toggle, updateTime } = useAlarm();
   const [newLabel, setNewLabel] = useState('');
 
   function handleAdd() {
@@ -63,13 +66,43 @@ export function SettingsView({
       {/* 출근 시간 */}
       <section className="settings-section">
         <h3 className="settings-section__title">⏰ 출근 시간</h3>
-        <p className="settings-section__desc">알림 기준 시간 (현재는 참고용)</p>
+        <p className="settings-section__desc">날씨 기준 출근 시간</p>
         <input
           type="time"
           className="settings-time-input"
           value={commuteTime}
           onChange={(e) => onCommuteTimeChange(e.target.value)}
         />
+      </section>
+
+      {/* 아침 알람 */}
+      <section className="settings-section">
+        <h3 className="settings-section__title">🔔 아침 알람</h3>
+        <p className="settings-section__desc">
+          {permission === 'denied'
+            ? '알림이 차단됐어요. 기기 설정에서 허용해 주세요.'
+            : permission === 'unsupported'
+            ? '이 환경에서는 알림이 지원되지 않아요.'
+            : enabled
+            ? nextAlarmLabel(alarmTime)
+            : '알람이 꺼져 있어요'}
+        </p>
+        <div className="alarm-row">
+          <input
+            type="time"
+            className="settings-time-input"
+            value={alarmTime}
+            onChange={(e) => updateTime(e.target.value)}
+            disabled={!enabled}
+          />
+          <button
+            className={`alarm-toggle ${enabled ? 'alarm-toggle--on' : ''}`}
+            onClick={toggle}
+            disabled={requesting || permission === 'unsupported'}
+          >
+            {requesting ? '요청 중…' : enabled ? 'ON' : 'OFF'}
+          </button>
+        </div>
       </section>
 
       {/* 체크리스트 항목 관리 */}

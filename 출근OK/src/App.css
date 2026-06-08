@@ -887,3 +887,35 @@ body { background: var(--toss-gray-100); }
   line-height: 1.5;
   white-space: pre-line;
 }
+
+/* ── Alarm toggle ────────────────────────────────────────────────── */
+.alarm-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.alarm-toggle {
+  flex-shrink: 0;
+  width: 64px;
+  height: 36px;
+  border-radius: 18px;
+  border: none;
+  background: var(--toss-gray-200);
+  color: var(--toss-gray-500);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.alarm-toggle--on {
+  background: var(--toss-blue);
+  color: #fff;
+}
+
+.alarm-toggle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
