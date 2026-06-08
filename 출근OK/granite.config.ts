@@ -1,7 +1,7 @@
 import { defineConfig } from "@apps-in-toss/web-framework/config";
 
 export default defineConfig({
-  appName: "Morningok",
+  appName: "morningok",
   brand: {
     displayName: "출근OK",
     primaryColor: "#3182f6",
