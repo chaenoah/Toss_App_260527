@@ -1,1 +1,1 @@
-export * from './publicData';
+export * from './medicalApi';
