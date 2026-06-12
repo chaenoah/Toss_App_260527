@@ -1,8 +1,17 @@
 import { useMemo, useState } from 'react';
 import type { PlaceCategory, MedicalPlace, UserLocation } from './types';
-import { LocationHeader, CategoryTabs, MedicalCard, EmptyState } from './components';
-import { usePharmacies, useHospitals, useEmergencyRooms, useLocation, useRegion } from './hooks';
+import {
+  LocationHeader,
+  CategoryTabs,
+  MedicalCard,
+  EmptyState,
+  LocationDeniedScreen,
+} from './components';
+import { usePharmacies, useHospitals, useEmergencyRooms, useCurrentLocation, useRegion } from './hooks';
+import { sortByDistance } from './utils';
 import './App.css';
+
+const PREVIEW_COUNT = 5;
 
 // ── 로딩 스켈레톤 ──────────────────────────────────────────────────────
 function CardSkeleton() {
@@ -12,8 +21,8 @@ function CardSkeleton() {
       background: 'var(--bg-card)',
       borderRadius: 16,
       border: '1px solid var(--border)',
-      height: 110,
-      animation: 'pulse 1.4s ease-in-out infinite',
+      height: 112,
+      animation: 'skelPulse 1.4s ease-in-out infinite',
     }} />
   );
 }
@@ -28,6 +37,8 @@ interface ContentProps {
 }
 
 function PlaceContent({ category, openNowOnly, sido, sigungu, userLocation }: ContentProps) {
+  const [showAll, setShowAll] = useState(false);
+
   const pharmacyQ  = usePharmacies(sido, sigungu, userLocation);
   const hospitalQ  = useHospitals(sido, sigungu, '', userLocation);
   const emergencyQ = useEmergencyRooms(sido, sigungu, userLocation);
@@ -35,15 +46,17 @@ function PlaceContent({ category, openNowOnly, sido, sigungu, userLocation }: Co
   const queryMap = { pharmacy: pharmacyQ, hospital: hospitalQ, emergency: emergencyQ } as const;
   const { data = [], isLoading, isError } = queryMap[category];
 
-  const counts = {
-    pharmacy:  pharmacyQ.data?.length  ?? 0,
-    hospital:  hospitalQ.data?.length  ?? 0,
-    emergency: emergencyQ.data?.length ?? 0,
-  };
+  // 거리순 정렬 → 영업 중만 필터
+  const sorted = useMemo(() => sortByDistance(data as MedicalPlace[]), [data]);
+  const filtered = useMemo(
+    () => openNowOnly ? sorted.filter((p) => p.isOpenNow) : sorted,
+    [sorted, openNowOnly],
+  );
+  const visible = showAll ? filtered : filtered.slice(0, PREVIEW_COUNT);
+  const hasMore = !showAll && filtered.length > PREVIEW_COUNT;
 
-  const filtered = useMemo<MedicalPlace[]>(() => {
-    return openNowOnly ? data.filter((p) => p.isOpenNow) : data;
-  }, [data, openNowOnly]);
+  // 탭 전환 시 접기 초기화
+  useMemo(() => { setShowAll(false); }, [category]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isLoading) {
     return (
@@ -68,29 +81,33 @@ function PlaceContent({ category, openNowOnly, sido, sigungu, userLocation }: Co
 
   return (
     <>
-      {/* counts를 상위로 올리는 대신 여기서 별도 prop으로 노출 */}
-      <ul className="placeList" data-counts={JSON.stringify(counts)}>
-        {filtered.slice(0, 5).map((place) => (
+      <ul className="placeList">
+        {visible.map((place) => (
           <MedicalCard key={place.id} place={place} />
         ))}
       </ul>
+      {hasMore && (
+        <button className="showAllBtn" onClick={() => setShowAll(true)} type="button">
+          전체 보기 ({filtered.length}개)
+        </button>
+      )}
     </>
   );
 }
 
 // ── App ───────────────────────────────────────────────────────────────
 function App() {
-  const locationState = useLocation();
-  const [category, setCategory]     = useState<PlaceCategory>('pharmacy');
+  const { state: locState, retry, openLocationSettings, submitManualAddress } = useCurrentLocation();
+  const [category, setCategory]       = useState<PlaceCategory>('pharmacy');
   const [openNowOnly, setOpenNowOnly] = useState(false);
 
   const userLocation: UserLocation | undefined =
-    locationState.status === 'success' ? locationState.location : undefined;
+    locState.phase === 'success' ? locState.location : undefined;
 
   const regionQuery = useRegion(userLocation);
 
-  // 1단계: 위치 로딩
-  if (locationState.status === 'idle' || locationState.status === 'loading') {
+  // ── 위치 로딩 중 ────────────────────────────────────────────────────
+  if (locState.phase === 'idle' || locState.phase === 'loading') {
     return (
       <div className="screen-center">
         <div className="spinner" />
@@ -99,16 +116,28 @@ function App() {
     );
   }
 
-  if (locationState.status === 'error') {
+  // ── 권한 거부 → 수동 입력 ──────────────────────────────────────────
+  if (locState.phase === 'denied') {
+    return (
+      <LocationDeniedScreen
+        onOpenSettings={openLocationSettings}
+        onSubmitAddress={submitManualAddress}
+      />
+    );
+  }
+
+  // ── 기타 에러 (GPS 오류 등) ────────────────────────────────────────
+  if (locState.phase === 'error') {
     return (
       <div className="screen-center">
-        <p>📍 위치 권한이 필요해요</p>
-        <p className="error-detail">{locationState.message}</p>
+        <p>위치를 가져오지 못했어요</p>
+        <p className="error-detail">{locState.message}</p>
+        <button className="retryBtn" onClick={retry} type="button">다시 시도</button>
       </div>
     );
   }
 
-  // 2단계: 역지오코딩 로딩
+  // ── 역지오코딩 로딩 ───────────────────────────────────────────────
   if (regionQuery.isLoading) {
     return (
       <div className="screen-center">
@@ -118,14 +147,18 @@ function App() {
     );
   }
 
-  // 역지오코딩 실패 시 좌표를 그대로 표시하고 진행
   const region = regionQuery.data ?? {
-    sido: '알 수 없음', sigungu: '', sidoShort: '알 수 없음', label: '내 근처',
+    sido: '', sigungu: '', sidoShort: '', label: '내 근처',
   };
+
+  const locationLabel =
+    locState.source === 'manual'
+      ? `📌 ${region.label}`
+      : region.label;
 
   return (
     <div className="app">
-      <LocationHeader locationName={region.label} />
+      <LocationHeader locationName={locationLabel} />
 
       <CategoryTabs active={category} onChange={setCategory} />
 
@@ -150,7 +183,7 @@ function App() {
         openNowOnly={openNowOnly}
         sido={region.sidoShort}
         sigungu={region.sigungu}
-        userLocation={locationState.location}
+        userLocation={locState.location}
       />
     </div>
   );

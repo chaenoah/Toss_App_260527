@@ -135,3 +135,46 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+@keyframes skelPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+/* 전체 보기 버튼 */
+.showAllBtn {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 4px 16px 20px;
+  padding: 14px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: -0.2px;
+  transition: all 0.15s;
+}
+
+.showAllBtn:active {
+  background: var(--blue-soft);
+  color: var(--blue);
+  border-color: var(--blue);
+}
+
+/* 재시도 버튼 */
+.retryBtn {
+  margin-top: 8px;
+  padding: 10px 24px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}

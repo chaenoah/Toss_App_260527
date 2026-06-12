@@ -1,4 +1,5 @@
 export * from './useLocation';
+export * from './useCurrentLocation';
 export * from './useStorage';
 export * from './useShare';
 export * from './useMedical';
