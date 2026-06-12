@@ -1,0 +1,160 @@
+.card {
+  list-style: none;
+  background: var(--bg-card);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid var(--border);
+  transition: box-shadow 0.15s ease;
+}
+
+.card:active {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+
+.emergencyCard {
+  border-color: var(--red-soft);
+  border-width: 1.5px;
+}
+
+/* top section */
+.top {
+  padding: 16px 16px 12px;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.erBadge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--red);
+  border-radius: 5px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+}
+
+.traumaBadge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--red);
+  background: var(--red-soft);
+  border-radius: 5px;
+  padding: 2px 6px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.distance {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.dot {
+  font-size: 12px;
+  color: var(--text-quaternary);
+}
+
+.address {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin: 2px 0 0;
+  letter-spacing: -0.1px;
+}
+
+.beds {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin: 2px 0 0;
+}
+
+.bedsOk { color: var(--green); font-weight: 700; }
+.bedsCritical { color: var(--red); font-weight: 700; }
+
+.nightBadge {
+  font-size: 11px;
+  color: var(--purple);
+  font-weight: 600;
+}
+
+.departments {
+  font-size: 12px;
+  color: var(--blue);
+  margin: 2px 0 0;
+  font-weight: 500;
+}
+
+/* status badges */
+.badge {
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 2px 7px;
+}
+
+.open    { background: var(--green-soft);   color: var(--green); }
+.closing { background: var(--orange-soft);  color: var(--orange); }
+.closed  { background: var(--bg-secondary); color: var(--text-quaternary); }
+
+.congLow     { background: var(--green-soft);   color: var(--green); }
+.congMedium  { background: var(--orange-soft);  color: var(--orange); }
+.congHigh    { background: var(--red-soft);     color: var(--red); }
+.congUnknown { background: var(--bg-secondary); color: var(--text-quaternary); }
+
+/* action bar */
+.actions {
+  display: flex;
+  border-top: 1px solid var(--border);
+}
+
+.actionBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 11px 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: background 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.actionBtn:active {
+  background: var(--bg-secondary);
+}
+
+.divider {
+  width: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}

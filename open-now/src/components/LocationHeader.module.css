@@ -1,0 +1,32 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px 12px;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pin {
+  color: var(--blue);
+  flex-shrink: 0;
+}
+
+.name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.label {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-left: 2px;
+}

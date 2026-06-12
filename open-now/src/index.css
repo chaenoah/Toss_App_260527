@@ -1,0 +1,82 @@
+/* ── Design Tokens (Light) ── */
+:root {
+  --bg-primary:   #ffffff;
+  --bg-secondary: #f5f6f8;
+  --bg-card:      #ffffff;
+  --border:       #ebebeb;
+
+  --text-primary:    #191f28;
+  --text-secondary:  #4e5968;
+  --text-tertiary:   #8b95a1;
+  --text-quaternary: #b0b8c1;
+
+  --blue:      #3182f6;
+  --blue-soft: #e8f0fd;
+
+  --green:      #0abf53;
+  --green-soft: #e5f9ed;
+
+  --orange:      #ff8f00;
+  --orange-soft: #fff3e0;
+
+  --red:      #f04452;
+  --red-soft: #fde8ea;
+
+  --purple:      #7b61ff;
+
+  font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Design Tokens (Dark) ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary:   #1a1a1a;
+    --bg-secondary: #2a2a2a;
+    --bg-card:      #242424;
+    --border:       #333333;
+
+    --text-primary:    #f2f4f6;
+    --text-secondary:  #b0b8c1;
+    --text-tertiary:   #6b7684;
+    --text-quaternary: #454f5b;
+
+    --blue:      #4d9ef7;
+    --blue-soft: #1a2b3d;
+
+    --green:      #20d269;
+    --green-soft: #0f2a1a;
+
+    --orange:      #ffaa00;
+    --orange-soft: #2a1f00;
+
+    --red:      #f46472;
+    --red-soft: #2d1215;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-secondary);
+  min-width: 320px;
+  min-height: 100vh;
+  color: var(--text-primary);
+}
+
+button {
+  font-family: inherit;
+}
+
+@media (min-width: 481px) {
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+}
