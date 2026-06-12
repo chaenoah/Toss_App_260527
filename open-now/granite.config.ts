@@ -3,7 +3,7 @@ import { defineConfig } from "@apps-in-toss/web-framework/config";
 export default defineConfig({
   appName: "open-now",
   brand: {
-    displayName: "지금 문연 약국",
+    displayName: "밤에 아플때",
     primaryColor: "#3182f6",
     icon: "",
   },
