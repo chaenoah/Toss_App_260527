@@ -1,30 +1,8 @@
 import { useMemo, useState } from 'react';
 import type { PlaceCategory, MedicalPlace, UserLocation } from './types';
 import { LocationHeader, CategoryTabs, MedicalCard, EmptyState } from './components';
-import { usePharmacies, useHospitals, useEmergencyRooms, useLocation } from './hooks';
+import { usePharmacies, useHospitals, useEmergencyRooms, useLocation, useRegion } from './hooks';
 import './App.css';
-
-// ── 위도·경도 → 시도/시군구 변환 (정적 매핑) ─────────────────────────
-// 실제 서비스에서는 카카오/네이버 역지오코딩 API 사용 권장
-function inferRegion(loc: UserLocation): { sido: string; sigungu: string } {
-  // 단순 경계값 기반 추론 (예시: 광주광역시)
-  if (loc.lat >= 35.05 && loc.lat <= 35.25 && loc.lng >= 126.7 && loc.lng <= 127.0) {
-    if (loc.lat >= 35.17 && loc.lng <= 126.85) return { sido: '광주', sigungu: '광산구' };
-    if (loc.lat >= 35.14 && loc.lat < 35.17)   return { sido: '광주', sigungu: '서구' };
-    if (loc.lat >= 35.10 && loc.lat < 35.14)   return { sido: '광주', sigungu: '남구' };
-    if (loc.lng >= 126.92)                      return { sido: '광주', sigungu: '동구' };
-    return { sido: '광주', sigungu: '북구' };
-  }
-  // 서울 대략 범위
-  if (loc.lat >= 37.4 && loc.lat <= 37.7 && loc.lng >= 126.8 && loc.lng <= 127.2) {
-    return { sido: '서울', sigungu: '' };
-  }
-  return { sido: '광주', sigungu: '광산구' }; // fallback
-}
-
-function locationLabel(sido: string, sigungu: string): string {
-  return sigungu ? `${sido} ${sigungu}` : sido;
-}
 
 // ── 로딩 스켈레톤 ──────────────────────────────────────────────────────
 function CardSkeleton() {
@@ -103,9 +81,15 @@ function PlaceContent({ category, openNowOnly, sido, sigungu, userLocation }: Co
 // ── App ───────────────────────────────────────────────────────────────
 function App() {
   const locationState = useLocation();
-  const [category, setCategory]   = useState<PlaceCategory>('pharmacy');
+  const [category, setCategory]     = useState<PlaceCategory>('pharmacy');
   const [openNowOnly, setOpenNowOnly] = useState(false);
 
+  const userLocation: UserLocation | undefined =
+    locationState.status === 'success' ? locationState.location : undefined;
+
+  const regionQuery = useRegion(userLocation);
+
+  // 1단계: 위치 로딩
   if (locationState.status === 'idle' || locationState.status === 'loading') {
     return (
       <div className="screen-center">
@@ -124,12 +108,24 @@ function App() {
     );
   }
 
-  const { location } = locationState;
-  const { sido, sigungu } = inferRegion(location);
+  // 2단계: 역지오코딩 로딩
+  if (regionQuery.isLoading) {
+    return (
+      <div className="screen-center">
+        <div className="spinner" />
+        <p>동네 정보를 확인하고 있어요...</p>
+      </div>
+    );
+  }
+
+  // 역지오코딩 실패 시 좌표를 그대로 표시하고 진행
+  const region = regionQuery.data ?? {
+    sido: '알 수 없음', sigungu: '', sidoShort: '알 수 없음', label: '내 근처',
+  };
 
   return (
     <div className="app">
-      <LocationHeader locationName={locationLabel(sido, sigungu)} />
+      <LocationHeader locationName={region.label} />
 
       <CategoryTabs active={category} onChange={setCategory} />
 
@@ -152,9 +148,9 @@ function App() {
       <PlaceContent
         category={category}
         openNowOnly={openNowOnly}
-        sido={sido}
-        sigungu={sigungu}
-        userLocation={location}
+        sido={region.sidoShort}
+        sigungu={region.sigungu}
+        userLocation={locationState.location}
       />
     </div>
   );
