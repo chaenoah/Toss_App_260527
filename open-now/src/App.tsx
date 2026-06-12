@@ -1,13 +1,25 @@
 import { useMemo, useState } from 'react';
-import type { PlaceCategory, MedicalPlace, UserLocation } from './types';
+import type { AppTab, PlaceCategory, MedicalPlace, UserLocation } from './types';
 import {
   LocationHeader,
   CategoryTabs,
   MedicalCard,
   EmptyState,
   LocationDeniedScreen,
+  DisclaimerModal,
+  EmergencyFAB,
+  SearchBar,
 } from './components';
-import { usePharmacies, useHospitals, useEmergencyRooms, useCurrentLocation, useRegion } from './hooks';
+import {
+  usePharmacies,
+  useHospitals,
+  useEmergencyRooms,
+  useCurrentLocation,
+  useRegion,
+  useDisclaimer,
+  useFavorites,
+  useDebounce,
+} from './hooks';
 import { sortByDistance } from './utils';
 import './App.css';
 
@@ -17,26 +29,31 @@ const PREVIEW_COUNT = 5;
 function CardSkeleton() {
   return (
     <li style={{
-      listStyle: 'none',
-      background: 'var(--bg-card)',
-      borderRadius: 16,
-      border: '1px solid var(--border)',
-      height: 112,
+      listStyle: 'none', background: 'var(--bg-card)', borderRadius: 16,
+      border: '1px solid var(--border)', height: 118,
       animation: 'skelPulse 1.4s ease-in-out infinite',
     }} />
   );
 }
 
-// ── 메인 콘텐츠 ───────────────────────────────────────────────────────
+// ── 의료기관 목록 ─────────────────────────────────────────────────────
 interface ContentProps {
   category: PlaceCategory;
   openNowOnly: boolean;
+  searchQuery: string;
   sido: string;
   sigungu: string;
   userLocation: UserLocation;
+  favorites: MedicalPlace[];
+  isFavorite: (id: string) => boolean;
+  onToggleFavorite: (place: MedicalPlace) => void;
 }
 
-function PlaceContent({ category, openNowOnly, sido, sigungu, userLocation }: ContentProps) {
+function PlaceContent({
+  category, openNowOnly, searchQuery,
+  sido, sigungu, userLocation,
+  isFavorite, onToggleFavorite,
+}: ContentProps) {
   const [showAll, setShowAll] = useState(false);
 
   const pharmacyQ  = usePharmacies(sido, sigungu, userLocation);
@@ -46,17 +63,24 @@ function PlaceContent({ category, openNowOnly, sido, sigungu, userLocation }: Co
   const queryMap = { pharmacy: pharmacyQ, hospital: hospitalQ, emergency: emergencyQ } as const;
   const { data = [], isLoading, isError } = queryMap[category];
 
-  // 거리순 정렬 → 영업 중만 필터
-  const sorted = useMemo(() => sortByDistance(data as MedicalPlace[]), [data]);
-  const filtered = useMemo(
-    () => openNowOnly ? sorted.filter((p) => p.isOpenNow) : sorted,
-    [sorted, openNowOnly],
-  );
-  const visible = showAll ? filtered : filtered.slice(0, PREVIEW_COUNT);
-  const hasMore = !showAll && filtered.length > PREVIEW_COUNT;
+  // 거리순 → 영업 중 필터 → 검색어 필터
+  const visible = useMemo(() => {
+    let list = sortByDistance(data as MedicalPlace[]);
+    if (openNowOnly) list = list.filter((p) => p.isOpenNow);
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter((p) =>
+        p.name.toLowerCase().includes(q) || p.address.toLowerCase().includes(q),
+      );
+    }
+    return list;
+  }, [data, openNowOnly, searchQuery]);
 
-  // 탭 전환 시 접기 초기화
+  // 탭 전환 시 전체 보기 초기화
   useMemo(() => { setShowAll(false); }, [category]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const displayed = showAll ? visible : visible.slice(0, PREVIEW_COUNT);
+  const hasMore   = !showAll && visible.length > PREVIEW_COUNT;
 
   if (isLoading) {
     return (
@@ -65,7 +89,6 @@ function PlaceContent({ category, openNowOnly, sido, sigungu, userLocation }: Co
       </ul>
     );
   }
-
   if (isError) {
     return (
       <div className="screen-center" style={{ minHeight: 'auto', padding: '40px 24px' }}>
@@ -74,39 +97,96 @@ function PlaceContent({ category, openNowOnly, sido, sigungu, userLocation }: Co
       </div>
     );
   }
-
-  if (filtered.length === 0) {
+  if (visible.length === 0) {
     return <EmptyState category={category} openNowOnly={openNowOnly} />;
   }
 
   return (
     <>
       <ul className="placeList">
-        {visible.map((place) => (
-          <MedicalCard key={place.id} place={place} />
+        {displayed.map((place) => (
+          <MedicalCard
+            key={place.id}
+            place={place}
+            isFavorite={isFavorite(place.id)}
+            onToggleFavorite={onToggleFavorite}
+          />
         ))}
       </ul>
       {hasMore && (
         <button className="showAllBtn" onClick={() => setShowAll(true)} type="button">
-          전체 보기 ({filtered.length}개)
+          전체 보기 ({visible.length}개)
         </button>
       )}
     </>
   );
 }
 
+// ── 즐겨찾기 탭 ──────────────────────────────────────────────────────
+interface FavTabProps {
+  favorites: MedicalPlace[];
+  isFavorite: (id: string) => boolean;
+  onToggleFavorite: (place: MedicalPlace) => void;
+  searchQuery: string;
+}
+
+function FavoritesContent({ favorites, isFavorite, onToggleFavorite, searchQuery }: FavTabProps) {
+  const filtered = useMemo(() => {
+    if (!searchQuery) return favorites;
+    const q = searchQuery.toLowerCase();
+    return favorites.filter(
+      (p) => p.name.toLowerCase().includes(q) || p.address.toLowerCase().includes(q),
+    );
+  }, [favorites, searchQuery]);
+
+  if (favorites.length === 0) {
+    return (
+      <div className="screen-center" style={{ minHeight: 'auto', padding: '60px 24px' }}>
+        <p style={{ fontSize: 36 }}>⭐</p>
+        <p>즐겨찾기한 곳이 없어요</p>
+        <p className="error-detail">카드의 ☆을 눌러 저장하세요</p>
+      </div>
+    );
+  }
+  if (filtered.length === 0) {
+    return (
+      <div className="screen-center" style={{ minHeight: 'auto', padding: '60px 24px' }}>
+        <p>검색 결과가 없어요</p>
+      </div>
+    );
+  }
+
+  return (
+    <ul className="placeList">
+      {filtered.map((place) => (
+        <MedicalCard
+          key={place.id}
+          place={place}
+          isFavorite={isFavorite(place.id)}
+          onToggleFavorite={onToggleFavorite}
+        />
+      ))}
+    </ul>
+  );
+}
+
 // ── App ───────────────────────────────────────────────────────────────
 function App() {
   const { state: locState, retry, openLocationSettings, submitManualAddress } = useCurrentLocation();
-  const [category, setCategory]       = useState<PlaceCategory>('pharmacy');
+  const { needsDisclaimer, accept: acceptDisclaimer } = useDisclaimer();
+  const { favorites, toggle: toggleFavorite, isFavorite } = useFavorites();
+
+  const [tab, setTab]           = useState<AppTab>('pharmacy');
   const [openNowOnly, setOpenNowOnly] = useState(false);
+  const [rawSearch, setRawSearch]     = useState('');
+  const searchQuery = useDebounce(rawSearch, 280);
 
   const userLocation: UserLocation | undefined =
     locState.phase === 'success' ? locState.location : undefined;
 
   const regionQuery = useRegion(userLocation);
 
-  // ── 위치 로딩 중 ────────────────────────────────────────────────────
+  // ── 위치 로딩 ─────────────────────────────────────────────────────
   if (locState.phase === 'idle' || locState.phase === 'loading') {
     return (
       <div className="screen-center">
@@ -115,8 +195,6 @@ function App() {
       </div>
     );
   }
-
-  // ── 권한 거부 → 수동 입력 ──────────────────────────────────────────
   if (locState.phase === 'denied') {
     return (
       <LocationDeniedScreen
@@ -125,8 +203,6 @@ function App() {
       />
     );
   }
-
-  // ── 기타 에러 (GPS 오류 등) ────────────────────────────────────────
   if (locState.phase === 'error') {
     return (
       <div className="screen-center">
@@ -147,44 +223,72 @@ function App() {
     );
   }
 
-  const region = regionQuery.data ?? {
-    sido: '', sigungu: '', sidoShort: '', label: '내 근처',
-  };
+  const region = regionQuery.data ?? { sido: '', sigungu: '', sidoShort: '', label: '내 근처' };
+  const headerLabel = locState.source === 'manual' ? `📌 ${region.label}` : region.label;
 
-  const locationLabel =
-    locState.source === 'manual'
-      ? `📌 ${region.label}`
-      : region.label;
+  const isPlaceTab = tab !== 'favorites';
 
   return (
     <div className="app">
-      <LocationHeader locationName={locationLabel} />
+      {/* 면책 모달 (첫 진입 1회) */}
+      {needsDisclaimer === true && (
+        <DisclaimerModal onAccept={acceptDisclaimer} />
+      )}
 
-      <CategoryTabs active={category} onChange={setCategory} />
+      <LocationHeader locationName={headerLabel} />
 
-      <div className="filterBar">
-        <span className="filterLabel">가까운 순</span>
-        <div className="toggleRow">
-          <span className="toggleLabel">지금 영업 중만</span>
-          <label className="toggle">
-            <input
-              type="checkbox"
-              checked={openNowOnly}
-              onChange={(e) => setOpenNowOnly(e.target.checked)}
-            />
-            <span className="toggleTrack" />
-            <span className="toggleThumb" />
-          </label>
-        </div>
-      </div>
-
-      <PlaceContent
-        category={category}
-        openNowOnly={openNowOnly}
-        sido={region.sidoShort}
-        sigungu={region.sigungu}
-        userLocation={locState.location}
+      <CategoryTabs
+        active={tab}
+        onChange={setTab}
+        favoritesCount={favorites.length}
       />
+
+      {/* 검색바 */}
+      <SearchBar value={rawSearch} onChange={setRawSearch} />
+
+      {/* 필터바 (즐겨찾기 탭에선 숨김) */}
+      {isPlaceTab && (
+        <div className="filterBar">
+          <span className="filterLabel">가까운 순</span>
+          <div className="toggleRow">
+            <span className="toggleLabel">지금 영업 중만</span>
+            <label className="toggle">
+              <input
+                type="checkbox"
+                checked={openNowOnly}
+                onChange={(e) => setOpenNowOnly(e.target.checked)}
+              />
+              <span className="toggleTrack" />
+              <span className="toggleThumb" />
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* 콘텐츠 */}
+      {tab === 'favorites' ? (
+        <FavoritesContent
+          favorites={favorites}
+          isFavorite={isFavorite}
+          onToggleFavorite={toggleFavorite}
+          searchQuery={searchQuery}
+        />
+      ) : (
+        <PlaceContent
+          category={tab}
+          openNowOnly={openNowOnly}
+          searchQuery={searchQuery}
+          sido={region.sidoShort}
+          sigungu={region.sigungu}
+          userLocation={locState.location}
+          favorites={favorites}
+          isFavorite={isFavorite}
+          onToggleFavorite={toggleFavorite}
+        />
+      )}
+
+      {/* 119 플로팅 버튼 */}
+      <EmergencyFAB />
     </div>
   );
 }

@@ -1,4 +1,6 @@
 export type PlaceCategory = 'pharmacy' | 'hospital' | 'emergency';
+/** 탭 포함 전체 뷰 타입 (favorites 탭 포함) */
+export type AppTab = PlaceCategory | 'favorites';
 
 export interface BusinessHours {
   open: string;  // "HH:MM" 형식

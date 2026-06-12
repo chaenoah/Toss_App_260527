@@ -1,35 +1,44 @@
-import type { PlaceCategory } from '../types';
+import type { AppTab } from '../types';
 import styles from './CategoryTabs.module.css';
 
 interface Props {
-  active: PlaceCategory;
-  onChange: (cat: PlaceCategory) => void;
-  counts?: Partial<Record<PlaceCategory, number>>;
+  active: AppTab;
+  onChange: (tab: AppTab) => void;
+  favoritesCount?: number;
 }
 
-const TABS: { key: PlaceCategory; label: string; emoji: string }[] = [
-  { key: 'pharmacy',  label: '약국',   emoji: '💊' },
-  { key: 'hospital',  label: '병원',   emoji: '🏥' },
-  { key: 'emergency', label: '응급실', emoji: '🚨' },
+const TABS: { key: AppTab; label: string; emoji: string }[] = [
+  { key: 'pharmacy',  label: '약국',    emoji: '💊' },
+  { key: 'hospital',  label: '병원',    emoji: '🏥' },
+  { key: 'emergency', label: '응급실',  emoji: '🚨' },
+  { key: 'favorites', label: '즐겨찾기', emoji: '⭐' },
 ];
 
-export function CategoryTabs({ active, onChange, counts }: Props) {
+export function CategoryTabs({ active, onChange, favoritesCount }: Props) {
   return (
     <nav className={styles.nav}>
-      {TABS.map(({ key, label, emoji }) => (
-        <button
-          key={key}
-          className={`${styles.tab} ${active === key ? styles.active : ''} ${key === 'emergency' ? styles.emergency : ''}`}
-          onClick={() => onChange(key)}
-          type="button"
-        >
-          <span className={styles.emoji}>{emoji}</span>
-          <span className={styles.label}>{label}</span>
-          {counts?.[key] != null && (
-            <span className={styles.count}>{counts[key]}</span>
-          )}
-        </button>
-      ))}
+      {TABS.map(({ key, label, emoji }) => {
+        const count = key === 'favorites' ? favoritesCount : undefined;
+        return (
+          <button
+            key={key}
+            className={[
+              styles.tab,
+              active === key ? styles.active : '',
+              key === 'emergency' ? styles.emergency : '',
+              key === 'favorites' ? styles.favorites : '',
+            ].join(' ')}
+            onClick={() => onChange(key)}
+            type="button"
+          >
+            <span className={styles.emoji}>{emoji}</span>
+            <span className={styles.label}>{label}</span>
+            {count != null && count > 0 && (
+              <span className={styles.count}>{count}</span>
+            )}
+          </button>
+        );
+      })}
     </nav>
   );
 }

@@ -6,7 +6,29 @@
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   border: 1px solid var(--border);
   transition: box-shadow 0.15s ease;
+  position: relative;
 }
+
+/* 즐겨찾기 별 버튼 */
+.starBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--text-quaternary);
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.starBtn:active { transform: scale(1.25); }
+
+.starred { color: #f5a623; }
 
 .card:active {
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);

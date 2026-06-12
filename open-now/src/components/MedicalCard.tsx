@@ -1,76 +1,114 @@
+import { share, getTossShareLink } from '@apps-in-toss/web-framework';
 import type { MedicalPlace, EmergencyRoom } from '../types';
 import { formatDistance } from '../utils';
 import styles from './MedicalCard.module.css';
 
 interface Props {
   place: MedicalPlace;
-  onShare?: (place: MedicalPlace) => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: (place: MedicalPlace) => void;
 }
 
+// ── 영업 상태 배지 ──────────────────────────────────────────────────────
 function StatusBadge({ place }: { place: MedicalPlace }) {
   if (!place.isOpenNow) {
     return <span className={`${styles.badge} ${styles.closed}`}>마감</span>;
   }
-
-  // 마감 1시간 이내 → "곧 마감"
   const todayKey = (['sun','mon','tue','wed','thu','fri','sat'] as const)[new Date().getDay()];
-  const todayHours = place.hours[todayKey];
-  if (todayHours) {
-    const [ch, cm] = todayHours.close.split(':').map(Number);
+  const slot = place.hours[todayKey];
+  if (slot) {
+    const [ch, cm] = slot.close.split(':').map(Number);
     const closeMin = ch * 60 + cm;
-    const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
-    if (closeMin - nowMin <= 60) {
+    const nowMin   = new Date().getHours() * 60 + new Date().getMinutes();
+    if (closeMin - nowMin <= 60)
       return <span className={`${styles.badge} ${styles.closing}`}>곧 마감</span>;
-    }
   }
-
   return <span className={`${styles.badge} ${styles.open}`}>영업중</span>;
 }
 
+// ── 혼잡도 배지 ────────────────────────────────────────────────────────
 function CongestionBadge({ room }: { room: EmergencyRoom }) {
   const MAP = {
-    low:     { label: '여유', cls: styles.congLow },
-    medium:  { label: '보통', cls: styles.congMedium },
-    high:    { label: '혼잡', cls: styles.congHigh },
+    low:     { label: '여유',    cls: styles.congLow },
+    medium:  { label: '보통',    cls: styles.congMedium },
+    high:    { label: '혼잡',    cls: styles.congHigh },
     unknown: { label: '확인불가', cls: styles.congUnknown },
   };
   const { label, cls } = MAP[room.congestion];
   return <span className={`${styles.badge} ${cls}`}>{label}</span>;
 }
 
-export function MedicalCard({ place, onShare }: Props) {
+// ── 액션 핸들러 ────────────────────────────────────────────────────────
+function handleCall(phone: string) {
+  window.location.href = `tel:${phone}`;
+}
+
+function handleMap(name: string, lat: number, lng: number) {
+  // 카카오맵 딥링크: 앱 설치 시 앱으로, 미설치 시 웹으로 fallback
+  const deeplink = `kakaomap://route?ep=${lat},${lng}&by=FOOT`;
+  const webFallback = `https://map.kakao.com/link/map/${encodeURIComponent(name)},${lat},${lng}`;
+
+  // 딥링크 시도 후 500ms 내 반응 없으면 웹 열기
+  const timer = setTimeout(() => {
+    window.open(webFallback, '_blank', 'noopener noreferrer');
+  }, 500);
+
+  window.location.href = deeplink;
+  // 앱 전환 성공 시 타이머 취소 (페이지가 blur되면 visibilitychange 발생)
+  const cleanup = () => { clearTimeout(timer); document.removeEventListener('visibilitychange', cleanup); };
+  document.addEventListener('visibilitychange', cleanup, { once: true });
+}
+
+async function handleShare(place: MedicalPlace) {
+  try {
+    const path  = `intoss://open-now/place/${place.category}/${place.id}`;
+    const link  = await getTossShareLink(path);
+    const text  = `[${place.name}]\n${place.address}\n📞 ${place.phone}\n\n${link}`;
+    await share({ message: text });
+  } catch {
+    // 토스 앱 외부(브라우저 등)에서는 Web Share API fallback
+    if (navigator.share) {
+      navigator.share({ title: place.name, text: place.address }).catch(() => {});
+    }
+  }
+}
+
+// ── 카드 ─────────────────────────────────────────────────────────────
+export function MedicalCard({ place, isFavorite = false, onToggleFavorite }: Props) {
   const isEmergency = place.category === 'emergency';
   const er = isEmergency ? (place as EmergencyRoom) : null;
 
-  const handleCall = () => {
-    window.location.href = `tel:${place.phone}`;
-  };
-
-  const handleMap = () => {
-    const url = `https://map.kakao.com/link/map/${encodeURIComponent(place.name)},${place.lat},${place.lng}`;
-    window.open(url, '_blank', 'noopener noreferrer');
-  };
-
   return (
     <li className={`${styles.card} ${isEmergency ? styles.emergencyCard : ''}`}>
+      {/* 즐겨찾기 버튼 */}
+      {onToggleFavorite && (
+        <button
+          className={`${styles.starBtn} ${isFavorite ? styles.starred : ''}`}
+          onClick={() => onToggleFavorite(place)}
+          type="button"
+          aria-label={isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+        >
+          {isFavorite ? '★' : '☆'}
+        </button>
+      )}
+
       <div className={styles.top}>
         <div className={styles.info}>
           <div className={styles.nameRow}>
-            {isEmergency && (
-              <span className={styles.erBadge}>응급</span>
-            )}
+            {isEmergency && <span className={styles.erBadge}>응급</span>}
             <span className={styles.name}>{place.name}</span>
-            {er?.isTraumaCenter && (
-              <span className={styles.traumaBadge}>외상센터</span>
-            )}
+            {er?.isTraumaCenter && <span className={styles.traumaBadge}>외상센터</span>}
           </div>
+
           <div className={styles.meta}>
             <span className={styles.distance}>{formatDistance(place.distance)}</span>
             <span className={styles.dot}>·</span>
             <StatusBadge place={place} />
             {er && <><span className={styles.dot}>·</span><CongestionBadge room={er} /></>}
           </div>
+
           <p className={styles.address}>{place.address}</p>
+
           {er && er.availableBeds != null && (
             <p className={styles.beds}>
               가용 병상{' '}
@@ -89,30 +127,43 @@ export function MedicalCard({ place, onShare }: Props) {
         </div>
       </div>
 
+      {/* 액션 바 */}
       <div className={styles.actions}>
-        <button className={styles.actionBtn} onClick={handleCall} type="button" aria-label="전화하기">
+        <button
+          className={styles.actionBtn}
+          onClick={() => handleCall(place.phone)}
+          type="button"
+          aria-label="전화하기"
+        >
           <PhoneIcon />
           <span>전화</span>
         </button>
         <div className={styles.divider} />
-        <button className={styles.actionBtn} onClick={handleMap} type="button" aria-label="지도 보기">
+        <button
+          className={styles.actionBtn}
+          onClick={() => handleMap(place.name, place.lat, place.lng)}
+          type="button"
+          aria-label="길찾기"
+        >
           <MapIcon />
-          <span>지도</span>
+          <span>길찾기</span>
         </button>
-        {onShare && (
-          <>
-            <div className={styles.divider} />
-            <button className={styles.actionBtn} onClick={() => onShare(place)} type="button" aria-label="공유하기">
-              <ShareIcon />
-              <span>공유</span>
-            </button>
-          </>
-        )}
+        <div className={styles.divider} />
+        <button
+          className={styles.actionBtn}
+          onClick={() => handleShare(place)}
+          type="button"
+          aria-label="공유하기"
+        >
+          <ShareIcon />
+          <span>공유</span>
+        </button>
       </div>
     </li>
   );
 }
 
+// ── 아이콘 ────────────────────────────────────────────────────────────
 function PhoneIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -120,15 +171,13 @@ function PhoneIcon() {
     </svg>
   );
 }
-
 function MapIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z" fill="currentColor"/>
+      <path d="M3 11l19-9-9 19-2-8-8-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
-
 function ShareIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">

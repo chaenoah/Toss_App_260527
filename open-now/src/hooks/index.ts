@@ -4,3 +4,6 @@ export * from './useStorage';
 export * from './useShare';
 export * from './useMedical';
 export * from './useRegion';
+export * from './useDisclaimer';
+export * from './useFavorites';
+export * from './useDebounce';

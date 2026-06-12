@@ -1,0 +1,54 @@
+.wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 10px 16px 0;
+}
+
+.icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.input {
+  width: 100%;
+  padding: 11px 36px 11px 36px;
+  background: var(--bg-secondary);
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+  /* 브라우저 기본 검색 UI 제거 */
+  -webkit-appearance: none;
+}
+
+.input::placeholder { color: var(--text-quaternary); }
+
+.input:focus {
+  background: var(--bg-primary);
+  border-color: var(--blue);
+}
+
+/* x 버튼 숨기기 (브라우저 기본) */
+.input::-webkit-search-cancel-button { display: none; }
+
+.clear {
+  position: absolute;
+  right: 10px;
+  padding: 4px 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text-quaternary);
+  font-family: inherit;
+  line-height: 1;
+}
+
+.clear:hover { color: var(--text-tertiary); }

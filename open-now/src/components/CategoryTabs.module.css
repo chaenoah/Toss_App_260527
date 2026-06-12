@@ -63,15 +63,16 @@
 }
 
 /* emergency active */
-.emergency.active .label {
-  color: var(--red);
-}
+.emergency.active .label { color: var(--red); }
+.emergency.active         { border-bottom-color: var(--red); }
+.emergency.active .count  { background: var(--red-soft); color: var(--red); }
 
-.emergency.active {
-  border-bottom-color: var(--red);
-}
+/* favorites active */
+.favorites.active .label { color: #f5a623; font-weight: 700; }
+.favorites.active        { border-bottom-color: #f5a623; }
+.favorites.active .count { background: #fff4e0; color: #f5a623; }
 
-.emergency.active .count {
-  background: var(--red-soft);
-  color: var(--red);
-}
+/* 4개 탭이면 라벨 살짝 작게 */
+.tab { padding: 11px 0; }
+.label { font-size: 12px; }
+.emoji { font-size: 14px; }
