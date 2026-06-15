@@ -5,9 +5,12 @@ import { parseWeeklyHours, getOperatingStatus } from '../utils/operatingHours';
 
 const KEY = import.meta.env.VITE_PUBLIC_DATA_API_KEY as string;
 
-const PHARMACY_BASE   = 'https://apis.data.go.kr/B552657/ErmctInsttInfoInqireService';
-const HOSPITAL_BASE   = 'https://apis.data.go.kr/B551182/hospInfoServicev2';
-const EMERGENCY_BASE  = 'https://apis.data.go.kr/B552657/ErmctInfoInqireService';
+// 브라우저 환경(dev/preview)에서는 Vite proxy로 CORS 우회
+const DATA_ORIGIN = import.meta.env.PROD ? 'https://apis.data.go.kr' : '/proxy/data';
+
+const PHARMACY_BASE   = `${DATA_ORIGIN}/B552657/ErmctInsttInfoInqireService`;
+const HOSPITAL_BASE   = `${DATA_ORIGIN}/B551182/hospInfoServicev2`;
+const EMERGENCY_BASE  = `${DATA_ORIGIN}/B552657/ErmctInfoInqireService`;
 
 // ── XML 파서 (공공데이터 XML 특성 반영) ────────────────────────────────────
 const parser = new XMLParser({

@@ -40,8 +40,9 @@ interface KakaoResponse {
  * Kakao Local API: /v2/local/geo/coord2regioncode
  */
 export async function reverseGeocode(location: UserLocation): Promise<RegionInfo> {
+  const kakaoOrigin = import.meta.env.PROD ? 'https://dapi.kakao.com' : '/proxy/kakao';
   const url =
-    `https://dapi.kakao.com/v2/local/geo/coord2regioncode.json` +
+    `${kakaoOrigin}/v2/local/geo/coord2regioncode.json` +
     `?x=${location.lng}&y=${location.lat}`;
 
   const res = await fetch(url, {

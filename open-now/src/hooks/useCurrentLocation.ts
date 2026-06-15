@@ -11,7 +11,8 @@ const KAKAO_KEY = import.meta.env.VITE_KAKAO_API_KEY as string;
 
 export async function geocodeAddress(query: string): Promise<UserLocation | null> {
   try {
-    const url = `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(query)}&size=1`;
+    const kakaoOrigin = import.meta.env.PROD ? 'https://dapi.kakao.com' : '/proxy/kakao';
+    const url = `${kakaoOrigin}/v2/local/search/address.json?query=${encodeURIComponent(query)}&size=1`;
     const res = await fetch(url, {
       headers: { Authorization: `KakaoAK ${KAKAO_KEY}` },
     });
