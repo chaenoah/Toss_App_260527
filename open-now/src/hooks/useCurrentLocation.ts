@@ -51,6 +51,17 @@ export function useCurrentLocation() {
     } catch (err) {
       if (err instanceof GetCurrentLocationPermissionError) {
         setState({ phase: 'denied' });
+      } else if (navigator.geolocation) {
+        // 브라우저 환경 폴백 (Toss SDK 미지원 시)
+        navigator.geolocation.getCurrentPosition(
+          (pos) => setState({
+            phase: 'success',
+            location: { lat: pos.coords.latitude, lng: pos.coords.longitude },
+            source: 'gps',
+          }),
+          () => setState({ phase: 'denied' }),
+          { enableHighAccuracy: true, timeout: 10000 },
+        );
       } else {
         setState({
           phase: 'error',
