@@ -5,7 +5,7 @@ export default defineConfig({
   brand: {
     displayName: "밤에 아플때",
     primaryColor: "#3182f6",
-    icon: "",
+    icon: "/icon.svg",
   },
   web: {
     host: "localhost",

@@ -59,6 +59,12 @@
   opacity: 0;
   width: 0;
   height: 0;
+  position: absolute;
+}
+
+.toggle input:focus-visible + .toggleTrack {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
 
 .toggleTrack {
@@ -141,6 +147,11 @@
   50%       { opacity: 0.45; }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; border-top-color: var(--blue); opacity: 0.7; }
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
 /* 전체 보기 버튼 */
 .showAllBtn {
   display: block;
@@ -159,10 +170,19 @@
   transition: all 0.15s;
 }
 
-.showAllBtn:active {
+.showAllBtn:hover {
   background: var(--blue-soft);
   color: var(--blue);
   border-color: var(--blue);
+}
+
+.showAllBtn:active {
+  opacity: 0.75;
+}
+
+.showAllBtn:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
 
 /* 재시도 버튼 */

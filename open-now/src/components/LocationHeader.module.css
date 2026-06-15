@@ -4,29 +4,45 @@
   z-index: 10;
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border);
-  padding: 14px 20px 12px;
-}
-
-.inner {
+  padding: 10px 20px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+}
+
+.appName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--blue);
 }
 
 .pin {
-  color: var(--blue);
   flex-shrink: 0;
 }
 
-.name {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.3px;
-}
-
-.label {
+.locationName {
   font-size: 13px;
-  color: var(--text-tertiary);
-  margin-left: 2px;
+  font-weight: 600;
+  color: var(--blue);
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
