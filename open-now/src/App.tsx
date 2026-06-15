@@ -183,11 +183,11 @@ function App() {
     return <AddressSearchScreen onSubmit={submitManualAddress} />;
   }
 
-  if (locState.phase === 'loading' || regionQuery.isLoading) {
+  if (regionQuery.isLoading) {
     return (
       <div className="screen-center">
         <div className="spinner" />
-        <p>{locState.phase === 'loading' ? '주소를 확인하고 있어요...' : '동네 정보를 확인하고 있어요...'}</p>
+        <p>동네 정보를 확인하고 있어요...</p>
       </div>
     );
   }

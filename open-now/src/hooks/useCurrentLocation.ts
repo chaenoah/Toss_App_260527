@@ -21,7 +21,6 @@ export async function geocodeAddress(query: string): Promise<UserLocation | null
 
 export type LocationStatus =
   | { phase: 'idle' }
-  | { phase: 'loading' }
   | { phase: 'success'; location: UserLocation; source: 'manual' }
   | { phase: 'error'; message: string };
 
@@ -29,12 +28,8 @@ export function useCurrentLocation() {
   const [state, setState] = useState<LocationStatus>({ phase: 'idle' });
 
   const submitManualAddress = useCallback(async (address: string): Promise<boolean> => {
-    setState({ phase: 'loading' });
     const coords = await geocodeAddress(address);
-    if (!coords) {
-      setState({ phase: 'idle' });
-      return false;
-    }
+    if (!coords) return false;
     setState({ phase: 'success', location: coords, source: 'manual' });
     return true;
   }, []);
