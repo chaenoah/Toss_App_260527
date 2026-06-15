@@ -5,7 +5,7 @@ import {
   CategoryTabs,
   MedicalCard,
   EmptyState,
-  LocationDeniedScreen,
+  AddressSearchScreen,
   DisclaimerModal,
   EmergencyFAB,
   SearchBar,
@@ -25,7 +25,6 @@ import './App.css';
 
 const PREVIEW_COUNT = 5;
 
-// ── 로딩 스켈레톤 ──────────────────────────────────────────────────────
 function CardSkeleton() {
   return (
     <li style={{
@@ -36,7 +35,6 @@ function CardSkeleton() {
   );
 }
 
-// ── 의료기관 목록 ─────────────────────────────────────────────────────
 interface ContentProps {
   category: PlaceCategory;
   openNowOnly: boolean;
@@ -44,7 +42,6 @@ interface ContentProps {
   sido: string;
   sigungu: string;
   userLocation: UserLocation;
-  favorites: MedicalPlace[];
   isFavorite: (id: string) => boolean;
   onToggleFavorite: (place: MedicalPlace) => void;
 }
@@ -63,7 +60,6 @@ function PlaceContent({
   const queryMap = { pharmacy: pharmacyQ, hospital: hospitalQ, emergency: emergencyQ } as const;
   const { data = [], isLoading, isError } = queryMap[category];
 
-  // 거리순 → 영업 중 필터 → 검색어 필터
   const visible = useMemo(() => {
     let list = sortByDistance(data as MedicalPlace[]);
     if (openNowOnly) list = list.filter((p) => p.isOpenNow);
@@ -76,7 +72,6 @@ function PlaceContent({
     return list;
   }, [data, openNowOnly, searchQuery]);
 
-  // 탭 전환 시 전체 보기 초기화
   useMemo(() => { setShowAll(false); }, [category]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const displayed = showAll ? visible : visible.slice(0, PREVIEW_COUNT);
@@ -122,15 +117,14 @@ function PlaceContent({
   );
 }
 
-// ── 즐겨찾기 탭 ──────────────────────────────────────────────────────
-interface FavTabProps {
+function FavoritesContent({
+  favorites, isFavorite, onToggleFavorite, searchQuery,
+}: {
   favorites: MedicalPlace[];
   isFavorite: (id: string) => boolean;
   onToggleFavorite: (place: MedicalPlace) => void;
   searchQuery: string;
-}
-
-function FavoritesContent({ favorites, isFavorite, onToggleFavorite, searchQuery }: FavTabProps) {
+}) {
   const filtered = useMemo(() => {
     if (!searchQuery) return favorites;
     const q = searchQuery.toLowerCase();
@@ -170,13 +164,12 @@ function FavoritesContent({ favorites, isFavorite, onToggleFavorite, searchQuery
   );
 }
 
-// ── App ───────────────────────────────────────────────────────────────
 function App() {
-  const { state: locState, retry, openLocationSettings, submitManualAddress } = useCurrentLocation();
+  const { state: locState, submitManualAddress, reset } = useCurrentLocation();
   const { needsDisclaimer, accept: acceptDisclaimer } = useDisclaimer();
   const { favorites, toggle: toggleFavorite, isFavorite } = useFavorites();
 
-  const [tab, setTab]           = useState<AppTab>('pharmacy');
+  const [tab, setTab]               = useState<AppTab>('pharmacy');
   const [openNowOnly, setOpenNowOnly] = useState(false);
   const [rawSearch, setRawSearch]     = useState('');
   const searchQuery = useDebounce(rawSearch, 280);
@@ -186,67 +179,34 @@ function App() {
 
   const regionQuery = useRegion(userLocation);
 
-  // ── 위치 로딩 ─────────────────────────────────────────────────────
-  if (locState.phase === 'idle' || locState.phase === 'loading') {
-    return (
-      <div className="screen-center">
-        <div className="spinner" />
-        <p>내 위치를 확인하고 있어요...</p>
-      </div>
-    );
-  }
-  if (locState.phase === 'denied') {
-    return (
-      <LocationDeniedScreen
-        onOpenSettings={openLocationSettings}
-        onSubmitAddress={submitManualAddress}
-      />
-    );
-  }
-  if (locState.phase === 'error') {
-    return (
-      <div className="screen-center">
-        <p>위치를 가져오지 못했어요</p>
-        <p className="error-detail">{locState.message}</p>
-        <button className="retryBtn" onClick={retry} type="button">다시 시도</button>
-      </div>
-    );
+  if (locState.phase === 'idle') {
+    return <AddressSearchScreen onSubmit={submitManualAddress} />;
   }
 
-  // ── 역지오코딩 로딩 ───────────────────────────────────────────────
-  if (regionQuery.isLoading) {
+  if (locState.phase === 'loading' || regionQuery.isLoading) {
     return (
       <div className="screen-center">
         <div className="spinner" />
-        <p>동네 정보를 확인하고 있어요...</p>
+        <p>{locState.phase === 'loading' ? '주소를 확인하고 있어요...' : '동네 정보를 확인하고 있어요...'}</p>
       </div>
     );
   }
 
   const region = regionQuery.data ?? { sido: '', sigungu: '', sidoShort: '', label: '내 근처' };
-  const headerLabel = locState.source === 'manual' ? `📌 ${region.label}` : region.label;
-
   const isPlaceTab = tab !== 'favorites';
 
   return (
     <div className="app">
-      {/* 면책 모달 (첫 진입 1회) */}
       {needsDisclaimer === true && (
         <DisclaimerModal onAccept={acceptDisclaimer} />
       )}
 
-      <LocationHeader locationName={headerLabel} />
+      <LocationHeader locationName={region.label} onChangeLocation={reset} />
 
-      <CategoryTabs
-        active={tab}
-        onChange={setTab}
-        favoritesCount={favorites.length}
-      />
+      <CategoryTabs active={tab} onChange={setTab} favoritesCount={favorites.length} />
 
-      {/* 검색바 */}
       <SearchBar value={rawSearch} onChange={setRawSearch} />
 
-      {/* 필터바 (즐겨찾기 탭에선 숨김) */}
       {isPlaceTab && (
         <div className="filterBar">
           <span className="filterLabel">가까운 순</span>
@@ -265,7 +225,6 @@ function App() {
         </div>
       )}
 
-      {/* 콘텐츠 */}
       {tab === 'favorites' ? (
         <FavoritesContent
           favorites={favorites}
@@ -281,13 +240,11 @@ function App() {
           sido={region.sidoShort}
           sigungu={region.sigungu}
           userLocation={locState.location}
-          favorites={favorites}
           isFavorite={isFavorite}
           onToggleFavorite={toggleFavorite}
         />
       )}
 
-      {/* 119 플로팅 버튼 */}
       <EmergencyFAB />
     </div>
   );
