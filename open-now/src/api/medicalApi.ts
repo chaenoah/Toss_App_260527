@@ -31,12 +31,24 @@ function buildUrl(base: string, path: string, params: Record<string, string | nu
   return `${base}${path}?${qs.toString()}`;
 }
 
+async function fetchText(url: string): Promise<string> {
+  // 1차: 직접 호출
+  try {
+    const res = await fetch(url);
+    if (res.ok) return await res.text();
+  } catch {
+    // CORS 또는 네트워크 오류 → 프록시로 폴백
+  }
+  // 2차: CORS 프록시 경유
+  const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  const res2 = await fetch(proxy);
+  if (!res2.ok) throw new Error(`HTTP ${res2.status}`);
+  return await res2.text();
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchXml(url: string): Promise<any[]> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
-
-  const text = await res.text();
+  const text = await fetchText(url);
   const parsed = parser.parse(text);
 
   // 공공데이터 공통 래퍼: response.body.items.item
