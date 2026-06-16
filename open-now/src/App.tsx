@@ -15,7 +15,6 @@ import {
   useHospitals,
   useEmergencyRooms,
   useCurrentLocation,
-  useRegion,
   useDisclaimer,
   useFavorites,
   useDebounce,
@@ -174,25 +173,12 @@ function App() {
   const [rawSearch, setRawSearch]     = useState('');
   const searchQuery = useDebounce(rawSearch, 280);
 
-  const userLocation: UserLocation | undefined =
-    locState.phase === 'success' ? locState.location : undefined;
-
-  const regionQuery = useRegion(userLocation);
-
   if (locState.phase === 'idle') {
     return <AddressSearchScreen onSubmit={submitManualAddress} />;
   }
 
-  if (regionQuery.isLoading) {
-    return (
-      <div className="screen-center">
-        <div className="spinner" />
-        <p>동네 정보를 확인하고 있어요...</p>
-      </div>
-    );
-  }
-
-  const region = regionQuery.data ?? { sido: '', sigungu: '', sidoShort: '', label: '내 근처' };
+  const region = locState.region;
+  const userLocation = locState.location;
   const isPlaceTab = tab !== 'favorites';
 
   return (
