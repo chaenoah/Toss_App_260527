@@ -6,6 +6,7 @@ import { CalendarPage } from './pages/CalendarPage';
 import { WeeklyReportPage } from './pages/WeeklyReportPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ToastProvider } from './components/Toast';
+import { ScrollToTop } from './components/ScrollToTop';
 import { getWeekEntries } from './utils/storage';
 import type { MoodEntry } from './types';
 
@@ -41,6 +42,8 @@ function AppRoutes() {
   }
 
   return (
+    <>
+    <ScrollToTop />
     <Routes>
       <Route
         path="/"
@@ -83,6 +86,7 @@ function AppRoutes() {
         element={<SettingsPage onBack={() => navigate('/')} />}
       />
     </Routes>
+    </>
   );
 }
 
