@@ -17,6 +17,7 @@ export function MainPage({ onComplete, onCalendar }: Props) {
   const [intensity, setIntensity] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [memo, setMemo] = useState('');
   const [dispensing, setDispensing] = useState(false);
+  const [vendAnim, setVendAnim] = useState(false);
 
   function handleSelect(emotion: EmotionMeta) {
     haptic('light');
@@ -27,8 +28,10 @@ export function MainPage({ onComplete, onCalendar }: Props) {
     if (!selected || dispensing) return;
     haptic('heavy');
     setDispensing(true);
+    setVendAnim(true);
+    setTimeout(() => setVendAnim(false), 450);
 
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 800));
 
     const timestamp = Date.now();
     const prescription = generatePrescription(selected.key, intensity, memo, timestamp);
@@ -48,18 +51,19 @@ export function MainPage({ onComplete, onCalendar }: Props) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 max-w-md mx-auto">
+    <div className="min-h-screen flex flex-col max-w-md mx-auto" style={{ background: 'var(--bg-warm)' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-14 pb-4">
+      <div className="flex items-center justify-between px-5 pt-14 pb-5">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 leading-snug">
-            오늘, 당신의 기분에<br />어떤 처방이 필요한가요?
+          <p className="text-xs font-semibold tracking-widest text-gray-400 mb-1 uppercase">감정 자판기</p>
+          <h1 className="text-[22px] font-bold leading-snug" style={{ color: 'var(--ink-primary)' }}>
+            오늘 기분이<br />어떠세요?
           </h1>
-          <p className="text-sm text-gray-400 mt-1">감정을 골라 자판기를 눌러보세요</p>
+          <p className="text-sm mt-1" style={{ color: 'var(--ink-secondary)' }}>감정을 선택하면 처방전을 드려요</p>
         </div>
         <button
           onClick={onCalendar}
-          className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-lg flex-shrink-0"
+          className="w-11 h-11 rounded-2xl bg-white shadow-sm flex items-center justify-center text-xl flex-shrink-0 active:scale-90 transition-transform"
         >
           📅
         </button>
@@ -67,7 +71,7 @@ export function MainPage({ onComplete, onCalendar }: Props) {
 
       <div className="flex-1 px-4 pb-6 overflow-y-auto">
         {/* Emotion Grid */}
-        <div className="grid grid-cols-4 gap-2 mb-6">
+        <div className="grid grid-cols-4 gap-2.5 mb-5">
           {EMOTIONS.map(e => (
             <EmotionCard
               key={e.key}
@@ -78,29 +82,44 @@ export function MainPage({ onComplete, onCalendar }: Props) {
           ))}
         </div>
 
-        {/* Intensity + Memo — appears after selection */}
+        {/* Intensity + Memo */}
         {selected && (
-          <div className="fade-up bg-white rounded-3xl p-5 shadow-sm space-y-5 mb-6">
+          <div className="fade-up bg-white rounded-3xl p-5 shadow-sm space-y-5 mb-4">
             <div>
-              <p className="text-sm font-semibold text-gray-700 mb-3">
-                {selected.emoji} <span className="text-gray-900">{selected.label}</span>을 얼마나 느끼나요?
+              <p className="text-sm font-semibold mb-3" style={{ color: 'var(--ink-primary)' }}>
+                {selected.emoji} <span>{selected.label}</span>을 얼마나 느끼나요?
               </p>
               <IntensitySlider value={intensity} onChange={v => setIntensity(v as 1 | 2 | 3 | 4 | 5)} />
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-gray-700 block mb-2">
-                왜 그런 기분이 드세요? <span className="font-normal text-gray-400">(선택)</span>
+              <label className="text-sm font-semibold block mb-2" style={{ color: 'var(--ink-primary)' }}>
+                어떤 일이 있었나요? <span className="font-normal" style={{ color: 'var(--ink-secondary)' }}>(선택)</span>
               </label>
               <textarea
                 value={memo}
                 onChange={e => setMemo(e.target.value.slice(0, 50))}
                 placeholder="짧게 적어봐요..."
                 rows={2}
-                className="w-full text-sm text-gray-800 bg-gray-50 rounded-xl px-4 py-3 resize-none outline-none border border-gray-100 focus:border-gray-300 transition-colors placeholder:text-gray-300"
+                className="w-full text-sm rounded-2xl px-4 py-3 resize-none outline-none transition-colors placeholder:text-gray-300"
+                style={{
+                  background: 'var(--bg-warm)',
+                  color: 'var(--ink-primary)',
+                  border: '1.5px solid #E5E7EB',
+                }}
+                onFocus={e => (e.target.style.borderColor = '#9CA3AF')}
+                onBlur={e => (e.target.style.borderColor = '#E5E7EB')}
               />
-              <p className="text-right text-xs text-gray-300 mt-1">{memo.length}/50</p>
+              <p className="text-right text-xs mt-1" style={{ color: 'var(--ink-tertiary)' }}>{memo.length}/50</p>
             </div>
+          </div>
+        )}
+
+        {/* Vending machine label */}
+        {!selected && (
+          <div className="flex items-center justify-center gap-2 py-4 text-gray-300">
+            <span className="text-2xl">🎰</span>
+            <span className="text-xs tracking-wider">감정을 선택해주세요</span>
           </div>
         )}
       </div>
@@ -110,19 +129,28 @@ export function MainPage({ onComplete, onCalendar }: Props) {
         <button
           onClick={handleDispense}
           disabled={!selected || dispensing}
-          className={`w-full py-4 rounded-2xl font-bold text-base transition-all duration-200
+          className={`
+            w-full py-4 rounded-2xl font-bold text-base
+            transition-colors duration-200
+            ${vendAnim ? 'vend-press' : ''}
             ${selected && !dispensing
-              ? 'bg-gray-900 text-white active:scale-95 shadow-lg'
+              ? 'text-white shadow-lg'
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
           `}
+          style={selected && !dispensing ? {
+            background: 'linear-gradient(135deg, #2D2D2D 0%, #1A1A1A 100%)',
+          } : undefined}
         >
           {dispensing ? (
-            <span className="flex items-center justify-center gap-2">
-              <span className="coin-spin inline-block">🪙</span>
-              처방전 뽑는 중...
+            <span className="flex items-center justify-center gap-2.5">
+              <span className="coin-spin">🪙</span>
+              <span>처방전 뽑는 중...</span>
             </span>
           ) : (
-            '🎰 처방전 받기'
+            <span className="flex items-center justify-center gap-2">
+              <span>🎰</span>
+              <span>처방전 받기</span>
+            </span>
           )}
         </button>
       </div>

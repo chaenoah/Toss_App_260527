@@ -42,7 +42,7 @@ export function CalendarPage({ onBack, onViewEntry }: Props) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white max-w-md mx-auto">
+    <div className="min-h-screen flex flex-col max-w-md mx-auto" style={{ background: 'var(--bg-warm)' }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-5 pt-14 pb-4 border-b border-gray-100">
         <button onClick={onBack} className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">

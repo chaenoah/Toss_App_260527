@@ -33,7 +33,7 @@ export function WeeklyReportPage({ onClose }: Props) {
     : '균형 잡힌 한 주를 보냈어요. 다양한 감정을 느낀 거예요 🌈';
 
   return (
-    <div className="min-h-screen flex flex-col bg-white max-w-md mx-auto">
+    <div className="min-h-screen flex flex-col max-w-md mx-auto" style={{ background: 'var(--bg-warm)' }}>
       <div className="flex items-center gap-3 px-5 pt-14 pb-4 border-b border-gray-100">
         <button onClick={onClose} className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
           ←

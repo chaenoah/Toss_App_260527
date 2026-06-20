@@ -60,13 +60,20 @@ export function PrescriptionPage({ entry, onBack, onRetry }: Props) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100 max-w-md mx-auto">
+    <div className="min-h-screen flex flex-col max-w-md mx-auto" style={{ background: 'var(--bg-warm)' }}>
       {/* Top bar */}
       <div className="flex items-center gap-3 px-5 pt-14 pb-4">
-        <button onClick={onBack} className="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600">
+        <button
+          onClick={onBack}
+          className="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center active:scale-90 transition-transform"
+          style={{ color: 'var(--ink-primary)' }}
+        >
           ←
         </button>
-        <h2 className="font-bold text-gray-900">오늘의 처방전</h2>
+        <div>
+          <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: 'var(--ink-secondary)' }}>처방전</p>
+          <h2 className="font-bold text-sm leading-none" style={{ color: 'var(--ink-primary)' }}>오늘의 감정 처방</h2>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pb-6">
@@ -169,27 +176,35 @@ export function PrescriptionPage({ entry, onBack, onRetry }: Props) {
       </div>
 
       {/* Actions */}
-      <div className="px-4 pb-10 pt-2 space-y-2">
+      <div className="px-4 pb-10 pt-2 space-y-2.5">
         <div className="flex gap-2">
           <button
             onClick={handleSave}
-            className="flex-1 py-3.5 rounded-2xl bg-white text-gray-800 font-semibold text-sm shadow-sm active:scale-95 transition-transform"
+            className="flex-1 py-3.5 rounded-2xl bg-white font-semibold text-sm shadow-sm active:scale-95 transition-transform"
+            style={{ color: 'var(--ink-primary)' }}
           >
-            💾 저장하기
+            💾 저장
           </button>
           <button
             onClick={handleShare}
             disabled={sharing}
-            className="flex-1 py-3.5 rounded-2xl bg-white text-gray-800 font-semibold text-sm shadow-sm active:scale-95 transition-transform disabled:opacity-50"
+            className="flex-1 py-3.5 rounded-2xl bg-white font-semibold text-sm shadow-sm active:scale-95 transition-transform disabled:opacity-40"
+            style={{ color: 'var(--ink-primary)' }}
           >
-            {sharing ? '공유 중...' : '📤 공유하기'}
+            {sharing ? (
+              <span className="flex items-center justify-center gap-1.5">
+                <span className="shimmer inline-block w-4 h-4 rounded bg-gray-200" />
+                공유 중
+              </span>
+            ) : '📤 공유'}
           </button>
         </div>
         <button
           onClick={handleRetry}
-          className="w-full py-3.5 rounded-2xl bg-gray-900 text-white font-semibold text-sm active:scale-95 transition-transform"
+          className="w-full py-3.5 rounded-2xl font-bold text-sm text-white active:scale-95 transition-transform shadow-md"
+          style={{ background: 'linear-gradient(135deg, #2D2D2D 0%, #1A1A1A 100%)' }}
         >
-          🔄 다시 받기
+          🔄 다른 처방 받기
         </button>
       </div>
     </div>

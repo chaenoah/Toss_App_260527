@@ -4,36 +4,53 @@ interface Props {
 }
 
 const LABELS = ['', '아주 약하게', '약하게', '보통', '강하게', '아주 강하게'];
+const EMOJIS = ['', '🌱', '🌿', '🌊', '🔥', '⚡'];
 
 export function IntensitySlider({ value, onChange }: Props) {
+  const pct = ((value - 1) / 4) * 100;
+
   return (
-    <div className="w-full px-1">
-      <div className="flex justify-between text-xs text-gray-400 mb-2">
-        <span>약하게</span>
-        <span className="font-semibold text-gray-700">{LABELS[value]}</span>
-        <span>강하게</span>
+    <div className="w-full space-y-3">
+      {/* Current label */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs" style={{ color: 'var(--ink-secondary)' }}>강도</span>
+        <span className="text-sm font-bold flex items-center gap-1" style={{ color: 'var(--ink-primary)' }}>
+          <span>{EMOJIS[value]}</span>
+          <span>{LABELS[value]}</span>
+        </span>
       </div>
+
+      {/* Range */}
       <input
         type="range"
         min={1}
         max={5}
         value={value}
         onChange={e => onChange(Number(e.target.value))}
-        className="w-full h-2 rounded-full appearance-none cursor-pointer"
+        className="w-full"
         style={{
-          background: `linear-gradient(to right, #374151 0%, #374151 ${(value - 1) * 25}%, #E5E7EB ${(value - 1) * 25}%, #E5E7EB 100%)`,
+          background: `linear-gradient(to right, #1A1A1A 0%, #1A1A1A ${pct}%, #E5E7EB ${pct}%, #E5E7EB 100%)`,
         }}
       />
-      <div className="flex justify-between mt-1">
+
+      {/* Dot steps */}
+      <div className="flex justify-between">
         {[1, 2, 3, 4, 5].map(n => (
           <button
             key={n}
             onClick={() => onChange(n)}
-            className={`w-6 h-6 rounded-full text-xs font-bold transition-all ${
-              value === n ? 'bg-gray-800 text-white scale-110' : 'bg-gray-200 text-gray-500'
-            }`}
+            className="flex flex-col items-center gap-1 active:scale-90 transition-transform"
           >
-            {n}
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-150"
+              style={
+                value === n
+                  ? { background: '#1A1A1A', color: '#FFFFFF', transform: 'scale(1.1)' }
+                  : { background: '#F3F4F6', color: '#9CA3AF' }
+              }
+            >
+              {n}
+            </div>
           </button>
         ))}
       </div>

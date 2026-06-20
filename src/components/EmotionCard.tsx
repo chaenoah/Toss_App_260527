@@ -20,22 +20,33 @@ export function EmotionCard({ emotion, selected, onSelect }: Props) {
     <button
       onClick={handleClick}
       className={`
-        relative flex flex-col items-center justify-center gap-1 rounded-2xl p-3
-        transition-all duration-150 select-none cursor-pointer border-2
+        relative flex flex-col items-center justify-center gap-1.5
+        rounded-2xl py-3 px-1 select-none cursor-pointer
+        transition-all duration-150
         ${popping ? 'card-pop' : ''}
-        ${selected
-          ? 'border-gray-800 shadow-lg scale-105'
-          : 'border-transparent shadow-sm active:scale-95'}
+        ${selected ? 'scale-105' : 'active:scale-90'}
       `}
       style={{
-        background: `linear-gradient(135deg, ${emotion.gradient[0]}, ${emotion.gradient[1]})`,
+        background: `linear-gradient(145deg, ${emotion.gradient[0]}, ${emotion.gradient[1]})`,
+        boxShadow: selected
+          ? `0 0 0 2.5px #1A1A1A, 0 6px 16px rgba(0,0,0,0.18)`
+          : '0 2px 6px rgba(0,0,0,0.07)',
       }}
     >
-      <span className="text-2xl leading-none">{emotion.emoji}</span>
-      <span className="text-xs font-semibold text-gray-800">{emotion.label}</span>
+      <span className="text-[26px] leading-none">{emotion.emoji}</span>
+      <span
+        className="text-[11px] font-bold leading-none"
+        style={{ color: 'rgba(0,0,0,0.75)' }}
+      >
+        {emotion.label}
+      </span>
+
       {selected && (
-        <div className="absolute top-1 right-1 w-4 h-4 bg-gray-800 rounded-full flex items-center justify-center">
-          <span className="text-white text-[9px]">✓</span>
+        <div
+          className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
+          style={{ background: '#1A1A1A' }}
+        >
+          <span className="text-white text-[9px] font-bold">✓</span>
         </div>
       )}
     </button>
