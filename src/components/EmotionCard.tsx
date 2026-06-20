@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import type { Emotion } from '../types';
+import type { EmotionMeta } from '../types';
 
 interface Props {
-  emotion: Emotion;
+  emotion: EmotionMeta;
   selected: boolean;
-  onSelect: (emotion: Emotion) => void;
+  onSelect: (emotion: EmotionMeta) => void;
 }
 
 export function EmotionCard({ emotion, selected, onSelect }: Props) {
@@ -28,13 +28,11 @@ export function EmotionCard({ emotion, selected, onSelect }: Props) {
           : 'border-transparent shadow-sm active:scale-95'}
       `}
       style={{
-        background: `linear-gradient(135deg, ${emotion.gradientFrom}, ${emotion.gradientTo})`,
+        background: `linear-gradient(135deg, ${emotion.gradient[0]}, ${emotion.gradient[1]})`,
       }}
     >
       <span className="text-2xl leading-none">{emotion.emoji}</span>
-      <span className="text-xs font-semibold" style={{ color: emotion.textColor }}>
-        {emotion.label}
-      </span>
+      <span className="text-xs font-semibold text-gray-800">{emotion.label}</span>
       {selected && (
         <div className="absolute top-1 right-1 w-4 h-4 bg-gray-800 rounded-full flex items-center justify-center">
           <span className="text-white text-[9px]">✓</span>

@@ -4,47 +4,39 @@ import { PrescriptionPage } from './pages/PrescriptionPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { WeeklyReportPage } from './pages/WeeklyReportPage';
 import { ToastProvider } from './components/Toast';
-import { getRecords } from './utils/storage';
+import { getWeekEntries, getEntries, saveEntry } from './utils/storage';
 import { generatePrescription } from './data/prescriptions';
-import { saveRecord } from './utils/storage';
-import type { EmotionRecord } from './types';
+import type { MoodEntry } from './types';
 
 type Page = 'main' | 'prescription' | 'calendar' | 'weekly';
 
-function isSunday(): boolean {
-  return new Date().getDay() === 0;
-}
-
-function hasWeekRecords(): boolean {
-  const now = new Date();
-  const dayOfWeek = now.getDay();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  monday.setHours(0, 0, 0, 0);
-  return getRecords().some(r => new Date(r.date) >= monday);
-}
-
 export default function App() {
   const [page, setPage] = useState<Page>('main');
-  const [currentRecord, setCurrentRecord] = useState<EmotionRecord | null>(null);
+  const [currentEntry, setCurrentEntry] = useState<MoodEntry | null>(null);
 
   useEffect(() => {
-    if (isSunday() && hasWeekRecords()) {
+    if (new Date().getDay() === 0 && getWeekEntries().length > 0) {
       setPage('weekly');
     }
   }, []);
 
-  function handleComplete(record: EmotionRecord) {
-    setCurrentRecord(record);
+  function handleComplete(entry: MoodEntry) {
+    setCurrentEntry(entry);
     setPage('prescription');
   }
 
-  function handleRetry(record: EmotionRecord) {
-    const seed = Date.now();
-    const newRx = generatePrescription(record.emotion, record.intensity, record.memo, seed);
-    const newRecord: EmotionRecord = { ...record, id: String(seed), prescription: newRx, createdAt: seed };
-    saveRecord(newRecord);
-    setCurrentRecord(newRecord);
+  function handleRetry() {
+    if (!currentEntry) return;
+    const timestamp = Date.now();
+    const newRx = generatePrescription(currentEntry.emotion, currentEntry.intensity, currentEntry.memo, timestamp);
+    const newEntry: MoodEntry = {
+      ...currentEntry,
+      id: crypto.randomUUID(),
+      timestamp,
+      prescription: newRx,
+    };
+    saveEntry(newEntry);
+    setCurrentEntry(newEntry);
   }
 
   return (
@@ -55,27 +47,24 @@ export default function App() {
           onCalendar={() => setPage('calendar')}
         />
       )}
-      {page === 'prescription' && currentRecord && (
+      {page === 'prescription' && currentEntry && (
         <PrescriptionPage
-          record={currentRecord}
+          entry={currentEntry}
           onBack={() => setPage('main')}
-          onRetry={() => handleRetry(currentRecord)}
+          onRetry={handleRetry}
         />
       )}
       {page === 'calendar' && (
         <CalendarPage
           onBack={() => setPage('main')}
-          onViewRecord={record => {
-            setCurrentRecord(record);
+          onViewEntry={entry => {
+            setCurrentEntry(entry);
             setPage('prescription');
           }}
         />
       )}
       {page === 'weekly' && (
-        <WeeklyReportPage
-          records={getRecords()}
-          onClose={() => setPage('main')}
-        />
+        <WeeklyReportPage onClose={() => setPage('main')} />
       )}
     </ToastProvider>
   );

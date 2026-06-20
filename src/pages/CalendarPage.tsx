@@ -1,31 +1,36 @@
 import { useState } from 'react';
-import { getRecordsByMonth } from '../utils/storage';
-import type { EmotionRecord } from '../types';
+import { EMOTION_MAP } from '../data/emotions';
+import { getEntriesByMonth } from '../utils/storage';
+import type { MoodEntry } from '../types';
 
 interface Props {
   onBack: () => void;
-  onViewRecord: (record: EmotionRecord) => void;
+  onViewEntry: (entry: MoodEntry) => void;
 }
 
-export function CalendarPage({ onBack, onViewRecord }: Props) {
+export function CalendarPage({ onBack, onViewEntry }: Props) {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
 
-  const records = getRecordsByMonth(year, month);
-  const recordMap = Object.fromEntries(records.map(r => [r.date, r]));
+  const entries = getEntriesByMonth(year, month);
+  const entryMap = Object.fromEntries(entries.map(e => [e.date, e]));
 
   const firstDay = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
 
   // Most frequent emotion this month
   const emotionCounts: Record<string, { label: string; emoji: string; count: number }> = {};
-  for (const r of records) {
-    const key = r.emotion.id;
-    if (!emotionCounts[key]) emotionCounts[key] = { label: r.emotion.label, emoji: r.emotion.emoji, count: 0 };
-    emotionCounts[key].count++;
+  for (const e of entries) {
+    const meta = EMOTION_MAP[e.emotion];
+    if (!emotionCounts[e.emotion]) {
+      emotionCounts[e.emotion] = { label: meta.label, emoji: meta.emoji, count: 0 };
+    }
+    emotionCounts[e.emotion].count++;
   }
   const topEmotion = Object.values(emotionCounts).sort((a, b) => b.count - a.count)[0];
+
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
   function prevMonth() {
     if (month === 1) { setYear(y => y - 1); setMonth(12); }
@@ -48,15 +53,9 @@ export function CalendarPage({ onBack, onViewRecord }: Props) {
 
       {/* Month nav */}
       <div className="flex items-center justify-between px-5 py-4">
-        <button onClick={prevMonth} className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-lg">
-          ‹
-        </button>
-        <span className="font-bold text-gray-900 text-base">
-          {year}년 {month}월
-        </span>
-        <button onClick={nextMonth} className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-lg">
-          ›
-        </button>
+        <button onClick={prevMonth} className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-lg">‹</button>
+        <span className="font-bold text-gray-900 text-base">{year}년 {month}월</span>
+        <button onClick={nextMonth} className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-lg">›</button>
       </div>
 
       {/* Summary banner */}
@@ -83,25 +82,26 @@ export function CalendarPage({ onBack, onViewRecord }: Props) {
         {Array.from({ length: daysInMonth }).map((_, i) => {
           const day = i + 1;
           const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-          const record = recordMap[dateStr];
-          const isToday = dateStr === `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+          const entry = entryMap[dateStr];
+          const meta = entry ? EMOTION_MAP[entry.emotion] : null;
+          const isToday = dateStr === todayStr;
 
           return (
             <button
               key={day}
-              onClick={() => record && onViewRecord(record)}
+              onClick={() => entry && onViewEntry(entry)}
               className={`flex flex-col items-center py-1.5 rounded-xl transition-all
-                ${record ? 'active:scale-90' : ''}
-                ${isToday ? 'bg-gray-900 text-white' : ''}
+                ${entry ? 'active:scale-90' : ''}
+                ${isToday ? 'bg-gray-900' : ''}
               `}
             >
               <span className={`text-sm font-medium ${isToday ? 'text-white' : 'text-gray-700'}`}>{day}</span>
-              {record ? (
+              {meta ? (
                 <div
                   className="w-5 h-5 rounded-full mt-0.5 flex items-center justify-center text-xs"
-                  style={{ background: `linear-gradient(135deg, ${record.emotion.gradientFrom}, ${record.emotion.gradientTo})` }}
+                  style={{ background: `linear-gradient(135deg, ${meta.gradient[0]}, ${meta.gradient[1]})` }}
                 >
-                  {record.emotion.emoji.slice(0, 2)}
+                  {meta.emoji.slice(0, 2)}
                 </div>
               ) : (
                 <div className="w-5 h-5 mt-0.5" />
@@ -112,35 +112,38 @@ export function CalendarPage({ onBack, onViewRecord }: Props) {
       </div>
 
       {/* Recent list */}
-      {records.length > 0 && (
+      {entries.length > 0 && (
         <div className="mt-6 px-4 pb-10">
           <h3 className="text-sm font-bold text-gray-500 mb-3">이번 달 기록</h3>
           <div className="space-y-2">
-            {[...records].reverse().map(r => (
-              <button
-                key={r.id}
-                onClick={() => onViewRecord(r)}
-                className="w-full flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-3 active:scale-98 transition-transform text-left"
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-xl"
-                  style={{ background: `linear-gradient(135deg, ${r.emotion.gradientFrom}, ${r.emotion.gradientTo})` }}
+            {[...entries].reverse().map(e => {
+              const meta = EMOTION_MAP[e.emotion];
+              return (
+                <button
+                  key={e.id}
+                  onClick={() => onViewEntry(e)}
+                  className="w-full flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-3 active:scale-95 transition-transform text-left"
                 >
-                  {r.emotion.emoji}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-gray-900 text-sm">{r.emotion.label}</div>
-                  <div className="text-xs text-gray-400">{r.date}</div>
-                </div>
-                <div className="text-xs text-gray-400">강도 {r.intensity}</div>
-                <span className="text-gray-300">›</span>
-              </button>
-            ))}
+                  <div
+                    className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-xl"
+                    style={{ background: `linear-gradient(135deg, ${meta.gradient[0]}, ${meta.gradient[1]})` }}
+                  >
+                    {meta.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-gray-900 text-sm">{meta.label}</div>
+                    <div className="text-xs text-gray-400">{e.date}</div>
+                  </div>
+                  <div className="text-xs text-gray-400">강도 {e.intensity}</div>
+                  <span className="text-gray-300">›</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {records.length === 0 && (
+      {entries.length === 0 && (
         <div className="flex-1 flex flex-col items-center justify-center text-gray-300 gap-2 py-16">
           <span className="text-4xl">🗓</span>
           <p className="text-sm">이번 달 기록이 없어요</p>

@@ -4,21 +4,21 @@ import { generatePrescription } from '../data/prescriptions';
 import { EmotionCard } from '../components/EmotionCard';
 import { IntensitySlider } from '../components/IntensitySlider';
 import { haptic } from '../utils/bridge';
-import { saveRecord, todayString } from '../utils/storage';
-import type { Emotion, EmotionRecord } from '../types';
+import { saveEntry, todayString } from '../utils/storage';
+import type { EmotionMeta, MoodEntry } from '../types';
 
 interface Props {
-  onComplete: (record: EmotionRecord) => void;
+  onComplete: (entry: MoodEntry) => void;
   onCalendar: () => void;
 }
 
 export function MainPage({ onComplete, onCalendar }: Props) {
-  const [selected, setSelected] = useState<Emotion | null>(null);
-  const [intensity, setIntensity] = useState(3);
+  const [selected, setSelected] = useState<EmotionMeta | null>(null);
+  const [intensity, setIntensity] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [memo, setMemo] = useState('');
   const [dispensing, setDispensing] = useState(false);
 
-  function handleSelect(emotion: Emotion) {
+  function handleSelect(emotion: EmotionMeta) {
     haptic('light');
     setSelected(emotion);
   }
@@ -30,21 +30,21 @@ export function MainPage({ onComplete, onCalendar }: Props) {
 
     await new Promise(r => setTimeout(r, 600));
 
-    const seed = Date.now();
-    const prescription = generatePrescription(selected, intensity, memo, seed);
-    const record: EmotionRecord = {
-      id: String(seed),
+    const timestamp = Date.now();
+    const prescription = generatePrescription(selected.key, intensity, memo, timestamp);
+    const entry: MoodEntry = {
+      id: crypto.randomUUID(),
       date: todayString(),
-      emotion: selected,
+      timestamp,
+      emotion: selected.key,
       intensity,
-      memo,
+      memo: memo || undefined,
       prescription,
-      createdAt: seed,
     };
-    saveRecord(record);
+    saveEntry(entry);
 
     setDispensing(false);
-    onComplete(record);
+    onComplete(entry);
   }
 
   return (
@@ -70,9 +70,9 @@ export function MainPage({ onComplete, onCalendar }: Props) {
         <div className="grid grid-cols-4 gap-2 mb-6">
           {EMOTIONS.map(e => (
             <EmotionCard
-              key={e.id}
+              key={e.key}
               emotion={e}
-              selected={selected?.id === e.id}
+              selected={selected?.key === e.key}
               onSelect={handleSelect}
             />
           ))}
@@ -85,7 +85,7 @@ export function MainPage({ onComplete, onCalendar }: Props) {
               <p className="text-sm font-semibold text-gray-700 mb-3">
                 {selected.emoji} <span className="text-gray-900">{selected.label}</span>을 얼마나 느끼나요?
               </p>
-              <IntensitySlider value={intensity} onChange={setIntensity} />
+              <IntensitySlider value={intensity} onChange={v => setIntensity(v as 1 | 2 | 3 | 4 | 5)} />
             </div>
 
             <div>

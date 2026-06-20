@@ -1,39 +1,28 @@
-import { getRecords } from '../utils/storage';
-import type { EmotionRecord } from '../types';
+import { EMOTION_MAP } from '../data/emotions';
+import { getWeekEntries } from '../utils/storage';
+import type { MoodEntry } from '../types';
 
-interface Props {
-  records: EmotionRecord[];
-  onClose: () => void;
-}
-
-function getWeekRecords(): EmotionRecord[] {
-  const now = new Date();
-  const dayOfWeek = now.getDay();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  monday.setHours(0, 0, 0, 0);
-  return getRecords().filter(r => new Date(r.date) >= monday);
-}
+// Props kept for API compatibility; entries fetched internally
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface Props { onClose: () => void }
 
 export function WeeklyReportPage({ onClose }: Props) {
-  const records = getWeekRecords();
+  const entries: MoodEntry[] = getWeekEntries();
 
-  const emotionCounts: Record<string, { label: string; emoji: string; count: number; color: string }> = {};
-  for (const r of records) {
-    const key = r.emotion.id;
-    if (!emotionCounts[key]) {
-      emotionCounts[key] = { label: r.emotion.label, emoji: r.emotion.emoji, count: 0, color: r.emotion.gradientTo };
+  const emotionCounts: Record<string, { label: string; emoji: string; count: number }> = {};
+  for (const e of entries) {
+    const meta = EMOTION_MAP[e.emotion];
+    if (!emotionCounts[e.emotion]) {
+      emotionCounts[e.emotion] = { label: meta.label, emoji: meta.emoji, count: 0 };
     }
-    emotionCounts[key].count++;
+    emotionCounts[e.emotion].count++;
   }
 
-  const sorted = Object.values(emotionCounts).sort((a, b) => b.count - a.count);
-  const top3 = sorted.slice(0, 3);
-  const total = records.length;
-
-  const positiveCount = records.filter(r => r.emotion.group === 'positive').length;
-  const negativeCount = records.filter(r => r.emotion.group === 'negative').length;
-  const neutralCount = records.filter(r => r.emotion.group === 'neutral').length;
+  const top3 = Object.values(emotionCounts).sort((a, b) => b.count - a.count).slice(0, 3);
+  const total = entries.length;
+  const positiveCount = entries.filter(e => EMOTION_MAP[e.emotion].group === 'positive').length;
+  const negativeCount = entries.filter(e => EMOTION_MAP[e.emotion].group === 'negative').length;
+  const neutralCount = entries.filter(e => EMOTION_MAP[e.emotion].group === 'neutral').length;
 
   const insight = total === 0
     ? ''
@@ -53,7 +42,7 @@ export function WeeklyReportPage({ onClose }: Props) {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5 pb-10">
-        {records.length === 0 ? (
+        {entries.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-gray-300 gap-3">
             <span className="text-5xl">📊</span>
             <p className="text-sm">이번 주 기록이 없어요</p>
@@ -99,17 +88,20 @@ export function WeeklyReportPage({ onClose }: Props) {
             <div className="bg-gray-50 rounded-3xl p-5">
               <p className="text-xs font-bold text-gray-500 mb-3">일별 기록</p>
               <div className="flex gap-2 overflow-x-auto pb-1">
-                {records.map(r => (
-                  <div key={r.id} className="flex flex-col items-center gap-1 flex-shrink-0">
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm"
-                      style={{ background: `linear-gradient(135deg, ${r.emotion.gradientFrom}, ${r.emotion.gradientTo})` }}
-                    >
-                      {r.emotion.emoji}
+                {entries.map(e => {
+                  const meta = EMOTION_MAP[e.emotion];
+                  return (
+                    <div key={e.id} className="flex flex-col items-center gap-1 flex-shrink-0">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm"
+                        style={{ background: `linear-gradient(135deg, ${meta.gradient[0]}, ${meta.gradient[1]})` }}
+                      >
+                        {meta.emoji}
+                      </div>
+                      <span className="text-[10px] text-gray-400">{e.date.slice(5)}</span>
                     </div>
-                    <span className="text-[10px] text-gray-400">{r.date.slice(5)}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </>
@@ -127,8 +119,6 @@ function DonutChart({ positive, negative, neutral, total }: {
   const posDash = (positive / total) * circ;
   const negDash = (negative / total) * circ;
   const neuDash = (neutral / total) * circ;
-  const negOffset = -posDash;
-  const neuOffset = -(posDash + negDash);
 
   return (
     <svg width={100} height={100} viewBox="0 0 100 100">
@@ -140,12 +130,12 @@ function DonutChart({ positive, negative, neutral, total }: {
       )}
       {negative > 0 && (
         <circle cx={50} cy={50} r={r} fill="none" stroke="#78909C" strokeWidth={16}
-          strokeDasharray={`${negDash} ${circ}`} strokeDashoffset={negOffset}
+          strokeDasharray={`${negDash} ${circ}`} strokeDashoffset={-posDash}
           transform="rotate(-90 50 50)" />
       )}
       {neutral > 0 && (
         <circle cx={50} cy={50} r={r} fill="none" stroke="#90CAF9" strokeWidth={16}
-          strokeDasharray={`${neuDash} ${circ}`} strokeDashoffset={neuOffset}
+          strokeDasharray={`${neuDash} ${circ}`} strokeDashoffset={-(posDash + negDash)}
           transform="rotate(-90 50 50)" />
       )}
       <text x={50} y={54} textAnchor="middle" fontSize={13} fontWeight="bold" fill="#111">{total}일</text>
