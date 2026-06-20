@@ -1,71 +1,95 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { MainPage } from './pages/MainPage';
 import { PrescriptionPage } from './pages/PrescriptionPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { WeeklyReportPage } from './pages/WeeklyReportPage';
+import { SettingsPage } from './pages/SettingsPage';
 import { ToastProvider } from './components/Toast';
-import { getWeekEntries, getEntries, saveEntry } from './utils/storage';
-import { generatePrescription } from './data/prescriptions';
+import { getWeekEntries } from './utils/storage';
 import type { MoodEntry } from './types';
 
-type Page = 'main' | 'prescription' | 'calendar' | 'weekly';
+// Persist prescription result across navigation via sessionStorage
+function saveResult(entry: MoodEntry) {
+  sessionStorage.setItem('last_entry', JSON.stringify(entry));
+}
+function loadResult(): MoodEntry | null {
+  try {
+    const raw = sessionStorage.getItem('last_entry');
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
 
-export default function App() {
-  const [page, setPage] = useState<Page>('main');
-  const [currentEntry, setCurrentEntry] = useState<MoodEntry | null>(null);
+function AppRoutes() {
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  // Auto-redirect to weekly report on Sunday if entries exist
   useEffect(() => {
-    if (new Date().getDay() === 0 && getWeekEntries().length > 0) {
-      setPage('weekly');
+    if (location.pathname === '/' && new Date().getDay() === 0 && getWeekEntries().length > 0) {
+      navigate('/report');
     }
   }, []);
 
   function handleComplete(entry: MoodEntry) {
-    setCurrentEntry(entry);
-    setPage('prescription');
+    saveResult(entry);
+    navigate('/result');
   }
 
-  function handleRetry() {
-    if (!currentEntry) return;
-    const timestamp = Date.now();
-    const newRx = generatePrescription(currentEntry.emotion, currentEntry.intensity, currentEntry.memo, timestamp);
-    const newEntry: MoodEntry = {
-      ...currentEntry,
-      id: crypto.randomUUID(),
-      timestamp,
-      prescription: newRx,
-    };
-    saveEntry(newEntry);
-    setCurrentEntry(newEntry);
+  function handleRetry(entry: MoodEntry) {
+    saveResult(entry);
   }
 
   return (
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <MainPage
+            onComplete={handleComplete}
+            onCalendar={() => navigate('/history')}
+            onSettings={() => navigate('/settings')}
+          />
+        }
+      />
+      <Route
+        path="/result"
+        element={
+          <PrescriptionPage
+            entry={loadResult()}
+            onBack={() => navigate('/')}
+            onRetry={handleRetry}
+          />
+        }
+      />
+      <Route
+        path="/history"
+        element={
+          <CalendarPage
+            onBack={() => navigate('/')}
+            onViewEntry={entry => {
+              saveResult(entry);
+              navigate('/result');
+            }}
+          />
+        }
+      />
+      <Route
+        path="/report"
+        element={<WeeklyReportPage onClose={() => navigate('/')} />}
+      />
+      <Route
+        path="/settings"
+        element={<SettingsPage onBack={() => navigate('/')} />}
+      />
+    </Routes>
+  );
+}
+
+export default function App() {
+  return (
     <ToastProvider>
-      {page === 'main' && (
-        <MainPage
-          onComplete={handleComplete}
-          onCalendar={() => setPage('calendar')}
-        />
-      )}
-      {page === 'prescription' && currentEntry && (
-        <PrescriptionPage
-          entry={currentEntry}
-          onBack={() => setPage('main')}
-          onRetry={handleRetry}
-        />
-      )}
-      {page === 'calendar' && (
-        <CalendarPage
-          onBack={() => setPage('main')}
-          onViewEntry={entry => {
-            setCurrentEntry(entry);
-            setPage('prescription');
-          }}
-        />
-      )}
-      {page === 'weekly' && (
-        <WeeklyReportPage onClose={() => setPage('main')} />
-      )}
+      <AppRoutes />
     </ToastProvider>
   );
 }

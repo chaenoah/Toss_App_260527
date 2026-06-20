@@ -1,20 +1,36 @@
 import { useRef, useState } from 'react';
 import { EMOTION_MAP } from '../data/emotions';
 import { saveEntry } from '../utils/storage';
+import { generatePrescription } from '../data/prescriptions';
 import { haptic, shareImage } from '../utils/bridge';
 import { useToast } from '../components/Toast';
 import type { MoodEntry } from '../types';
 
 interface Props {
-  entry: MoodEntry;
+  entry: MoodEntry | null;
   onBack: () => void;
-  onRetry: () => void;
+  onRetry: (updated: MoodEntry) => void;
 }
 
-export function PrescriptionPage({ entry, onBack, onRetry }: Props) {
+export function PrescriptionPage({ entry: initialEntry, onBack, onRetry }: Props) {
   const { show } = useToast();
   const ticketRef = useRef<HTMLDivElement>(null);
   const [sharing, setSharing] = useState(false);
+  const [entry, setEntry] = useState<MoodEntry | null>(initialEntry);
+
+  if (!entry) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-warm)' }}>
+        <div className="text-center space-y-3">
+          <p className="text-4xl">💊</p>
+          <p className="text-sm" style={{ color: 'var(--ink-secondary)' }}>처방전을 찾을 수 없어요</p>
+          <button onClick={onBack} className="text-sm font-semibold underline" style={{ color: 'var(--ink-primary)' }}>
+            처음으로
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const meta = EMOTION_MAP[entry.emotion];
   const rx = entry.prescription;
@@ -56,7 +72,17 @@ export function PrescriptionPage({ entry, onBack, onRetry }: Props) {
 
   function handleRetry() {
     haptic('medium');
-    onRetry();
+    const timestamp = Date.now();
+    const newRx = generatePrescription(entry.emotion, entry.intensity, entry.memo, timestamp);
+    const newEntry: MoodEntry = {
+      ...entry,
+      id: crypto.randomUUID(),
+      timestamp,
+      prescription: newRx,
+    };
+    saveEntry(newEntry);
+    setEntry(newEntry);
+    onRetry(newEntry);
   }
 
   return (

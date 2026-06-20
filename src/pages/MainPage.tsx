@@ -10,9 +10,10 @@ import type { EmotionMeta, MoodEntry } from '../types';
 interface Props {
   onComplete: (entry: MoodEntry) => void;
   onCalendar: () => void;
+  onSettings: () => void;
 }
 
-export function MainPage({ onComplete, onCalendar }: Props) {
+export function MainPage({ onComplete, onCalendar, onSettings }: Props) {
   const [selected, setSelected] = useState<EmotionMeta | null>(null);
   const [intensity, setIntensity] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [memo, setMemo] = useState('');
@@ -61,12 +62,20 @@ export function MainPage({ onComplete, onCalendar }: Props) {
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--ink-secondary)' }}>감정을 선택하면 처방전을 드려요</p>
         </div>
-        <button
-          onClick={onCalendar}
-          className="w-11 h-11 rounded-2xl bg-white shadow-sm flex items-center justify-center text-xl flex-shrink-0 active:scale-90 transition-transform"
-        >
-          📅
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={onCalendar}
+            className="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-lg flex-shrink-0 active:scale-90 transition-transform"
+          >
+            📅
+          </button>
+          <button
+            onClick={onSettings}
+            className="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-lg flex-shrink-0 active:scale-90 transition-transform"
+          >
+            ⚙️
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 px-4 pb-6 overflow-y-auto">
