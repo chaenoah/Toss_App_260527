@@ -53,17 +53,34 @@ export async function shareImage(
   url?: string,
 ): Promise<boolean> {
   try {
+    // Inside Toss app — native bridge handles image + deep link
     if (window.TossAIT?.share) {
       window.TossAIT.share({ title, text, url, imageDataUrl });
       return true;
     }
+
+    // Mobile browser: try sharing image file (renders as visual card in KakaoTalk)
+    if (navigator.share && imageDataUrl) {
+      try {
+        const res = await fetch(imageDataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], 'prescription.png', { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title, text: url ?? text });
+          return true;
+        }
+      } catch { /* fall through to URL share */ }
+    }
+
+    // Mobile browser without file share: share URL + text
     if (navigator.share) {
-      // Some platforms reject extra fields — strip undefined
       const payload: ShareData = { title, text };
       if (url) payload.url = url;
       await navigator.share(payload);
       return true;
     }
+
+    // Desktop fallback: copy link to clipboard
     const clipboardText = url ? `${text}\n\n${url}` : text;
     await navigator.clipboard.writeText(clipboardText);
     return true;
