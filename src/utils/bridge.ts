@@ -1,9 +1,16 @@
 // Safe wrappers for Toss WebView bridge APIs.
 // Falls back gracefully when running outside the Toss app.
 
+interface TossAITShareOptions {
+  title: string;
+  text: string;
+  url?: string;
+  imageDataUrl?: string;
+}
+
 interface TossAIT {
   haptic?: (type: string) => void;
-  share?: (options: { title: string; text: string; imageDataUrl?: string }) => void;
+  share?: (options: TossAITShareOptions) => void;
   toast?: (message: string) => void;
 }
 
@@ -29,26 +36,36 @@ export function haptic(type: 'light' | 'medium' | 'heavy' = 'medium'): void {
 
 export function showToast(message: string): void {
   try {
-    if (window.TossAIT?.toast) {
-      window.TossAIT.toast(message);
-    }
-    // In-app toast is handled by the ToastProvider in the UI layer
-  } catch {
-    // silently fail
-  }
+    if (window.TossAIT?.toast) window.TossAIT.toast(message);
+  } catch { /* silently fail */ }
 }
 
-export async function shareImage(title: string, text: string, imageDataUrl?: string): Promise<boolean> {
+/**
+ * Share a prescription with optional deep link URL and image.
+ * - Inside Toss app: native share sheet via TossAIT bridge (URL re-opens mini-app)
+ * - Mobile browser: Web Share API
+ * - Desktop / fallback: copy link + text to clipboard
+ */
+export async function shareImage(
+  title: string,
+  text: string,
+  imageDataUrl?: string,
+  url?: string,
+): Promise<boolean> {
   try {
     if (window.TossAIT?.share) {
-      window.TossAIT.share({ title, text, imageDataUrl });
+      window.TossAIT.share({ title, text, url, imageDataUrl });
       return true;
     }
     if (navigator.share) {
-      await navigator.share({ title, text });
+      // Some platforms reject extra fields — strip undefined
+      const payload: ShareData = { title, text };
+      if (url) payload.url = url;
+      await navigator.share(payload);
       return true;
     }
-    await navigator.clipboard.writeText(text);
+    const clipboardText = url ? `${text}\n\n${url}` : text;
+    await navigator.clipboard.writeText(clipboardText);
     return true;
   } catch {
     return false;

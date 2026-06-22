@@ -3,6 +3,7 @@ import { EMOTION_MAP } from '../data/emotions';
 import { saveEntry } from '../utils/storage';
 import { generatePrescription } from '../data/prescriptions';
 import { haptic, shareImage } from '../utils/bridge';
+import { buildShareUrl } from '../utils/sharedLink';
 import { useToast } from '../components/Toast';
 import type { MoodEntry } from '../types';
 
@@ -10,9 +11,11 @@ interface Props {
   entry: MoodEntry | null;
   onBack: () => void;
   onRetry: (updated: MoodEntry) => void;
+  /** When true: viewer is reading someone else's shared prescription — hides save/retry/share. */
+  readOnly?: boolean;
 }
 
-export function PrescriptionPage({ entry: initialEntry, onBack, onRetry }: Props) {
+export function PrescriptionPage({ entry: initialEntry, onBack, onRetry, readOnly = false }: Props) {
   const { show } = useToast();
   const ticketRef = useRef<HTMLDivElement>(null);
   const [sharing, setSharing] = useState(false);
@@ -52,15 +55,17 @@ export function PrescriptionPage({ entry: initialEntry, onBack, onRetry }: Props
       '[감정 자판기 처방전]',
       `${meta.emoji} ${intensityLabel} ${meta.label}`,
       '',
-      `🎨 ${rx.color.hex} ${rx.color.name} — ${rx.color.description}`,
       `🎵 ${rx.song.title} — ${rx.song.artist}`,
       `💬 "${rx.quote.text}"${authorPart}`,
       `🎯 ${rx.mission}`,
       `💙 ${rx.comfort}`,
+      '',
+      '👇 처방전 자세히 보기',
     ].join('\n');
 
-    const ok = await shareImage('오늘의 처방전', text, dataUrl);
-    show(ok ? '처방전을 공유했어요 ✨' : '공유 기능을 지원하지 않는 환경이에요');
+    const url = buildShareUrl(entry);
+    const ok = await shareImage('오늘의 처방전', text, dataUrl, url);
+    show(ok ? '처방전 링크를 공유했어요 ✨' : '공유 기능을 지원하지 않는 환경이에요');
     setSharing(false);
   }
 
@@ -97,8 +102,12 @@ export function PrescriptionPage({ entry: initialEntry, onBack, onRetry }: Props
           ←
         </button>
         <div>
-          <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: 'var(--ink-secondary)' }}>처방전</p>
-          <h2 className="font-bold text-sm leading-none" style={{ color: 'var(--ink-primary)' }}>오늘의 감정 처방</h2>
+          <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: 'var(--ink-secondary)' }}>
+            {readOnly ? '공유된 처방전' : '처방전'}
+          </p>
+          <h2 className="font-bold text-sm leading-none" style={{ color: 'var(--ink-primary)' }}>
+            {readOnly ? '친구가 보낸 감정 처방' : '오늘의 감정 처방'}
+          </h2>
         </div>
       </div>
 
@@ -203,35 +212,47 @@ export function PrescriptionPage({ entry: initialEntry, onBack, onRetry }: Props
 
       {/* Actions */}
       <div className="px-4 pb-10 pt-2 space-y-2.5">
-        <div className="flex gap-2">
+        {readOnly ? (
           <button
-            onClick={handleSave}
-            className="flex-1 py-3.5 rounded-2xl bg-white font-semibold text-sm shadow-sm active:scale-95 transition-transform"
-            style={{ color: 'var(--ink-primary)' }}
+            onClick={onBack}
+            className="w-full py-3.5 rounded-2xl font-bold text-sm text-white active:scale-95 transition-transform shadow-md"
+            style={{ background: 'linear-gradient(135deg, #2D2D2D 0%, #1A1A1A 100%)' }}
           >
-            💾 저장
+            🎰 나도 처방전 받기
           </button>
-          <button
-            onClick={handleShare}
-            disabled={sharing}
-            className="flex-1 py-3.5 rounded-2xl bg-white font-semibold text-sm shadow-sm active:scale-95 transition-transform disabled:opacity-40"
-            style={{ color: 'var(--ink-primary)' }}
-          >
-            {sharing ? (
-              <span className="flex items-center justify-center gap-1.5">
-                <span className="shimmer inline-block w-4 h-4 rounded bg-gray-200" />
-                공유 중
-              </span>
-            ) : '📤 공유'}
-          </button>
-        </div>
-        <button
-          onClick={handleRetry}
-          className="w-full py-3.5 rounded-2xl font-bold text-sm text-white active:scale-95 transition-transform shadow-md"
-          style={{ background: 'linear-gradient(135deg, #2D2D2D 0%, #1A1A1A 100%)' }}
-        >
-          🔄 다른 처방 받기
-        </button>
+        ) : (
+          <>
+            <div className="flex gap-2">
+              <button
+                onClick={handleSave}
+                className="flex-1 py-3.5 rounded-2xl bg-white font-semibold text-sm shadow-sm active:scale-95 transition-transform"
+                style={{ color: 'var(--ink-primary)' }}
+              >
+                💾 저장
+              </button>
+              <button
+                onClick={handleShare}
+                disabled={sharing}
+                className="flex-1 py-3.5 rounded-2xl bg-white font-semibold text-sm shadow-sm active:scale-95 transition-transform disabled:opacity-40"
+                style={{ color: 'var(--ink-primary)' }}
+              >
+                {sharing ? (
+                  <span className="flex items-center justify-center gap-1.5">
+                    <span className="shimmer inline-block w-4 h-4 rounded bg-gray-200" />
+                    공유 중
+                  </span>
+                ) : '📤 공유'}
+              </button>
+            </div>
+            <button
+              onClick={handleRetry}
+              className="w-full py-3.5 rounded-2xl font-bold text-sm text-white active:scale-95 transition-transform shadow-md"
+              style={{ background: 'linear-gradient(135deg, #2D2D2D 0%, #1A1A1A 100%)' }}
+            >
+              🔄 다른 처방 받기
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

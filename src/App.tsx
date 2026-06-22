@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { MainPage } from './pages/MainPage';
 import { PrescriptionPage } from './pages/PrescriptionPage';
 import { CalendarPage } from './pages/CalendarPage';
@@ -8,6 +8,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { ToastProvider } from './components/Toast';
 import { ScrollToTop } from './components/ScrollToTop';
 import { getWeekEntries } from './utils/storage';
+import { decodeEntry } from './utils/sharedLink';
 import type { MoodEntry } from './types';
 
 // Persist prescription result across navigation via sessionStorage
@@ -85,9 +86,19 @@ function AppRoutes() {
         path="/settings"
         element={<SettingsPage onBack={() => navigate('/')} />}
       />
+      <Route
+        path="/shared/:data"
+        element={<SharedRoute onBack={() => navigate('/')} onRetry={() => {}} />}
+      />
     </Routes>
     </>
   );
+}
+
+function SharedRoute({ onBack, onRetry }: { onBack: () => void; onRetry: (e: MoodEntry) => void }) {
+  const { data } = useParams<{ data: string }>();
+  const entry = data ? decodeEntry(data) : null;
+  return <PrescriptionPage entry={entry} onBack={onBack} onRetry={onRetry} readOnly />;
 }
 
 export default function App() {
