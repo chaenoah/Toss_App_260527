@@ -1,6 +1,9 @@
+import { loadFullScreenAd, showFullScreenAd } from "@apps-in-toss/web-framework";
 import { Button } from "@toss/tds-mobile";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./App.css";
+
+const AD_GROUP_ID = "ait.v2.live.f7921b58284745ba";
 
 // ── Types ────────────────────────────────────────────
 type Screen = "intro" | "input" | "result";
@@ -84,6 +87,8 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>("intro");
   const [inputs, setInputs] = useState<Inputs>({ meals: 45, laundry: 8, cleaning: "half", rent: 70 });
   const [result, setResult] = useState<Result | null>(null);
+  const [adLoaded, setAdLoaded] = useState(false);
+  const navigatedRef = useRef(false);
 
   useEffect(() => {
     history.replaceState({ screen: "intro" }, "");
@@ -94,14 +99,55 @@ export default function App() {
     return () => window.removeEventListener("popstate", handle);
   }, []);
 
+  // 광고 사전 로드
+  useEffect(() => {
+    if (!loadFullScreenAd.isSupported()) return;
+    const unsub = loadFullScreenAd({
+      options: { adGroupId: AD_GROUP_ID },
+      onEvent: (e) => { if (e.type === "loaded") setAdLoaded(true); },
+      onError: () => setAdLoaded(false),
+    });
+    return unsub;
+  }, []);
+
   function go(s: Screen) {
     history.pushState({ screen: s }, "");
     setScreen(s);
   }
 
+  function preloadAd() {
+    if (!loadFullScreenAd.isSupported()) return;
+    loadFullScreenAd({
+      options: { adGroupId: AD_GROUP_ID },
+      onEvent: (e) => { if (e.type === "loaded") setAdLoaded(true); },
+      onError: () => {},
+    });
+  }
+
   function handleCalculate() {
     setResult(calculate(inputs));
-    go("result");
+
+    if (adLoaded && showFullScreenAd.isSupported()) {
+      setAdLoaded(false);
+      navigatedRef.current = false;
+
+      const afterAd = () => {
+        if (navigatedRef.current) return;
+        navigatedRef.current = true;
+        go("result");
+        preloadAd();
+      };
+
+      showFullScreenAd({
+        options: { adGroupId: AD_GROUP_ID },
+        onEvent: (e) => {
+          if (e.type === "dismissed" || e.type === "failedToShow") afterAd();
+        },
+        onError: afterAd,
+      });
+    } else {
+      go("result");
+    }
   }
 
   return (
