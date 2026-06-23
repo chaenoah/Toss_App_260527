@@ -1,11 +1,14 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { EMOTION_MAP } from '../data/emotions';
 import { saveEntry } from '../utils/storage';
 import { generatePrescription } from '../data/prescriptions';
 import { haptic, shareImage } from '../utils/bridge';
 import { buildShareUrl } from '../utils/sharedLink';
 import { useToast } from '../components/Toast';
+import { loadFullScreenAd, showFullScreenAd } from '@apps-in-toss/web-bridge';
 import type { MoodEntry } from '../types';
+
+const AD_GROUP_ID = 'ait.v2.live.b9d90ca135b44f40';
 
 interface Props {
   entry: MoodEntry | null;
@@ -20,6 +23,29 @@ export function PrescriptionPage({ entry: initialEntry, onBack, onRetry, readOnl
   const ticketRef = useRef<HTMLDivElement>(null);
   const [sharing, setSharing] = useState(false);
   const [entry, setEntry] = useState<MoodEntry | null>(initialEntry);
+  const adLoaded = useRef(false);
+
+  // Load interstitial ad on mount; show once loaded (readOnly 제외)
+  useEffect(() => {
+    if (readOnly || !loadFullScreenAd.isSupported()) return;
+
+    const unsubscribe = loadFullScreenAd({
+      options: { adGroupId: AD_GROUP_ID },
+      onEvent: (event) => {
+        if (event.type === 'loaded' && !adLoaded.current) {
+          adLoaded.current = true;
+          showFullScreenAd({
+            options: { adGroupId: AD_GROUP_ID },
+            onEvent: () => {},
+            onError: () => {},
+          });
+        }
+      },
+      onError: () => {},
+    });
+
+    return unsubscribe;
+  }, [readOnly]);
 
   if (!entry) {
     return (
