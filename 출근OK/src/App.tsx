@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { loadFullScreenAd, showFullScreenAd } from '@apps-in-toss/web-bridge';
 import { useChecklist } from './hooks/useChecklist';
 import { useWeather } from './hooks/useWeather';
 import { useStreak } from './hooks/useStreak';
@@ -14,6 +15,8 @@ import { loadCity, saveCity, loadCommuteTime, saveCommuteTime, loadAlarmEnabled,
 import { registerSW, scheduleAlarm } from './lib/alarm';
 import type { ViewType } from './types';
 import './App.css';
+
+const AD_GROUP_ID = 'ait.v2.live.8898421fe1154a09';
 
 export default function App() {
   const {
@@ -33,14 +36,21 @@ export default function App() {
   const [modalShownToday, setModalShownToday] = useState(() => {
     return localStorage.getItem('modal_shown_date') === new Date().toISOString().slice(0, 10);
   });
+  const adLoaded = useRef(false);
 
   useEffect(() => {
-    // Re-register SW and re-schedule alarm on every app open (SW timer lost on browser restart)
     registerSW().then(() => {
-      if (loadAlarmEnabled()) {
-        scheduleAlarm(loadAlarmTime(), true);
-      }
+      if (loadAlarmEnabled()) scheduleAlarm(loadAlarmTime(), true);
     });
+
+    // 앱 진입 시 전면광고 미리 로드
+    if (loadFullScreenAd.isSupported()) {
+      loadFullScreenAd({
+        onEvent: () => { adLoaded.current = true; },
+        onError: () => {},
+        options: { adGroupId: AD_GROUP_ID },
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -53,10 +63,22 @@ export default function App() {
   useEffect(() => {
     if (allChecked && !modalShownToday) {
       markComplete();
-      setShowModal(true);
       const today = new Date().toISOString().slice(0, 10);
       localStorage.setItem('modal_shown_date', today);
       setModalShownToday(true);
+
+      // 전면광고 로드 완료 시 노출, 아니면 바로 완료 모달
+      if (adLoaded.current && showFullScreenAd.isSupported()) {
+        showFullScreenAd({
+          onEvent: (e) => {
+            if (e.type === 'dismissed' || e.type === 'failedToShow') setShowModal(true);
+          },
+          onError: () => setShowModal(true),
+          options: { adGroupId: AD_GROUP_ID },
+        });
+      } else {
+        setShowModal(true);
+      }
     }
   }, [allChecked]); // eslint-disable-line react-hooks/exhaustive-deps
 
