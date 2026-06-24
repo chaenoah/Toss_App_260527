@@ -41,11 +41,16 @@ export function NewScreen({ onBack, onCommit, excludeTickers }: Props) {
       />
 
       <div style={{ padding: "12px 16px 8px" }}>
+        <label htmlFor="stock-search" className="sr-only">
+          종목 검색
+        </label>
         <input
+          id="stock-search"
           autoFocus
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="종목명 또는 코드 검색"
+          aria-label="종목 검색"
           style={{
             width: "100%",
             border: 0,
@@ -55,52 +60,56 @@ export function NewScreen({ onBack, onCommit, excludeTickers }: Props) {
             background: tokens.grey100,
             outline: "none",
             boxSizing: "border-box",
+            color: tokens.grey900,
           }}
         />
       </div>
 
-      <div style={{ padding: "0 16px" }}>
+      <ul style={{ listStyle: "none", padding: "0 16px", margin: 0 }} role="listbox" aria-label="종목 후보">
         {results.map((s) => {
           const isPicked = picked?.ticker === s.ticker;
           return (
-            <button
-              key={s.ticker}
-              onClick={() => setPicked(s)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                width: "100%",
-                padding: "16px",
-                background: isPicked ? tokens.blueBg : "#fff",
-                border: 0,
-                borderRadius: 12,
-                marginBottom: 4,
-                cursor: "pointer",
-                textAlign: "left",
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 16, fontWeight: 700, color: tokens.grey900 }}>
-                  {s.name}
+            <li key={s.ticker} style={{ marginBottom: 4 }}>
+              <button
+                onClick={() => setPicked(s)}
+                role="option"
+                aria-selected={isPicked}
+                aria-label={`${s.name}, ${s.market}, 종목코드 ${s.ticker}${isPicked ? ", 선택됨" : ""}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  width: "100%",
+                  padding: "16px",
+                  background: isPicked ? tokens.blueBg : "#fff",
+                  border: 0,
+                  borderRadius: 12,
+                  cursor: "pointer",
+                  textAlign: "left",
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: tokens.grey900 }}>
+                    {s.name}
+                  </div>
+                  <div style={{ fontSize: 14, color: tokens.grey600, marginTop: 2 }}>
+                    {s.market} · {s.ticker}
+                  </div>
                 </div>
-                <div style={{ fontSize: 13, color: tokens.grey500, marginTop: 2 }}>
-                  {s.market} · {s.ticker}
-                </div>
-              </div>
-              {isPicked && (
-                <div style={{ fontSize: 14, fontWeight: 700, color: tokens.blue }}>
-                  선택됨
-                </div>
-              )}
-            </button>
+                {isPicked && (
+                  <div style={{ fontSize: 14, fontWeight: 700, color: tokens.blue }} aria-hidden="true">
+                    선택됨
+                  </div>
+                )}
+              </button>
+            </li>
           );
         })}
         {results.length === 0 && (
-          <div style={{ padding: 32, textAlign: "center", color: tokens.grey500 }}>
+          <li style={{ padding: 32, textAlign: "center", color: tokens.grey600 }}>
             검색 결과가 없어.
-          </div>
+          </li>
         )}
-      </div>
+      </ul>
 
       <div style={{ height: 140 }} />
 
