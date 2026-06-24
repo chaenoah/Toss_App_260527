@@ -1,65 +1,71 @@
-import { Asset, Button, Top } from "@toss/tds-mobile";
+import { useEffect, useState } from "react";
 import "./App.css";
+import type { Challenge } from "./types";
+import { loadActive, pushGravestone, saveActive } from "./storage";
+import { newId } from "./util";
+import { ListScreen } from "./screens/ListScreen";
+import { NewScreen } from "./screens/NewScreen";
+import { DetailScreen } from "./screens/DetailScreen";
 
+type Screen =
+  | { kind: "list" }
+  | { kind: "new" }
+  | { kind: "detail"; id: string };
 
 function App() {
-  
-  return (
-    <>
-      <Top
-        title={<Top.TitleParagraph size={22}>반가워요</Top.TitleParagraph>}
-        subtitleBottom={
-          <Top.SubtitleParagraph size={17}>
-            앱인토스 개발을 시작해 보세요.
-          </Top.SubtitleParagraph>
-        }
+  const [challenges, setChallenges] = useState<Challenge[]>(() => loadActive());
+  const [screen, setScreen] = useState<Screen>({ kind: "list" });
+
+  useEffect(() => {
+    saveActive(challenges);
+  }, [challenges]);
+
+  if (screen.kind === "new") {
+    return (
+      <NewScreen
+        excludeTickers={new Set(challenges.map((c) => c.ticker))}
+        onBack={() => setScreen({ kind: "list" })}
+        onCommit={(stock) => {
+          const now = Date.now();
+          const c: Challenge = {
+            id: newId(),
+            ticker: stock.ticker,
+            name: stock.name,
+            startedAt: now,
+            createdAt: now,
+          };
+          setChallenges((prev) => [...prev, c]);
+          setScreen({ kind: "detail", id: c.id });
+        }}
       />
+    );
+  }
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-          padding: "24px",
+  if (screen.kind === "detail") {
+    const c = challenges.find((x) => x.id === screen.id);
+    if (!c) {
+      setScreen({ kind: "list" });
+      return null;
+    }
+    return (
+      <DetailScreen
+        challenge={c}
+        onBack={() => setScreen({ kind: "list" })}
+        onSurrender={() => {
+          pushGravestone({ ...c, endedAt: Date.now(), reason: "sold" });
+          setChallenges((prev) => prev.filter((x) => x.id !== c.id));
+          setScreen({ kind: "list" });
         }}
-      >
-        <Button
-          as="a"
-          variant="weak"
-          href="https://developers-apps-in-toss.toss.im"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          개발자센터
-        </Button>
-        <Button
-          as="a"
-          variant="weak"
-          href="https://techchat-apps-in-toss.toss.im"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          개발자 커뮤니티
-        </Button>
-        
-      </div>
+      />
+    );
+  }
 
-      <div
-        style={{
-          position: "fixed",
-          bottom: "24px",
-          left: "50%",
-          transform: "translateX(-50%)",
-        }}
-      >
-        <Asset.Image
-          alt="apps in toss logo"
-          frameShape={{ width: 160 }}
-          backgroundColor="transparent"
-          src={`${import.meta.env.BASE_URL}appsintoss-logo.png`}
-        />
-      </div>
-    </>
+  return (
+    <ListScreen
+      challenges={challenges}
+      onOpenNew={() => setScreen({ kind: "new" })}
+      onOpenDetail={(id) => setScreen({ kind: "detail", id })}
+    />
   );
 }
 
