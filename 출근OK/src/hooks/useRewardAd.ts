@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GoogleAdMob } from '@apps-in-toss/web-bridge';
 
-const REWARD_AD_GROUP_ID = ''; // 리워드 광고 ID (추후 입력)
+const REWARD_AD_GROUP_ID = 'ait.v2.live.becc31f22b064178';
 const UNLOCK_KEY = 'outfit_unlocked_date';
 
 function todayStr() {
