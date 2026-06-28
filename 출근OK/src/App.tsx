@@ -11,6 +11,8 @@ import { CompletionModal } from './components/CompletionModal';
 import { CalendarView } from './components/CalendarView';
 import { SettingsView } from './components/SettingsView';
 import { BottomNav } from './components/BottomNav';
+import { BannerAd } from './components/BannerAd';
+import { useRewardAd } from './hooks/useRewardAd';
 import { loadCity, saveCity, loadCommuteTime, saveCommuteTime, loadAlarmEnabled, loadAlarmTime } from './lib/storage';
 import { registerSW, scheduleAlarm } from './lib/alarm';
 import type { ViewType } from './types';
@@ -29,6 +31,7 @@ export default function App() {
   const [city, setCity] = useState(() => loadCity());
   const { weather, airQuality, loading, error, needsUmbrella, needsMask } = useWeather(city);
   const { streak, markComplete, isMilestone } = useStreak();
+  const { unlocked, watching, watchAd } = useRewardAd();
 
   const [view, setView] = useState<ViewType>('home');
   const [showModal, setShowModal] = useState(false);
@@ -127,7 +130,16 @@ export default function App() {
           </span>
         </header>
 
-        <WeatherCard city={city} weather={weather} airQuality={airQuality} loading={loading} error={error} />
+        <WeatherCard
+          city={city}
+          weather={weather}
+          airQuality={airQuality}
+          loading={loading}
+          error={error}
+          unlocked={unlocked}
+          watching={watching}
+          onWatchAd={watchAd}
+        />
         <WeatherTip needsUmbrella={needsUmbrella} needsMask={needsMask} airQuality={airQuality} />
 
         <Checklist
@@ -141,6 +153,7 @@ export default function App() {
         />
 
         <StreakFooter streak={streak.count} onCalendarClick={() => setView('calendar')} />
+        <BannerAd />
       </div>
     );
   };

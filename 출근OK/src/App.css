@@ -946,3 +946,77 @@ body { background: var(--toss-gray-100); }
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* ── 체감온도 ── */
+.weather-card__temps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.weather-card__feels {
+  font-size: 14px;
+  opacity: 0.75;
+  letter-spacing: -0.3px;
+}
+
+/* ── 리워드 잠금 해제 영역 ── */
+.weather-card__reward-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 12px;
+  padding: 11px 0;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.weather-card__reward-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.weather-card__reward-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.weather-card__detail {
+  margin-top: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.weather-card__detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  opacity: 0.92;
+}
+
+.weather-card__detail .weather-card__outfit {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── 배너 광고 ── */
+.banner-ad {
+  margin: 0 16px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  min-height: 50px;
+}

@@ -11,6 +11,14 @@ export const CITIES: Record<string, { lat: number; lon: number }> = {
   세종: { lat: 36.4801, lon: 127.2882 },
 };
 
+/** 체감온도 (바람냉각 지수, 기온 >= 10°C 이면 기온 그대로) */
+export function feelsLike(temp: number, windspeed: number): number {
+  if (temp >= 10) return temp;
+  return Math.round(
+    13.12 + 0.6215 * temp - 11.37 * Math.pow(windspeed, 0.16) + 0.3965 * temp * Math.pow(windspeed, 0.16)
+  );
+}
+
 /** 위도/경도로 가장 가까운 도시 이름 반환 */
 export function nearestCity(lat: number, lon: number): string {
   let best = '';
@@ -42,7 +50,7 @@ export async function fetchWeather(city: string): Promise<WeatherData> {
   const url =
     `https://api.open-meteo.com/v1/forecast` +
     `?latitude=${lat}&longitude=${lon}` +
-    `&current=temperature_2m,weather_code` +
+    `&current=temperature_2m,weather_code,wind_speed_10m` +
     `&daily=precipitation_probability_max` +
     `&timezone=Asia%2FSeoul&forecast_days=1`;
 
@@ -50,8 +58,11 @@ export async function fetchWeather(city: string): Promise<WeatherData> {
   if (!res.ok) throw new Error('날씨 API 실패');
   const data = await res.json();
 
+  const temp = Math.round(data.current.temperature_2m);
+  const wind = data.current.wind_speed_10m ?? 0;
   return {
-    temperature: Math.round(data.current.temperature_2m),
+    temperature: temp,
+    feelsLikeTemperature: feelsLike(temp, wind),
     precipitationProbability: data.daily.precipitation_probability_max[0] ?? 0,
     weatherCode: data.current.weather_code,
   };

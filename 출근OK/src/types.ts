@@ -8,6 +8,7 @@ export interface ChecklistItem {
 
 export interface WeatherData {
   temperature: number;
+  feelsLikeTemperature: number;
   precipitationProbability: number;
   weatherCode: number;
 }
