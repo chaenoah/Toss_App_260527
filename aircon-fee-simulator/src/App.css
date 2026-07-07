@@ -473,6 +473,149 @@ select.input {
   color: var(--gray2);
 }
 
+/* ── Report card (rewarded) ── */
+.report-card.locked {
+  background: linear-gradient(160deg, #fff8ec 0%, #ffffff 70%);
+  text-align: center;
+}
+.report-teaser {
+  margin: 0 0 16px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--gray);
+}
+.report-teaser b.danger {
+  color: var(--danger);
+}
+.report-teaser b.ok {
+  color: var(--ok);
+}
+.reward-btn {
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #ff9500, #ff7a00);
+  cursor: pointer;
+}
+.reward-btn:active {
+  transform: scale(0.98);
+}
+.reward-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.reward-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--gray2);
+}
+.report-block {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+.report-block:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+.report-block.last {
+  padding-bottom: 0;
+}
+.report-h {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray2);
+}
+.report-compare {
+  margin: 0;
+  font-size: 16px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.report-compare b.danger {
+  color: var(--danger);
+}
+.report-compare b.ok {
+  color: var(--ok);
+}
+.report-pill {
+  font-size: 13px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+.report-pill.danger {
+  background: #fff0f1;
+  color: var(--danger);
+}
+.report-pill.ok {
+  background: #eaf3ff;
+  color: var(--ok);
+}
+.brk-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.brk-label {
+  flex: 0 0 92px;
+  font-size: 13px;
+  color: var(--gray);
+}
+.brk-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.brk-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+.brk-fill.s1 {
+  background: var(--ok);
+}
+.brk-fill.s2 {
+  background: var(--warn);
+}
+.brk-fill.s3 {
+  background: var(--danger);
+}
+.brk-amt {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.report-best {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: var(--ink);
+}
+.report-best b {
+  color: #12b886;
+  font-weight: 800;
+}
+.report-tip {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--gray);
+}
+.report-tip b {
+  color: var(--ink);
+}
+
 /* ── Onboarding ── */
 .onboarding {
   min-height: 100vh;

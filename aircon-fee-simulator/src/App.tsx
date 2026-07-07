@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "./App.css";
 
 /* ────────────────────────────────────────────────────────────────────────
@@ -75,6 +75,28 @@ function nextTierInfo(usageKwh: number, tiers: Tier[]) {
   };
 }
 
+/** 누진 단계별 사용량·요금 분해 (리포트용) */
+function tierBreakdown(usageKwh: number, tiers: Tier[]) {
+  const usage = Math.max(0, usageKwh);
+  let prev = 0;
+  const out: { stage: number; kwh: number; amount: number }[] = [];
+  tiers.forEach((t, i) => {
+    if (usage > prev) {
+      const inTier = Math.min(usage, t.upTo) - prev;
+      out.push({ stage: i + 1, kwh: inTier, amount: inTier * t.price });
+      prev = t.upTo;
+    }
+  });
+  return out;
+}
+
+// 가구 월 사용량 평균(참고용 추정치) — 리포트의 '평균 대비' 비교에 사용
+const AVG_KWH = { summer: 350, normal: 280 };
+
+/* 리워드형 광고 그룹 ID — 앱인토스 콘솔에서 발급한 '리워드형' 광고 그룹 ID로 교체하세요.
+ * ⚠️ 테스트 중에는 반드시 '테스트용' 광고 ID를 사용하세요. 운영 ID로 테스트하면 제재 대상이에요. */
+const REWARDED_AD_GROUP_ID = "<REWARDED_AD_GROUP_ID>";
+
 /* ────────────────────────────────────────────────────────────────────────
  * 에어컨 소비량 추정
  * 프리셋의 kWh/h, 그리고 직접입력(냉방면적×타입)의 계수는 인버터 저전력 운전을
@@ -146,6 +168,8 @@ function loadSettings(): Settings {
 function App() {
   const [s, setS] = useState<Settings>(loadSettings);
   const [now, setNow] = useState(() => new Date());
+  const [reportUnlocked, setReportUnlocked] = useState(false);
+  const [adShowing, setAdShowing] = useState(false);
 
   // 날짜가 바뀌면 '오늘까지' 계산이 자동 갱신되도록 1분마다 시계 갱신
   useEffect(() => {
@@ -163,6 +187,57 @@ function App() {
 
   const set = <K extends keyof Settings>(key: K, value: Settings[K]) =>
     setS((prev) => ({ ...prev, [key]: value }));
+
+  // 리워드 광고 미리 불러오기 (토스 앱 등 지원 환경에서만)
+  useEffect(() => {
+    let cleanup: (() => void) | undefined;
+    (async () => {
+      try {
+        const { GoogleAdMob } = await import("@apps-in-toss/web-framework");
+        if (GoogleAdMob?.loadAppsInTossAdMob?.isSupported?.() !== true) return;
+        cleanup = GoogleAdMob.loadAppsInTossAdMob({
+          options: { adGroupId: REWARDED_AD_GROUP_ID },
+          onEvent: () => {},
+          onError: () => {},
+        });
+      } catch {
+        /* 미지원 환경 */
+      }
+    })();
+    return () => cleanup?.();
+  }, []);
+
+  // 리워드 광고 노출 → 시청 완료 시 맞춤 리포트 잠금 해제
+  const showRewardedAd = useCallback(() => {
+    setAdShowing(true);
+    (async () => {
+      try {
+        const { GoogleAdMob } = await import("@apps-in-toss/web-framework");
+        if (GoogleAdMob?.showAppsInTossAdMob?.isSupported?.() !== true) {
+          throw new Error("unsupported");
+        }
+        let earned = false;
+        GoogleAdMob.showAppsInTossAdMob({
+          options: { adGroupId: REWARDED_AD_GROUP_ID },
+          onEvent: (e) => {
+            if (e.type === "userEarnedReward") earned = true;
+            if (e.type === "dismissed") {
+              setAdShowing(false);
+              if (earned) setReportUnlocked(true);
+            }
+            if (e.type === "failedToShow") setAdShowing(false);
+          },
+          onError: () => setAdShowing(false),
+        });
+      } catch {
+        // 토스 앱 밖(브라우저)·미지원 환경: 광고 시청을 시뮬레이션한 뒤 보상 지급
+        setTimeout(() => {
+          setAdShowing(false);
+          setReportUnlocked(true);
+        }, 1500);
+      }
+    })();
+  }, []);
 
   const r = useMemo(() => {
     const month = now.getMonth() + 1;
@@ -212,6 +287,27 @@ function App() {
       estTotal - billIf(kwhPerHour * Math.max(0, s.hoursPerDay - 2)),
     );
 
+    // 맞춤 절약 리포트 (리워드 광고 보상)
+    const avgKwh = month === 7 || month === 8 ? AVG_KWH.summer : AVG_KWH.normal;
+    const avgBill = calcBill(avgKwh, tiers).total;
+    const diffPct = Math.round((bill.total / avgBill - 1) * 100);
+    const breakdown = tierBreakdown(projectedMonth, tiers);
+    const best =
+      saveTwoHour >= saveHour && saveTwoHour >= saveTemp
+        ? { label: "하루 2시간 덜 틀기", amount: saveTwoHour }
+        : saveHour >= saveTemp
+          ? { label: "하루 1시간 덜 틀기", amount: saveHour }
+          : { label: "설정온도 1℃ 올리기", amount: saveTemp };
+    const tier2Hours =
+      kwhPerHour > 0
+        ? Math.max(
+            0,
+            Math.floor(
+              (tiers[0].upTo - s.baselineKwh) / (kwhPerHour * cycle.totalDays),
+            ),
+          )
+        : 0;
+
     return {
       month,
       isSummer: month === 7 || month === 8,
@@ -233,6 +329,11 @@ function App() {
       saveHour,
       saveTwoHour,
       saveTemp,
+      avgBill,
+      diffPct,
+      breakdown,
+      best,
+      tier2Hours,
     };
   }, [s, now]);
 
@@ -355,6 +456,19 @@ function App() {
           예상 사용량 기준으로 이번 달 아낄 수 있는 금액이에요.
         </p>
       </section>
+
+      {/* 맞춤 절약 리포트 (리워드 광고 보상) */}
+      <ReportCard
+        unlocked={reportUnlocked}
+        showing={adShowing}
+        onWatch={showRewardedAd}
+        billTotal={r.bill.total}
+        avgBill={r.avgBill}
+        diffPct={r.diffPct}
+        breakdown={r.breakdown}
+        best={r.best}
+        tier2Hours={r.tier2Hours}
+      />
 
       {/* 예상 상세 */}
       <section className="card">
@@ -619,6 +733,99 @@ function SaveRow({
       </span>
       <span className="save-amount">{save > 0 ? `−${won(save)}` : "-"}</span>
     </div>
+  );
+}
+
+function ReportCard({
+  unlocked,
+  showing,
+  onWatch,
+  billTotal,
+  avgBill,
+  diffPct,
+  breakdown,
+  best,
+  tier2Hours,
+}: {
+  unlocked: boolean;
+  showing: boolean;
+  onWatch: () => void;
+  billTotal: number;
+  avgBill: number;
+  diffPct: number;
+  breakdown: { stage: number; kwh: number; amount: number }[];
+  best: { label: string; amount: number };
+  tier2Hours: number;
+}) {
+  const above = diffPct >= 0;
+  const diffText = above
+    ? `${diffPct}% 높아요`
+    : `${Math.abs(diffPct)}% 낮아요`;
+
+  if (!unlocked) {
+    return (
+      <section className="card report-card locked">
+        <h2 className="card-title">맞춤 절약 리포트 🔒</h2>
+        <p className="report-teaser">
+          우리집 요금은 평균보다{" "}
+          <b className={above ? "danger" : "ok"}>{diffText}</b>. 평균 비교 ·
+          단계별 요금 구성 · 맞춤 절약 액션을 확인해보세요.
+        </p>
+        <button className="reward-btn" onClick={onWatch} disabled={showing}>
+          {showing ? "광고 준비 중…" : "📺 광고 보고 무료로 열기"}
+        </button>
+        <p className="reward-note">광고를 끝까지 보면 리포트가 열려요.</p>
+      </section>
+    );
+  }
+
+  const maxAmt = Math.max(...breakdown.map((b) => b.amount), 1);
+  return (
+    <section className="card report-card">
+      <h2 className="card-title">맞춤 절약 리포트 ✨</h2>
+
+      <div className="report-block">
+        <p className="report-h">여름철 4인 가구 평균 대비</p>
+        <p className="report-compare">
+          평균 {won(avgBill)} → 우리집{" "}
+          <b className={above ? "danger" : "ok"}>{won(billTotal)}</b>
+          <span className={`report-pill ${above ? "danger" : "ok"}`}>
+            {above ? `+${diffPct}%` : `${diffPct}%`}
+          </span>
+        </p>
+      </div>
+
+      <div className="report-block">
+        <p className="report-h">누진 단계별 요금 구성</p>
+        {breakdown.map((b) => (
+          <div className="brk-row" key={b.stage}>
+            <span className="brk-label">
+              {b.stage}단계 · {b.kwh.toFixed(0)}kWh
+            </span>
+            <div className="brk-bar">
+              <div
+                className={`brk-fill s${b.stage}`}
+                style={{ width: `${(b.amount / maxAmt) * 100}%` }}
+              />
+            </div>
+            <span className="brk-amt">{won(b.amount)}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="report-block last">
+        <p className="report-h">지금 가장 효과적인 절약</p>
+        <p className="report-best">
+          🏆 {best.label} <b>−{won(best.amount)}</b>
+        </p>
+        {tier2Hours > 0 && (
+          <p className="report-tip">
+            💡 하루 <b>{tier2Hours}시간</b> 이하로 쓰면 누진 2단계를 유지할 수
+            있어요.
+          </p>
+        )}
+      </div>
+    </section>
   );
 }
 

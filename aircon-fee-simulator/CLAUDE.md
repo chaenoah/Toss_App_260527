@@ -13,6 +13,14 @@
 - **엔트리**: `src/main.tsx` → `src/App.tsx`
 - **스크립트**: `npm run dev`(granite dev) · `npm run build`(ait build) · `npm run deploy`(ait deploy) · `npm run lint` · `npm run format`
 
+## 출시 전 교체 체크리스트 (`src/App.tsx` 상단 상수)
+
+- `REWARDED_AD_GROUP_ID` — 콘솔에서 발급한 **리워드형 광고 그룹 ID**로 교체. **테스트 중엔 반드시 테스트용 ID** 사용(운영 ID로 테스트 시 제재).
+- `NORMAL_TIERS`/`SUMMER_TIERS`, `CLIMATE_CHARGE`, `FUEL_CHARGE`, `FUND_RATE` — 출시 시점 **한전 공식 요금표**로 재확인(요율은 개정됨).
+- `AC_PRESETS`/`PYEONG_FACTOR` — 대표 추정치. 실제 제품 스펙으로 보정 권장.
+- `AVG_KWH` — 평균 대비 비교용 참고 벤치마크(추정치).
+- `granite.config.ts`의 `brand.icon` — 배포 전 반드시 채우기.
+
 ## 앱인토스 필수 준수 사항
 
 - **iframe 사용 금지** — SDK 오동작 + 심사 반려 사유.
