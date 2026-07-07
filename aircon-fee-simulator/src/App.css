@@ -152,39 +152,142 @@
   color: var(--gray2);
   font-weight: 500;
 }
-.bar {
-  position: relative;
-  height: 12px;
-  background: var(--line);
-  border-radius: 999px;
-  overflow: hidden;
+/* ── Share button ── */
+.share-btn {
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--blue);
+  cursor: pointer;
 }
-.bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #3182f6, #4593fc);
-  border-radius: 999px;
-  transition: width 0.4s ease;
+.share-btn:active {
+  transform: scale(0.98);
 }
-.stage-card.warn .bar-fill {
-  background: linear-gradient(90deg, #ff9500, #ffb44d);
+
+/* ── Usage chart ── */
+.chart {
+  width: 100%;
+  height: auto;
+  display: block;
 }
-.stage-card.danger .bar-fill {
-  background: linear-gradient(90deg, #f04452, #ff6b76);
+.area-fill {
+  fill: rgba(49, 130, 246, 0.12);
 }
-.bar-mark {
-  position: absolute;
-  top: -2px;
-  width: 2px;
-  height: 16px;
-  background: #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+.line-solid {
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 2.5;
+  stroke-linecap: round;
 }
-.bar-legend {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 8px;
+.line-dashed {
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+  opacity: 0.55;
+  stroke-linecap: round;
+}
+.today-dot {
+  fill: var(--blue);
+  stroke: #fff;
+  stroke-width: 2;
+}
+.today-label {
+  fill: var(--ink);
   font-size: 11px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.tier-line {
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+.tier-line.warn {
+  stroke: var(--warn);
+}
+.tier-line.danger {
+  stroke: var(--danger);
+}
+.tier-label {
+  font-size: 11px;
+  font-weight: 700;
+}
+.tier-label.warn {
+  fill: var(--warn);
+}
+.tier-label.danger {
+  fill: var(--danger);
+}
+.tier-sub {
+  font-size: 9px;
+  fill: var(--gray2);
+}
+.cross-dot.warn {
+  fill: var(--warn);
+}
+.cross-dot.danger {
+  fill: var(--danger);
+}
+.cross-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.cross-label.warn {
+  fill: var(--warn);
+}
+.cross-label.danger {
+  fill: var(--danger);
+}
+.axis-label {
+  font-size: 10px;
+  fill: var(--gray2);
+}
+.axis-label.end {
+  text-anchor: end;
+}
+.chart-caption {
+  margin: 10px 2px 0;
+  font-size: 12px;
+  line-height: 1.5;
   color: var(--gray2);
+}
+
+/* ── Segment toggle ── */
+.segment {
+  display: flex;
+  gap: 6px;
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 4px;
+}
+.segment button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  border-radius: 9px;
+  padding: 11px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray);
+  cursor: pointer;
+}
+.segment button.on {
+  background: #fff;
+  color: var(--blue);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.est-note {
+  margin: -6px 0 16px;
+  font-size: 13px;
+  color: var(--gray);
+}
+.est-note b {
+  color: var(--blue);
 }
 .stage-msg {
   margin: 14px 0 0;

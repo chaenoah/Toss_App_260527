@@ -2,15 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 
 /* ────────────────────────────────────────────────────────────────────────
- * 한전 주택용 전력(저압) 누진 요금표 — 근사치
- * ⚠️ 단가·기본요금·부가 요금은 개정됩니다. 실제 서비스 전에 한전 공식 요금표
- *    또는 최근 고지서 기준으로 아래 상수를 반드시 갱신하세요.
+ * 한전 주택용 전력(저압) 요금표
+ * 누진 단가/기본요금: 2023-05-16 시행표 (2025년 현재 유효) — 출처 KEPCO
+ * 전력산업기반기금: 2025-07-01부터 2.7% (3.7% → 3.2% → 2.7% 단계 인하)
+ * ⚠️ 요율은 개정될 수 있어요. 출시 전 한전 공식 요금표로 아래 상수를 확인하세요.
  * ──────────────────────────────────────────────────────────────────────── */
-const RATE_AS_OF = "2024년 주택용 저압 기준 (근사치)";
+const RATE_AS_OF = "2025년 주택용 저압 기준";
 const CLIMATE_CHARGE = 9.0; // 기후환경요금 (원/kWh)
 const FUEL_CHARGE = 5.0; // 연료비조정요금 (원/kWh)
 const VAT_RATE = 0.1; // 부가가치세
-const FUND_RATE = 0.037; // 전력산업기반기금
+const FUND_RATE = 0.027; // 전력산업기반기금 (2025.7~)
 
 type Tier = { upTo: number; price: number; baseFee: number };
 
@@ -32,8 +33,8 @@ function tiersForMonth(month1to12: number): Tier[] {
 }
 
 /** 총 사용량(kWh) → 청구요금 상세 (누진 + 부가요금 + 세금) */
-function calcBill(kwh: number, tiers: Tier[]) {
-  const usage = Math.max(0, kwh);
+function calcBill(usageKwh: number, tiers: Tier[]) {
+  const usage = Math.max(0, usageKwh);
   let energy = 0;
   let prev = 0;
   let baseFee = tiers[0].baseFee;
@@ -55,14 +56,14 @@ function calcBill(kwh: number, tiers: Tier[]) {
 }
 
 /** 현재 누적 kWh 기준: 현재 단계 / 다음 단계까지 남은 kWh */
-function nextTierInfo(kwh: number, tiers: Tier[]) {
+function nextTierInfo(usageKwh: number, tiers: Tier[]) {
   for (let i = 0; i < tiers.length - 1; i++) {
-    if (kwh <= tiers[i].upTo) {
+    if (usageKwh <= tiers[i].upTo) {
       return {
         currentStage: i + 1,
         nextStage: i + 2,
         threshold: tiers[i].upTo,
-        remaining: Math.max(0, tiers[i].upTo - kwh),
+        remaining: Math.max(0, tiers[i].upTo - usageKwh),
       };
     }
   }
@@ -75,8 +76,9 @@ function nextTierInfo(kwh: number, tiers: Tier[]) {
 }
 
 /* ────────────────────────────────────────────────────────────────────────
- * 에어컨 프리셋 — 시간당 예상 소비량(kWh/h)은 인버터 저전력 운전을 감안한
- * '실사용 평균' 추정치입니다. 정속형은 더 높게 잡았습니다.
+ * 에어컨 소비량 추정
+ * 프리셋의 kWh/h, 그리고 직접입력(냉방면적×타입)의 계수는 인버터 저전력 운전을
+ * 감안한 '실사용 평균' 추정치입니다.
  * ──────────────────────────────────────────────────────────────────────── */
 type Preset = { id: string; label: string; kwhPerHour: number };
 const AC_PRESETS: Preset[] = [
@@ -87,6 +89,8 @@ const AC_PRESETS: Preset[] = [
   { id: "stand-23", label: "스탠드 · 23평형 (인버터)", kwhPerHour: 1.5 },
   { id: "fixed-old", label: "구형 정속형 (대형)", kwhPerHour: 1.8 },
 ];
+// 냉방면적(평)당 시간당 소비량 추정 계수
+const PYEONG_FACTOR = { inverter: 0.066, fixed: 0.1 } as const;
 
 /** 검침 시작일 기준 이번 청구주기의 일수 / 경과일 계산 */
 function billingCycle(today: Date, startDay: number) {
@@ -102,24 +106,30 @@ function billingCycle(today: Date, startDay: number) {
 }
 
 const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
-const kwh = (n: number) => `${n.toFixed(1)}kWh`;
+const kwhStr = (n: number) => `${n.toFixed(1)}kWh`;
 
 /* ────────────────────────── 설정(로컬 저장) ────────────────────────── */
 type Settings = {
+  specMode: "preset" | "custom";
   presetId: string;
+  areaPyeong: number; // 직접입력: 냉방면적(평)
+  acType: "inverter" | "fixed"; // 직접입력: 에어컨 타입
   hoursPerDay: number;
   baselineKwh: number; // 에어컨 제외 평상시 한 달 사용량
   startDay: number; // 검침 시작일
   measuredKwh: string; // 실측 보정(지금까지 실제 총 사용량). 빈 문자열=미사용
 };
 const DEFAULTS: Settings = {
+  specMode: "preset",
   presetId: "stand-15",
+  areaPyeong: 15,
+  acType: "inverter",
   hoursPerDay: 8,
   baselineKwh: 250,
   startDay: 1,
   measuredKwh: "",
 };
-const STORAGE_KEY = "aircon-fee-sim/v1";
+const STORAGE_KEY = "aircon-fee-sim/v2";
 
 function loadSettings(): Settings {
   try {
@@ -156,41 +166,42 @@ function App() {
     const month = now.getMonth() + 1;
     const tiers = tiersForMonth(month);
     const cycle = billingCycle(now, s.startDay);
-    const preset = AC_PRESETS.find((p) => p.id === s.presetId) ?? AC_PRESETS[2];
 
-    const acDailyKwh = preset.kwhPerHour * s.hoursPerDay;
+    const kwhPerHour =
+      s.specMode === "custom"
+        ? Math.max(0.2, s.areaPyeong * PYEONG_FACTOR[s.acType])
+        : (AC_PRESETS.find((p) => p.id === s.presetId) ?? AC_PRESETS[2])
+            .kwhPerHour;
+
+    const acDailyKwh = kwhPerHour * s.hoursPerDay;
     const baselineDaily = s.baselineKwh / cycle.totalDays;
+    const dailyTotal = acDailyKwh + baselineDaily;
 
-    // 지금까지 누적 (자동 추정)
-    const estSoFar = (acDailyKwh + baselineDaily) * cycle.elapsedDays;
-    // 실측 보정값이 있으면 그것을 '지금까지 총 사용량'으로 사용
+    // 지금까지 누적 (자동 추정) — 실측 보정값이 있으면 그 값 사용
+    const estSoFar = dailyTotal * cycle.elapsedDays;
     const measured = parseFloat(s.measuredKwh);
     const hasMeasured = !isNaN(measured) && measured >= 0;
     const totalSoFar = hasMeasured ? measured : estSoFar;
 
-    // 남은 일수만큼 (에어컨 + 평상시) 연장 → 월말 예상
+    // 남은 일수만큼 연장 → 월말 예상
     const remainDays = cycle.totalDays - cycle.elapsedDays;
-    const projectedMonth =
-      totalSoFar + (acDailyKwh + baselineDaily) * remainDays;
+    const projectedMonth = totalSoFar + dailyTotal * remainDays;
 
     const bill = calcBill(projectedMonth, tiers);
     const baselineOnlyBill = calcBill(s.baselineKwh, tiers); // 에어컨이 없었다면
     const acExtra = Math.max(0, bill.total - baselineOnlyBill.total);
 
-    const nt = nextTierInfo(totalSoFar, tiers); // 현재 누적 기준(2단계까지 남은 kWh)
+    const nt = nextTierInfo(totalSoFar, tiers); // 현재 누적 기준
     const projStage = nextTierInfo(projectedMonth, tiers).currentStage; // 월말 예상 단계
     const acDaysAccum = acDailyKwh * cycle.elapsedDays;
-
-    // 누진 구간 진행 막대 (현재 누적 vs 3단계 진입선)
-    const topThreshold = tiers[1].upTo; // 마지막 경계(=3단계 진입선)
-    const barPct = Math.min(100, (totalSoFar / topThreshold) * 100);
 
     return {
       month,
       isSummer: month === 7 || month === 8,
       cycle,
-      preset,
+      kwhPerHour,
       acDailyKwh,
+      dailyTotal,
       acDaysAccum,
       totalSoFar,
       projectedMonth,
@@ -198,22 +209,57 @@ function App() {
       acExtra,
       nt,
       projStage,
-      barPct,
       tiers,
+      t2: tiers[0].upTo,
+      t3: tiers[1].upTo,
       hasMeasured,
     };
   }, [s, now]);
 
-  const stageClass =
-    r.nt.currentStage >= 3 ? "danger" : r.nt.currentStage === 2 ? "warn" : "ok";
-  const projClass =
-    r.projStage >= 3 ? "danger" : r.projStage === 2 ? "warn" : "ok";
+  const stageClass = classFor(r.nt.currentStage);
+  const projClass = classFor(r.projStage);
+
+  const onShare = async () => {
+    const message =
+      `🌡️ 우리집 이번 달 예상 전기요금 ${won(r.bill.total)}\n` +
+      `에어컨 때문에 +${won(r.acExtra)} 😱 (이대로면 누진 ${r.projStage}단계)\n\n` +
+      `#에어컨요금시뮬레이터`;
+    try {
+      const mod = await import("@apps-in-toss/web-framework");
+      let text = message;
+      try {
+        const link = await mod.getTossShareLink(
+          "intoss://aircon-fee-simulator",
+        );
+        text = `${message}\n${link}`;
+      } catch {
+        /* 링크 생성 불가 시 텍스트만 공유 */
+      }
+      await mod.share({ message: text });
+    } catch {
+      // 토스 앱 밖(브라우저)에서는 웹 공유/클립보드로 폴백
+      if (navigator.share) {
+        try {
+          await navigator.share({ text: message });
+          return;
+        } catch {
+          /* 사용자 취소 등 */
+        }
+      }
+      try {
+        await navigator.clipboard.writeText(message);
+        alert("공유 문구를 복사했어요!");
+      } catch {
+        alert(message);
+      }
+    }
+  };
 
   return (
     <div className="app">
       <header className="hero">
         <p className="hero-eyebrow">
-          {r.month}월 {r.isSummer ? "· 여름 누진구간 확대 적용" : ""}
+          {r.month}월{r.isSummer ? " · 여름 누진구간 확대 적용" : ""}
         </p>
         <h1 className="hero-title">이번 달 예상 전기요금</h1>
         <p className={`hero-amount ${projClass}`}>{won(r.bill.total)}</p>
@@ -223,12 +269,16 @@ function App() {
         </p>
         <p className="hero-proj">
           이대로 가면 월말 <b className={projClass}>누진 {r.projStage}단계</b> ·{" "}
-          {kwh(r.projectedMonth)}
+          {kwhStr(r.projectedMonth)}
         </p>
         <div className="hero-extra">
           🔥 에어컨 때문에 <b>+{won(r.acExtra)}</b>
         </div>
       </header>
+
+      <button className="share-btn" onClick={onShare}>
+        📤 예상 요금 공유하기
+      </button>
 
       {/* 누진 단계 현황 */}
       <section className={`card stage-card ${stageClass}`}>
@@ -237,26 +287,14 @@ function App() {
             현재 누진 {r.nt.currentStage}단계
           </span>
           <span className="stage-kwh">
-            누적 {kwh(r.totalSoFar)}
+            누적 {kwhStr(r.totalSoFar)}
             {r.hasMeasured ? " · 실측" : " · 추정"}
           </span>
-        </div>
-        <div className="bar">
-          <div className="bar-fill" style={{ width: `${r.barPct}%` }} />
-          <span
-            className="bar-mark"
-            style={{ left: `${(r.tiers[0].upTo / r.tiers[1].upTo) * 100}%` }}
-          />
-        </div>
-        <div className="bar-legend">
-          <span>1단계</span>
-          <span>2단계 ({r.tiers[0].upTo}kWh)</span>
-          <span>3단계 ({r.tiers[1].upTo}kWh)</span>
         </div>
         {r.nt.nextStage ? (
           <p className="stage-msg">
             누진 <b>{r.nt.nextStage}단계</b> 진입까지{" "}
-            <b className={stageClass}>{kwh(r.nt.remaining)}</b> 남았어요
+            <b className={stageClass}>{kwhStr(r.nt.remaining)}</b> 남았어요
           </p>
         ) : (
           <p className="stage-msg danger">
@@ -265,12 +303,30 @@ function App() {
         )}
       </section>
 
+      {/* 일별 누적 사용량 그래프 */}
+      <section className="card">
+        <h2 className="card-title">이번 달 사용량 추이</h2>
+        <UsageChart
+          elapsedDays={r.cycle.elapsedDays}
+          totalDays={r.cycle.totalDays}
+          totalSoFar={r.totalSoFar}
+          projectedMonth={r.projectedMonth}
+          dailyTotal={r.dailyTotal}
+          t2={r.t2}
+          t3={r.t3}
+        />
+        <p className="chart-caption">
+          파란 실선 = 오늘까지, 점선 = 월말 예상. 가로선은 누진 2·3단계
+          진입선이에요.
+        </p>
+      </section>
+
       {/* 예상 상세 */}
       <section className="card">
         <h2 className="card-title">예상 상세</h2>
-        <Row label="월말 예상 사용량" value={kwh(r.projectedMonth)} />
-        <Row label="지금까지 에어컨 사용량" value={kwh(r.acDaysAccum)} />
-        <Row label="에어컨 하루 사용량" value={kwh(r.acDailyKwh)} />
+        <Row label="월말 예상 사용량" value={kwhStr(r.projectedMonth)} />
+        <Row label="지금까지 에어컨 사용량" value={kwhStr(r.acDaysAccum)} />
+        <Row label="에어컨 하루 사용량" value={kwhStr(r.acDailyKwh)} />
         <Row label="이번 청구주기" value={`${r.cycle.totalDays}일`} />
       </section>
 
@@ -278,20 +334,77 @@ function App() {
       <section className="card">
         <h2 className="card-title">내 정보 입력</h2>
 
-        <label className="field">
-          <span className="field-label">에어컨 종류</span>
-          <select
-            className="input"
-            value={s.presetId}
-            onChange={(e) => set("presetId", e.target.value)}
-          >
-            {AC_PRESETS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="field">
+          <span className="field-label">에어컨 정보</span>
+          <div className="segment">
+            <button
+              className={s.specMode === "preset" ? "on" : ""}
+              onClick={() => set("specMode", "preset")}
+            >
+              프리셋
+            </button>
+            <button
+              className={s.specMode === "custom" ? "on" : ""}
+              onClick={() => set("specMode", "custom")}
+            >
+              직접 입력
+            </button>
+          </div>
+        </div>
+
+        {s.specMode === "preset" ? (
+          <label className="field">
+            <span className="field-label">에어컨 종류</span>
+            <select
+              className="input"
+              value={s.presetId}
+              onChange={(e) => set("presetId", e.target.value)}
+            >
+              {AC_PRESETS.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <>
+            <label className="field">
+              <span className="field-label">냉방면적 (평)</span>
+              <input
+                className="input"
+                type="number"
+                inputMode="numeric"
+                min={3}
+                max={60}
+                value={s.areaPyeong}
+                onChange={(e) =>
+                  set("areaPyeong", Math.max(0, Number(e.target.value) || 0))
+                }
+              />
+            </label>
+            <div className="field">
+              <span className="field-label">에어컨 타입</span>
+              <div className="segment">
+                <button
+                  className={s.acType === "inverter" ? "on" : ""}
+                  onClick={() => set("acType", "inverter")}
+                >
+                  인버터
+                </button>
+                <button
+                  className={s.acType === "fixed" ? "on" : ""}
+                  onClick={() => set("acType", "fixed")}
+                >
+                  정속형
+                </button>
+              </div>
+            </div>
+            <p className="est-note">
+              추정 소비량 <b>{r.kwhPerHour.toFixed(2)}kWh/시간</b>
+            </p>
+          </>
+        )}
 
         <div className="field">
           <span className="field-label">하루 평균 사용시간</span>
@@ -374,6 +487,10 @@ function App() {
   );
 }
 
+function classFor(stage: number) {
+  return stage >= 3 ? "danger" : stage === 2 ? "warn" : "ok";
+}
+
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="row">
@@ -420,6 +537,123 @@ function Stepper({
         +
       </button>
     </div>
+  );
+}
+
+/* 일별 누적 사용량 면적 차트 (단일 시리즈 + 누진 경계선) */
+function UsageChart({
+  elapsedDays,
+  totalDays,
+  totalSoFar,
+  projectedMonth,
+  dailyTotal,
+  t2,
+  t3,
+}: {
+  elapsedDays: number;
+  totalDays: number;
+  totalSoFar: number;
+  projectedMonth: number;
+  dailyTotal: number;
+  t2: number;
+  t3: number;
+}) {
+  const W = 340;
+  const H = 200;
+  const ML = 8;
+  const MR = 52;
+  const MT = 16;
+  const MB = 26;
+  const PW = W - ML - MR;
+  const PH = H - MT - MB;
+  const yMax = Math.max(projectedMonth, t3) * 1.12;
+
+  const xOf = (day: number) => ML + (day / totalDays) * PW;
+  const yOf = (v: number) => MT + PH - (v / yMax) * PH;
+  const baseY = yOf(0);
+
+  // 누진 단계 진입일 (piecewise: 0→오늘 실선, 오늘→월말 점선)
+  const crossDay = (T: number): number | null => {
+    if (T <= 0) return 0;
+    if (T <= totalSoFar) {
+      return totalSoFar > 0 ? (T / totalSoFar) * elapsedDays : null;
+    }
+    if (T <= projectedMonth && dailyTotal > 0) {
+      return elapsedDays + (T - totalSoFar) / dailyTotal;
+    }
+    return null;
+  };
+
+  const solid = `M ${xOf(0)} ${yOf(0)} L ${xOf(elapsedDays)} ${yOf(totalSoFar)}`;
+  const area =
+    `M ${xOf(0)} ${baseY} L ${xOf(0)} ${yOf(0)} ` +
+    `L ${xOf(elapsedDays)} ${yOf(totalSoFar)} L ${xOf(elapsedDays)} ${baseY} Z`;
+  const dashed =
+    `M ${xOf(elapsedDays)} ${yOf(totalSoFar)} ` +
+    `L ${xOf(totalDays)} ${yOf(projectedMonth)}`;
+
+  const tierLine = (T: number, cls: string, label: string) => {
+    const y = yOf(T);
+    const cd = crossDay(T);
+    return (
+      <g key={label}>
+        <line
+          className={`tier-line ${cls}`}
+          x1={ML}
+          y1={y}
+          x2={ML + PW}
+          y2={y}
+        />
+        <text className={`tier-label ${cls}`} x={ML + PW + 6} y={y - 3}>
+          {label}
+        </text>
+        <text className="tier-sub" x={ML + PW + 6} y={y + 10}>
+          {T}kWh
+        </text>
+        {cd != null && cd >= 0 && cd <= totalDays && (
+          <>
+            <circle
+              className={`cross-dot ${cls}`}
+              cx={xOf(cd)}
+              cy={y}
+              r={3.5}
+            />
+            <text className={`cross-label ${cls}`} x={xOf(cd)} y={y - 7}>
+              {Math.ceil(cd)}일
+            </text>
+          </>
+        )}
+      </g>
+    );
+  };
+
+  return (
+    <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img">
+      <path className="area-fill" d={area} />
+      {tierLine(t3, "danger", "3단계")}
+      {tierLine(t2, "warn", "2단계")}
+      <path className="line-solid" d={solid} />
+      <path className="line-dashed" d={dashed} />
+      <circle
+        className="today-dot"
+        cx={xOf(elapsedDays)}
+        cy={yOf(totalSoFar)}
+        r={4.5}
+      />
+      <text
+        className="today-label"
+        x={xOf(elapsedDays)}
+        y={yOf(totalSoFar) - 9}
+      >
+        오늘
+      </text>
+      <text className="axis-label" x={ML} y={H - 8}>
+        1일
+      </text>
+      <text className="axis-label end" x={ML + PW} y={H - 8}>
+        {totalDays}일
+      </text>
+    </svg>
   );
 }
 
