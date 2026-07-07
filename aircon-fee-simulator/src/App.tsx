@@ -110,6 +110,7 @@ const kwhStr = (n: number) => `${n.toFixed(1)}kWh`;
 
 /* ────────────────────────── 설정(로컬 저장) ────────────────────────── */
 type Settings = {
+  onboarded: boolean; // 첫 실행 온보딩 완료 여부
   specMode: "preset" | "custom";
   presetId: string;
   areaPyeong: number; // 직접입력: 냉방면적(평)
@@ -120,6 +121,7 @@ type Settings = {
   measuredKwh: string; // 실측 보정(지금까지 실제 총 사용량). 빈 문자열=미사용
 };
 const DEFAULTS: Settings = {
+  onboarded: false,
   specMode: "preset",
   presetId: "stand-15",
   areaPyeong: 15,
@@ -195,6 +197,21 @@ function App() {
     const projStage = nextTierInfo(projectedMonth, tiers).currentStage; // 월말 예상 단계
     const acDaysAccum = acDailyKwh * cycle.elapsedDays;
 
+    // 절약 시뮬레이션 (추정 사용 기준 — 습관을 바꾸면 얼마나 아끼나)
+    const estMonth = s.baselineKwh + acDailyKwh * cycle.totalDays;
+    const estTotal = calcBill(estMonth, tiers).total;
+    const billIf = (acDaily: number) =>
+      calcBill(s.baselineKwh + acDaily * cycle.totalDays, tiers).total;
+    const saveHour = Math.max(
+      0,
+      estTotal - billIf(kwhPerHour * Math.max(0, s.hoursPerDay - 1)),
+    );
+    const saveTemp = Math.max(0, estTotal - billIf(acDailyKwh * 0.93)); // 설정온도 1℃↑ ≈ 냉방 7%↓
+    const saveTwoHour = Math.max(
+      0,
+      estTotal - billIf(kwhPerHour * Math.max(0, s.hoursPerDay - 2)),
+    );
+
     return {
       month,
       isSummer: month === 7 || month === 8,
@@ -213,6 +230,9 @@ function App() {
       t2: tiers[0].upTo,
       t3: tiers[1].upTo,
       hasMeasured,
+      saveHour,
+      saveTwoHour,
+      saveTemp,
     };
   }, [s, now]);
 
@@ -254,6 +274,10 @@ function App() {
       }
     }
   };
+
+  if (!s.onboarded) {
+    return <Onboarding s={s} set={set} onDone={() => set("onboarded", true)} />;
+  }
 
   return (
     <div className="app">
@@ -318,6 +342,17 @@ function App() {
         <p className="chart-caption">
           파란 실선 = 오늘까지, 점선 = 월말 예상. 가로선은 누진 2·3단계
           진입선이에요.
+        </p>
+      </section>
+
+      {/* 절약 시뮬레이션 */}
+      <section className="card savings-card">
+        <h2 className="card-title">이렇게 하면 아껴요 💰</h2>
+        <SaveRow icon="⏱️" label="하루 1시간 덜 틀기" save={r.saveHour} />
+        <SaveRow icon="⏱️" label="하루 2시간 덜 틀기" save={r.saveTwoHour} />
+        <SaveRow icon="🌡️" label="설정온도 1℃ 올리기" save={r.saveTemp} />
+        <p className="savings-note">
+          예상 사용량 기준으로 이번 달 아낄 수 있는 금액이에요.
         </p>
       </section>
 
@@ -474,7 +509,10 @@ function App() {
           </label>
         </details>
 
-        <button className="reset" onClick={() => setS(DEFAULTS)}>
+        <button
+          className="reset"
+          onClick={() => setS({ ...DEFAULTS, onboarded: true })}
+        >
           기본값으로 초기화
         </button>
       </section>
@@ -489,6 +527,99 @@ function App() {
 
 function classFor(stage: number) {
   return stage >= 3 ? "danger" : stage === 2 ? "warn" : "ok";
+}
+
+function Onboarding({
+  s,
+  set,
+  onDone,
+}: {
+  s: Settings;
+  set: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
+  onDone: () => void;
+}) {
+  return (
+    <div className="app onboarding">
+      <div className="onb-hero">
+        <div className="onb-emoji">🌡️❄️</div>
+        <h1 className="onb-title">{"우리집 에어컨 요금,\n미리 확인해요"}</h1>
+        <p className="onb-sub">
+          3가지만 입력하면 이번 달 예상 전기요금과 누진 단계를 알려드려요.
+        </p>
+      </div>
+
+      <div className="card">
+        <label className="field">
+          <span className="field-label">에어컨 종류</span>
+          <select
+            className="input"
+            value={s.presetId}
+            onChange={(e) => set("presetId", e.target.value)}
+          >
+            {AC_PRESETS.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <div className="field">
+          <span className="field-label">하루 평균 사용시간</span>
+          <Stepper
+            value={s.hoursPerDay}
+            min={0}
+            max={24}
+            step={1}
+            suffix="시간"
+            onChange={(v) => set("hoursPerDay", v)}
+          />
+        </div>
+
+        <label className="field last">
+          <span className="field-label">
+            지난달 사용량 (kWh){" "}
+            <em className="hint">고지서 참고 · 몰라도 대략</em>
+          </span>
+          <input
+            className="input"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            value={s.baselineKwh}
+            onChange={(e) => set("baselineKwh", Number(e.target.value) || 0)}
+          />
+        </label>
+      </div>
+
+      <button className="onb-cta" onClick={onDone}>
+        내 예상 요금 보기
+      </button>
+      <button className="onb-skip" onClick={onDone}>
+        나중에 설정할게요
+      </button>
+    </div>
+  );
+}
+
+function SaveRow({
+  icon,
+  label,
+  save,
+}: {
+  icon: string;
+  label: string;
+  save: number;
+}) {
+  return (
+    <div className="save-row">
+      <span className="save-label">
+        <span className="save-icon">{icon}</span>
+        {label}
+      </span>
+      <span className="save-amount">{save > 0 ? `−${won(save)}` : "-"}</span>
+    </div>
+  );
 }
 
 function Row({ label, value }: { label: string; value: string }) {

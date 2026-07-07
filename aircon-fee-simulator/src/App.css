@@ -436,3 +436,96 @@ select.input {
   line-height: 1.6;
   color: var(--gray2);
 }
+
+/* ── Savings card ── */
+.savings-card {
+  background: linear-gradient(160deg, #eefaf3 0%, #ffffff 70%);
+}
+.save-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.save-row:first-of-type {
+  border-top: none;
+}
+.save-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--ink);
+  font-weight: 500;
+}
+.save-icon {
+  font-size: 18px;
+}
+.save-amount {
+  font-size: 17px;
+  font-weight: 800;
+  color: #12b886;
+}
+.savings-note {
+  margin: 10px 2px 0;
+  font-size: 12px;
+  color: var(--gray2);
+}
+
+/* ── Onboarding ── */
+.onboarding {
+  min-height: 100vh;
+  justify-content: center;
+  gap: 16px;
+}
+.onb-hero {
+  text-align: center;
+  padding: 12px 8px 4px;
+}
+.onb-emoji {
+  font-size: 44px;
+  margin-bottom: 12px;
+}
+.onb-title {
+  margin: 0 0 12px;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  white-space: pre-line;
+}
+.onb-sub {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--gray);
+}
+.field.last {
+  margin-bottom: 0;
+}
+.onb-cta {
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  padding: 18px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--blue);
+  cursor: pointer;
+}
+.onb-cta:active {
+  transform: scale(0.98);
+}
+.onb-skip {
+  width: 100%;
+  border: none;
+  background: none;
+  color: var(--gray2);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 4px;
+  cursor: pointer;
+}
