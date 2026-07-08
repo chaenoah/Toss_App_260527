@@ -7,7 +7,7 @@
 - **패키지 매니저**: npm
 - **설정 파일**: `granite.config.ts`
   - `appName`: 콘솔에 등록하는 영문 식별자 (`airconbill`)
-  - `brand.displayName`: 화면에 노출되는 한글 이름 (`에어컨 요금 얼마?`)
+  - `brand.displayName`: 화면에 노출되는 한글 이름 (`에어컨 전기 요금 얼마?`) — **콘솔 앱 정보등록 이름과 정확히 일치해야 함**(불일치 시 반려)
   - `brand.icon`: 아이콘 이미지 URL (설정됨)
   - `permissions`: 사용하는 디바이스 권한을 명시 (기본 `[]`)
 - **엔트리**: `src/main.tsx` → `src/App.tsx`
