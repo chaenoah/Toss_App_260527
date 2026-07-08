@@ -93,9 +93,9 @@ function tierBreakdown(usageKwh: number, tiers: Tier[]) {
 // 가구 월 사용량 평균(참고용 추정치) — 리포트의 '평균 대비' 비교에 사용
 const AVG_KWH = { summer: 350, normal: 280 };
 
-/* 리워드형 광고 그룹 ID — 앱인토스 콘솔에서 발급한 '리워드형' 광고 그룹 ID로 교체하세요.
- * ⚠️ 테스트 중에는 반드시 '테스트용' 광고 ID를 사용하세요. 운영 ID로 테스트하면 제재 대상이에요. */
-const REWARDED_AD_GROUP_ID = "<REWARDED_AD_GROUP_ID>";
+/* 리워드형 광고 그룹 ID (앱인토스 콘솔 발급, 운영/라이브).
+ * ⚠️ 이건 운영 ID예요. 실기기 테스트 시 광고를 반복 클릭하면 무효 트래픽으로 제재될 수 있어요. */
+const REWARDED_AD_GROUP_ID = "ait.v2.live.fa632ebad4b84cf3";
 
 /* ────────────────────────────────────────────────────────────────────────
  * 에어컨 소비량 추정

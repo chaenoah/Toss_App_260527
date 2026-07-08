@@ -15,7 +15,7 @@
 
 ## 출시 전 교체 체크리스트 (`src/App.tsx` 상단 상수)
 
-- `REWARDED_AD_GROUP_ID` — 콘솔에서 발급한 **리워드형 광고 그룹 ID**로 교체. **테스트 중엔 반드시 테스트용 ID** 사용(운영 ID로 테스트 시 제재).
+- `REWARDED_AD_GROUP_ID` — 설정됨(운영/라이브: `ait.v2.live.…`). **실기기 테스트 시 광고 반복 클릭 금지**(무효 트래픽 제재 소지).
 - `NORMAL_TIERS`/`SUMMER_TIERS`, `CLIMATE_CHARGE`, `FUEL_CHARGE`, `FUND_RATE` — 출시 시점 **한전 공식 요금표**로 재확인(요율은 개정됨).
 - `AC_PRESETS`/`PYEONG_FACTOR` — 대표 추정치. 실제 제품 스펙으로 보정 권장.
 - `AVG_KWH` — 평균 대비 비교용 참고 벤치마크(추정치).
