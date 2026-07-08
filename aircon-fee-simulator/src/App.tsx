@@ -349,9 +349,7 @@ function App() {
       const mod = await import("@apps-in-toss/web-framework");
       let text = message;
       try {
-        const link = await mod.getTossShareLink(
-          "intoss://aircon-fee-simulator",
-        );
+        const link = await mod.getTossShareLink("intoss://airconbill");
         text = `${message}\n${link}`;
       } catch {
         /* 링크 생성 불가 시 텍스트만 공유 */

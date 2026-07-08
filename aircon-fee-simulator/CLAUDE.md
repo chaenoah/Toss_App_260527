@@ -6,9 +6,9 @@
 
 - **패키지 매니저**: npm
 - **설정 파일**: `granite.config.ts`
-  - `appName`: 콘솔에 등록하는 영문 식별자 (`aircon-fee-simulator`)
-  - `brand.displayName`: 화면에 노출되는 한글 이름 (`에어컨 요금 시뮬레이터`)
-  - `brand.icon`: 배포 전 **반드시 채울 것** (비어 있으면 QR/실기기 테스트에서 오류가 잦음)
+  - `appName`: 콘솔에 등록하는 영문 식별자 (`airconbill`)
+  - `brand.displayName`: 화면에 노출되는 한글 이름 (`에어컨 요금 얼마?`)
+  - `brand.icon`: 아이콘 이미지 URL (설정됨)
   - `permissions`: 사용하는 디바이스 권한을 명시 (기본 `[]`)
 - **엔트리**: `src/main.tsx` → `src/App.tsx`
 - **스크립트**: `npm run dev`(granite dev) · `npm run build`(ait build) · `npm run deploy`(ait deploy) · `npm run lint` · `npm run format`
