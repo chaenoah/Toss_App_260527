@@ -7,12 +7,13 @@ interface Props {
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
   onAdd: (label: string) => void;
+  // 필수 항목 기준 진행률 (완료 게이트와 시각적으로 일치)
   checkedCount: number;
   total: number;
-  allChecked: boolean;
+  done: boolean;
 }
 
-export function Checklist({ items, onToggle, onRemove, onAdd, checkedCount, total, allChecked }: Props) {
+export function Checklist({ items, onToggle, onRemove, onAdd, checkedCount, total, done }: Props) {
   const [inputVal, setInputVal] = useState('');
   const pct = total > 0 ? (checkedCount / total) * 100 : 0;
 
@@ -23,17 +24,17 @@ export function Checklist({ items, onToggle, onRemove, onAdd, checkedCount, tota
   }
 
   return (
-    <div className={`checklist ${allChecked ? 'checklist--done' : ''}`}>
+    <div className={`checklist ${done ? 'checklist--done' : ''}`}>
       <div className="checklist__header">
         <span className="checklist__title">출근 준비물</span>
-        <span className={`checklist__progress ${allChecked ? 'checklist__progress--done' : ''}`}>
-          {checkedCount}/{total}
+        <span className={`checklist__progress ${done ? 'checklist__progress--done' : ''}`}>
+          필수 {checkedCount}/{total}
         </span>
       </div>
 
       <div className="checklist__progress-bar">
         <div
-          className={`checklist__progress-fill ${allChecked ? 'checklist__progress-fill--done' : ''}`}
+          className={`checklist__progress-fill ${done ? 'checklist__progress-fill--done' : ''}`}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -49,9 +50,9 @@ export function Checklist({ items, onToggle, onRemove, onAdd, checkedCount, tota
         ))}
       </div>
 
-      {allChecked && (
+      {done && (
         <div className="checklist__done-banner">
-          ✅ 출근 준비 완료! 오늘도 화이팅이에요
+          ✅ 필수 준비물 완료! 오늘도 출근 OK 🫡
         </div>
       )}
 

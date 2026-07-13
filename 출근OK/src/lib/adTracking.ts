@@ -56,6 +56,23 @@ export function trackAd(kind: AdKind, stage: AdStage, extra?: Extra): void {
   }
 }
 
+/**
+ * 광고 외 앱 이벤트 트래킹 (체크리스트 완료 도달, 스트릭 보험 사용,
+ * 공유 리워드 발송 등). 앱인토스 콘솔에서 log_name으로 집계 가능.
+ */
+export function trackEvent(name: string, extra?: Extra): void {
+  const payload = {
+    log_name: name,
+    ad_platform: getAdPlatform(),
+    ...extra,
+  };
+  try {
+    void Analytics.impression(payload);
+  } catch {
+    /* 무시 */
+  }
+}
+
 /** Error/unknown → 안전한 문자열 */
 export function errMessage(err: unknown): string {
   if (err instanceof Error) return err.message;

@@ -4,8 +4,13 @@ import { trackAd, errMessage } from '../lib/adTracking';
 
 const INTERSTITIAL_AD_GROUP_ID = 'ait.v2.live.8898421fe1154a09';
 
-/** 노출 직전 로드 대기 상한 (유저를 오래 붙잡지 않도록 짧게) */
-const MAX_WAIT_MS = 1500;
+/**
+ * 노출 직전 로드 대기 상한.
+ * 광고는 앱 진입 시점부터 세션 내내 프리로드되므로 완료 시점엔 대부분 이미 로드됨.
+ * "유저를 광고 로드로 붙잡지 않는다"는 원칙에 따라 짧은 유예(800ms)만 두고,
+ * 그 안에 로드가 안 되면 노출을 스킵한다.
+ */
+const MAX_WAIT_MS = 800;
 const POLL_MS = 150;
 
 /**

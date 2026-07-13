@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { getCompletionCopy, getMilestoneCopy, getShareCopy } from '../lib/copy';
+import { shareWithReward } from '../lib/shareReward';
 
 interface Props {
   streak: number;
@@ -17,13 +18,7 @@ export function CompletionModal({ streak, isMilestone, onClose }: Props) {
 
   function handleShare() {
     const text = `${getShareCopy(streak)}\n\n#출근OK #직장인 #개근챌린지`;
-    if (navigator.share) {
-      navigator.share({ title: '출근 OK', text }).catch(() => {});
-    } else {
-      navigator.clipboard
-        .writeText(text)
-        .then(() => alert('클립보드에 복사됐어요 📋'));
-    }
+    void shareWithReward(text);
   }
 
   return (

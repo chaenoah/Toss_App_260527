@@ -7,13 +7,16 @@ const KEYS = {
   COMMUTE_TIME: 'chulgeun_ok_commute_time',
   ALARM_ENABLED: 'chulgeun_ok_alarm_enabled',
   ALARM_TIME: 'chulgeun_ok_alarm_time',
+  INSURANCE_USES: 'chulgeun_ok_insurance_uses',
 } as const;
 
+// 완료 문턱을 낮춰 전면광고 노출률을 높이기 위해 필수 항목을 3개(지갑·핸드폰·사원증)로 축소.
+// 나머지는 모두 선택 항목 — 필수 3개만 체크해도 "출근 OK(완료)"로 판정됨.
 export const DEFAULT_ITEMS = [
   { id: 'wallet', label: '지갑', required: true },
   { id: 'phone', label: '핸드폰', required: true },
   { id: 'id_card', label: '사원증', required: true },
-  { id: 'transit', label: '교통카드', required: true },
+  { id: 'transit', label: '교통카드', required: false },
   { id: 'mask', label: '마스크', required: false },
   { id: 'earphone', label: '이어폰', required: false },
   { id: 'charger', label: '충전기', required: false },
@@ -98,4 +101,25 @@ export function loadAlarmTime(): string {
 
 export function saveAlarmTime(time: string): void {
   localStorage.setItem(KEYS.ALARM_TIME, time);
+}
+
+// ── 스트릭 보험 사용 이력 (월 2회 제한) ──
+export function loadInsuranceUses(): string[] {
+  try {
+    const raw = localStorage.getItem(KEYS.INSURANCE_USES);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    /* ignore */
+  }
+  return [];
+}
+
+export function saveInsuranceUses(uses: string[]): void {
+  localStorage.setItem(KEYS.INSURANCE_USES, JSON.stringify(uses));
+}
+
+/** 이번 달(YYYY-MM) 스트릭 보험 사용 횟수 */
+export function insuranceUsesThisMonth(): number {
+  const month = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+  return loadInsuranceUses().filter((d) => d.startsWith(month)).length;
 }

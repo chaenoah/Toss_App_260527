@@ -145,8 +145,13 @@ export function useChecklist() {
 
   const allChecked =
     state.items.length > 0 && state.items.every((i) => i.checked);
-  const requiredAllChecked =
-    state.items.filter((i) => i.required).every((i) => i.checked);
+
+  // 완료(출근 OK) 판정 = 필수 항목 전부 체크. 선택 항목은 완료 게이트에 영향 없음.
+  const requiredItems = state.items.filter((i) => i.required);
+  const requiredTotal = requiredItems.length;
+  const requiredChecked = requiredItems.filter((i) => i.checked).length;
+  const requiredAllChecked = requiredTotal > 0 && requiredChecked === requiredTotal;
+
   const checkedCount = state.items.filter((i) => i.checked).length;
 
   return {
@@ -160,6 +165,8 @@ export function useChecklist() {
     moveItem,
     allChecked,
     requiredAllChecked,
+    requiredChecked,
+    requiredTotal,
     checkedCount,
     total: state.items.length,
   };

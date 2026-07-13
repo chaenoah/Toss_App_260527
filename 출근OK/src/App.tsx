@@ -11,10 +11,13 @@ import { CalendarView } from './components/CalendarView';
 import { SettingsView } from './components/SettingsView';
 import { BottomNav } from './components/BottomNav';
 import { BannerAd } from './components/BannerAd';
+import { StreakInsuranceCard } from './components/StreakInsuranceCard';
 import { useRewardAd } from './hooks/useRewardAd';
 import { useInterstitialAd } from './hooks/useInterstitialAd';
+import { useStreakInsurance } from './hooks/useStreakInsurance';
 import { loadCity, saveCity, loadCommuteTime, saveCommuteTime, loadAlarmEnabled, loadAlarmTime } from './lib/storage';
 import { registerSW, scheduleAlarm } from './lib/alarm';
+import { trackEvent } from './lib/adTracking';
 import type { ViewType } from './types';
 import './App.css';
 
@@ -23,14 +26,15 @@ export default function App() {
     items, toggle, addItem, removeItem,
     syncUmbrella, syncMask,
     toggleRequired, moveItem,
-    allChecked, checkedCount, total,
+    requiredAllChecked, requiredChecked, requiredTotal,
   } = useChecklist();
 
   const [city, setCity] = useState(() => loadCity());
   const { weather, airQuality, loading, error, needsUmbrella, needsMask } = useWeather(city);
-  const { streak, markComplete, isMilestone } = useStreak();
+  const { streak, markComplete, restoreStreak, isMilestone } = useStreak();
   const { unlocked, watching, watchAd } = useRewardAd();
   const { showIfReady } = useInterstitialAd(); // 앱 진입 시 전면광고 프리로드 + 노출 제어
+  const insurance = useStreakInsurance(streak, restoreStreak); // 스트릭 보험
 
   const [view, setView] = useState<ViewType>('home');
   const [showModal, setShowModal] = useState(false);
@@ -53,17 +57,20 @@ export default function App() {
   }, [needsUmbrella, needsMask, loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (allChecked && !modalShownToday) {
+    if (requiredAllChecked && !modalShownToday) {
       markComplete();
       const today = new Date().toISOString().slice(0, 10);
       localStorage.setItem('modal_shown_date', today);
       setModalShownToday(true);
 
-      // 전면광고 노출 시도(로드돼 있으면 즉시, 아니면 최대 1.5초 대기 후 스킵).
+      // 체크리스트 완료 도달 트래킹 (전면광고 노출 퍼널의 상단 지표)
+      trackEvent('checklist_completed', { streak: streak.count });
+
+      // 전면광고 노출 시도(로드돼 있으면 즉시, 아니면 최대 800ms 대기 후 스킵).
       // 광고 흐름이 끝나거나 스킵되면 완료 모달을 띄움.
       showIfReady().finally(() => setShowModal(true));
     }
-  }, [allChecked]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [requiredAllChecked]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleCityChange(c: string) {
     saveCity(c);
@@ -122,14 +129,24 @@ export default function App() {
         />
         <WeatherTip needsUmbrella={needsUmbrella} needsMask={needsMask} airQuality={airQuality} />
 
+        {insurance.canUse && (
+          <StreakInsuranceCard
+            streak={streak.count}
+            usesThisMonth={insurance.usesThisMonth}
+            monthlyLimit={insurance.monthlyLimit}
+            watching={insurance.watching}
+            onProtect={insurance.watchToProtect}
+          />
+        )}
+
         <Checklist
           items={items}
           onToggle={toggle}
           onRemove={removeItem}
           onAdd={addItem}
-          checkedCount={checkedCount}
-          total={total}
-          allChecked={allChecked}
+          checkedCount={requiredChecked}
+          total={requiredTotal}
+          done={requiredAllChecked}
         />
 
         <StreakFooter streak={streak.count} onCalendarClick={() => setView('calendar')} />

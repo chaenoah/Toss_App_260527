@@ -1020,3 +1020,42 @@ body { background: var(--toss-gray-100); }
   overflow: hidden;
   min-height: 50px;
 }
+
+/* ── 스트릭 보험 카드 ── */
+.streak-insurance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 16px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #fff4e5, #ffe9d6);
+  border: 1px solid #ffd7ac;
+  border-radius: var(--radius);
+}
+.streak-insurance__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #b45309;
+  margin-bottom: 2px;
+}
+.streak-insurance__desc {
+  font-size: 12px;
+  color: #a16207;
+}
+.streak-insurance__btn {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: #f97316;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+.streak-insurance__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
