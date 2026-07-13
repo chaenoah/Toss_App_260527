@@ -2,18 +2,22 @@ import { useEffect, useRef, useState } from "react";
 import type { Fortune } from "../logic/fortuneEngine";
 import { saveImage, shareMessage } from "../sdk";
 import { track } from "../utils/eventTracking";
+import { grantShareRewardOncePerDay } from "../logic/bokjumeoni";
 
 interface Props {
   fortune: Fortune;
+  /** 공유 보상으로 복주머니를 받으면 호출돼요 (부모가 개수 갱신). */
+  onReward?: (count: number) => void;
 }
 
 const SIZE = 1080; // 1:1 정사각형 (인스타/카톡 공유 최적화)
 const APP_NAME = "오늘의 재물운 자판기";
 
 /** 결과를 1:1 이미지 카드로 렌더링하고, 공유/저장 버튼을 제공해요. */
-export function ShareCard({ fortune }: Props) {
+export function ShareCard({ fortune, onReward }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [preview, setPreview] = useState<string>("");
+  const [toast, setToast] = useState<string>("");
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -30,7 +34,16 @@ export function ShareCard({ fortune }: Props) {
 
   const handleShare = async () => {
     const ok = await shareMessage(shareText);
-    if (ok) track("card_shared", { score: fortune.score, sipsin: fortune.sipsin });
+    if (!ok) return;
+    track("card_shared", { score: fortune.score, sipsin: fortune.sipsin });
+    // 공유 보상: 하루 1회 복주머니 +1
+    const { granted, count } = await grantShareRewardOncePerDay();
+    if (granted) {
+      track("share_reward_granted", { count });
+      onReward?.(count);
+      setToast("복주머니 +1 🧧");
+      window.setTimeout(() => setToast(""), 2000);
+    }
   };
 
   const handleSave = async () => {
@@ -59,6 +72,7 @@ export function ShareCard({ fortune }: Props) {
           이미지 저장
         </button>
       </div>
+      {toast && <div className="toast">{toast}</div>}
     </div>
   );
 }

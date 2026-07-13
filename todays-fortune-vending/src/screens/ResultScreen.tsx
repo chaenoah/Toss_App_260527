@@ -4,8 +4,9 @@ import { ShareCard } from "../components/ShareCard";
 import { BadgeCelebration } from "../components/BadgeCelebration";
 import { useInterstitialAd } from "../hooks/useInterstitialAd";
 import { useRewardAd } from "../hooks/useRewardAd";
-import { track } from "../utils/eventTracking";
+import { track, trackScreen } from "../utils/eventTracking";
 import { haptic } from "../sdk";
+import { getBokjumeoni, spendBokjumeoni } from "../logic/bokjumeoni";
 
 interface Props {
   fortune: Fortune;
@@ -14,19 +15,44 @@ interface Props {
   onHome: () => void;
 }
 
-/** 결과 화면: 점수 + 코멘트 + 소비 처방 + 공유 카드 + 복주머니(리워드). */
+/** 결과 화면: 점수 + 코멘트 + 소비 처방 + 공유 카드 + 복주머니(리워드/복주머니 해제). */
 export function ResultScreen({ fortune, newBadge, onHome }: Props) {
   const { maybeShowInterstitial } = useInterstitialAd();
   const { showRewardedAd } = useRewardAd();
   const [detailUnlocked, setDetailUnlocked] = useState(false);
   const [loadingAd, setLoadingAd] = useState(false);
+  const [bok, setBok] = useState(0);
 
-  // 결과 진입 시 전면 광고 1회(빈도 제한 적용).
+  // 결과 진입 시 전면 광고 1회(빈도 제한) + 화면 트래킹
   useEffect(() => {
+    trackScreen("result");
     void maybeShowInterstitial();
   }, [maybeShowInterstitial]);
 
+  // 복주머니 보유 개수 로드
+  useEffect(() => {
+    let alive = true;
+    getBokjumeoni().then((c) => {
+      if (alive) setBok(c);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const unlockDetail = async () => {
+    // 복주머니가 있으면 광고 없이 사용, 없으면 리워드 광고를 봐요.
+    if (bok > 0) {
+      const ok = await spendBokjumeoni(1);
+      if (ok) {
+        setBok((b) => b - 1);
+        setDetailUnlocked(true);
+        haptic("confetti");
+        track("bokjumeoni_spent");
+        track("detail_report_unlocked", { method: "bokjumeoni" });
+        return;
+      }
+    }
     setLoadingAd(true);
     haptic("tap");
     const rewarded = await showRewardedAd();
@@ -34,14 +60,21 @@ export function ResultScreen({ fortune, newBadge, onHome }: Props) {
     if (rewarded) {
       setDetailUnlocked(true);
       haptic("confetti");
-      track("detail_report_unlocked", { score: fortune.score });
+      track("detail_report_unlocked", { method: "ad" });
     }
   };
+
+  const unlockLabel = loadingAd
+    ? "복주머니 여는 중…"
+    : bok > 0
+      ? `🧧 복주머니로 열기 (보유 ${bok})`
+      : "🧧 복주머니 더 열어보기";
 
   return (
     <div className="screen">
       <div className="result">
         {newBadge && <BadgeCelebration badge={newBadge} />}
+
         <div className="result-emoji">{fortune.emoji}</div>
         <div className="result-grade">{fortune.grade}</div>
 
@@ -81,7 +114,7 @@ export function ResultScreen({ fortune, newBadge, onHome }: Props) {
           </div>
         </div>
 
-        <ShareCard fortune={fortune} />
+        <ShareCard fortune={fortune} onReward={(c) => setBok(c)} />
 
         {detailUnlocked ? (
           <div className="detail-report">
@@ -95,7 +128,7 @@ export function ResultScreen({ fortune, newBadge, onHome }: Props) {
           </div>
         ) : (
           <button className="btn btn-gold block" onClick={unlockDetail} disabled={loadingAd}>
-            {loadingAd ? "복주머니 여는 중…" : "🧧 복주머니 더 열어보기"}
+            {unlockLabel}
           </button>
         )}
 

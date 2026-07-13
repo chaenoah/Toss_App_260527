@@ -4,6 +4,7 @@ import { OnboardingScreen } from "./screens/OnboardingScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { SlotMachineScreen } from "./screens/SlotMachineScreen";
 import { ResultScreen } from "./screens/ResultScreen";
+import { WeekendSummaryScreen } from "./screens/WeekendSummaryScreen";
 import { RecoveryModal } from "./components/RecoveryModal";
 import { getFortune, type Fortune } from "./logic/fortuneEngine";
 import {
@@ -22,7 +23,7 @@ import { track } from "./utils/eventTracking";
 
 const BIRTH_KEY = "birthdate";
 
-type Phase = "loading" | "onboarding" | "home" | "slot" | "result";
+type Phase = "loading" | "onboarding" | "home" | "slot" | "result" | "weekend";
 
 function App() {
   const [phase, setPhase] = useState<Phase>("loading");
@@ -103,6 +104,7 @@ function App() {
             streak={record.streak}
             drawnToday={hasDrawnToday(record)}
             onDraw={startDraw}
+            onWeekend={() => setPhase("weekend")}
           />
           {showRecovery && (
             <RecoveryModal
@@ -115,6 +117,10 @@ function App() {
       );
     case "slot":
       return <SlotMachineScreen onDone={finishDraw} />;
+    case "weekend":
+      return birth ? (
+        <WeekendSummaryScreen birth={birth} onHome={goHome} />
+      ) : null;
     case "result":
       return fortune ? (
         <ResultScreen

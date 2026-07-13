@@ -22,3 +22,25 @@ export function isWeekend(key: string): boolean {
   const day = new Date(y, m - 1, d).getDay();
   return day === 0 || day === 6;
 }
+
+const WEEKDAY = ["일", "월", "화", "수", "목", "금", "토"];
+
+/** 'YYYY-MM-DD' 의 요일 한 글자 (일~토) */
+export function weekdayLabel(key: string): string {
+  const [y, m, d] = key.split("-").map(Number);
+  return WEEKDAY[new Date(y, m - 1, d).getDay()];
+}
+
+/** 해당 날짜가 속한 주(월~일)의 7개 날짜 키 배열 */
+export function weekDates(key: string = dateKey()): string[] {
+  const [y, m, d] = key.split("-").map(Number);
+  const base = new Date(y, m - 1, d);
+  const backToMon = (base.getDay() + 6) % 7; // 월요일까지 되돌리는 일수
+  const mon = new Date(base);
+  mon.setDate(base.getDate() - backToMon);
+  return Array.from({ length: 7 }, (_, i) => {
+    const dt = new Date(mon);
+    dt.setDate(mon.getDate() + i);
+    return dateKey(dt);
+  });
+}
