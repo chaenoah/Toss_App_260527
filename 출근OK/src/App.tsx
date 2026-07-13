@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
-import { loadFullScreenAd, showFullScreenAd } from '@apps-in-toss/web-bridge';
+import { useEffect, useState } from 'react';
 import { useChecklist } from './hooks/useChecklist';
 import { useWeather } from './hooks/useWeather';
 import { useStreak } from './hooks/useStreak';
@@ -13,12 +12,11 @@ import { SettingsView } from './components/SettingsView';
 import { BottomNav } from './components/BottomNav';
 import { BannerAd } from './components/BannerAd';
 import { useRewardAd } from './hooks/useRewardAd';
+import { useInterstitialAd } from './hooks/useInterstitialAd';
 import { loadCity, saveCity, loadCommuteTime, saveCommuteTime, loadAlarmEnabled, loadAlarmTime } from './lib/storage';
 import { registerSW, scheduleAlarm } from './lib/alarm';
 import type { ViewType } from './types';
 import './App.css';
-
-const AD_GROUP_ID = 'ait.v2.live.8898421fe1154a09';
 
 export default function App() {
   const {
@@ -32,6 +30,7 @@ export default function App() {
   const { weather, airQuality, loading, error, needsUmbrella, needsMask } = useWeather(city);
   const { streak, markComplete, isMilestone } = useStreak();
   const { unlocked, watching, watchAd } = useRewardAd();
+  const { showIfReady } = useInterstitialAd(); // 앱 진입 시 전면광고 프리로드 + 노출 제어
 
   const [view, setView] = useState<ViewType>('home');
   const [showModal, setShowModal] = useState(false);
@@ -39,21 +38,11 @@ export default function App() {
   const [modalShownToday, setModalShownToday] = useState(() => {
     return localStorage.getItem('modal_shown_date') === new Date().toISOString().slice(0, 10);
   });
-  const adLoaded = useRef(false);
 
   useEffect(() => {
     registerSW().then(() => {
       if (loadAlarmEnabled()) scheduleAlarm(loadAlarmTime(), true);
     });
-
-    // 앱 진입 시 전면광고 미리 로드
-    if (loadFullScreenAd.isSupported()) {
-      loadFullScreenAd({
-        onEvent: () => { adLoaded.current = true; },
-        onError: () => {},
-        options: { adGroupId: AD_GROUP_ID },
-      });
-    }
   }, []);
 
   useEffect(() => {
@@ -70,18 +59,9 @@ export default function App() {
       localStorage.setItem('modal_shown_date', today);
       setModalShownToday(true);
 
-      // 전면광고 로드 완료 시 노출, 아니면 바로 완료 모달
-      if (adLoaded.current && showFullScreenAd.isSupported()) {
-        showFullScreenAd({
-          onEvent: (e) => {
-            if (e.type === 'dismissed' || e.type === 'failedToShow') setShowModal(true);
-          },
-          onError: () => setShowModal(true),
-          options: { adGroupId: AD_GROUP_ID },
-        });
-      } else {
-        setShowModal(true);
-      }
+      // 전면광고 노출 시도(로드돼 있으면 즉시, 아니면 최대 1.5초 대기 후 스킵).
+      // 광고 흐름이 끝나거나 스킵되면 완료 모달을 띄움.
+      showIfReady().finally(() => setShowModal(true));
     }
   }, [allChecked]); // eslint-disable-line react-hooks/exhaustive-deps
 
