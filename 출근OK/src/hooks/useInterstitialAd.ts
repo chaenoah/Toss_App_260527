@@ -21,10 +21,15 @@ let shownThisSession = false;
  *   안 되면 스킵. 세션당 최대 1회.
  * - 모든 단계 트래킹 (콘솔에서 어디서 새는지 확인 가능)
  */
+/** 로드 실패 시 재시도 대기 시간 */
+const RETRY_DELAY_MS = 3000;
+
 export function useInterstitialAd() {
   const loadedRef = useRef(false);
   const loadingRef = useRef(false);
+  const retriedRef = useRef(false); // 세션당 재시도 1회만
   const cleanupRef = useRef<null | (() => void)>(null);
+  const preloadRef = useRef<() => void>(() => {});
 
   const preload = useCallback(() => {
     if (!loadFullScreenAd.isSupported()) {
@@ -39,6 +44,7 @@ export function useInterstitialAd() {
     cleanupRef.current = loadFullScreenAd({
       options: { adGroupId: INTERSTITIAL_AD_GROUP_ID },
       onEvent: (e) => {
+        // type === 'loaded'일 때만 로드 완료로 처리 (다른 이벤트와 구분)
         if (e.type === 'loaded') {
           loadedRef.current = true;
           loadingRef.current = false;
@@ -48,9 +54,17 @@ export function useInterstitialAd() {
       onError: (err) => {
         loadingRef.current = false;
         trackAd('interstitial', 'load_fail', { message: errMessage(err) });
+        // 로드 실패 시 3초 후 1회 재시도
+        if (!retriedRef.current) {
+          retriedRef.current = true;
+          setTimeout(() => preloadRef.current(), RETRY_DELAY_MS);
+        }
       },
     });
   }, []);
+
+  // onError 내부 setTimeout에서 최신 preload를 참조하기 위한 ref
+  preloadRef.current = preload;
 
   useEffect(() => {
     preload();
