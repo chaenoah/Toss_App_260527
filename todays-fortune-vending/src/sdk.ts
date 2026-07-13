@@ -1,0 +1,59 @@
+// 앱인토스(web-framework) 브릿지 API 얇은 래퍼.
+//
+// Storage / generateHapticFeedback 같은 브릿지 함수는 토스 앱 WebView 안에서만
+// 실제로 동작해요. 일반 브라우저(vite dev / preview)에서는 예외가 날 수 있으므로
+// try/catch 로 감싸고, 저장소는 localStorage 로 폴백해서 어디서든 앱이 동작하게 해요.
+import { Storage, generateHapticFeedback } from "@apps-in-toss/web-framework";
+
+type HapticType =
+  | "tickWeak"
+  | "tap"
+  | "tickMedium"
+  | "softMedium"
+  | "basicWeak"
+  | "basicMedium"
+  | "success"
+  | "error"
+  | "wiggle"
+  | "confetti";
+
+/** 토스 로컬 저장소에 저장. 실패하면 localStorage 로 폴백해요. */
+export async function saveItem(key: string, value: string): Promise<void> {
+  try {
+    await Storage.setItem(key, value);
+  } catch {
+    try {
+      window.localStorage.setItem(key, value);
+    } catch {
+      /* 저장 실패는 조용히 무시 (운세는 날짜로 재현 가능해요) */
+    }
+  }
+}
+
+/** 토스 로컬 저장소에서 읽기. 실패하면 localStorage 로 폴백해요. */
+export async function loadItem(key: string): Promise<string | null> {
+  try {
+    const v = await Storage.getItem(key);
+    if (v != null) return v;
+  } catch {
+    /* 폴백으로 진행 */
+  }
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+/** 햅틱 진동. 토스 앱 밖(브라우저)에서는 조용히 무시돼요. */
+export function haptic(type: HapticType): void {
+  try {
+    // 브라우저에서는 동기 throw 또는 Promise reject 로 실패할 수 있어 둘 다 삼켜요.
+    const result = generateHapticFeedback({ type }) as unknown;
+    if (result && typeof (result as Promise<void>).then === "function") {
+      (result as Promise<void>).catch(() => {});
+    }
+  } catch {
+    /* 브라우저에서는 지원되지 않을 수 있어요 */
+  }
+}
