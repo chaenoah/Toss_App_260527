@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Fortune } from "../logic/fortuneEngine";
 import { ShareCard } from "../components/ShareCard";
+import { BadgeCelebration } from "../components/BadgeCelebration";
 import { useInterstitialAd } from "../hooks/useInterstitialAd";
 import { useRewardAd } from "../hooks/useRewardAd";
 import { track } from "../utils/eventTracking";
@@ -9,11 +10,12 @@ import { haptic } from "../sdk";
 interface Props {
   fortune: Fortune;
   streak: number;
+  newBadge?: string | null;
   onHome: () => void;
 }
 
 /** 결과 화면: 점수 + 코멘트 + 소비 처방 + 공유 카드 + 복주머니(리워드). */
-export function ResultScreen({ fortune, onHome }: Props) {
+export function ResultScreen({ fortune, newBadge, onHome }: Props) {
   const { maybeShowInterstitial } = useInterstitialAd();
   const { showRewardedAd } = useRewardAd();
   const [detailUnlocked, setDetailUnlocked] = useState(false);
@@ -39,6 +41,7 @@ export function ResultScreen({ fortune, onHome }: Props) {
   return (
     <div className="screen">
       <div className="result">
+        {newBadge && <BadgeCelebration badge={newBadge} />}
         <div className="result-emoji">{fortune.emoji}</div>
         <div className="result-grade">{fortune.grade}</div>
 

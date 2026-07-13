@@ -426,6 +426,90 @@
   margin: 8px 0 0;
 }
 
+/* ── recovery modal ── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 5, 16, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+  animation: fade 0.2s ease;
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.modal {
+  width: 100%;
+  max-width: 320px;
+  background: linear-gradient(160deg, #33284d, #1a1430);
+  border: 2px solid var(--line);
+  padding: 22px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  animation: pop 0.28s ease;
+}
+.modal-emoji {
+  font-size: 2.4rem;
+}
+.modal-title {
+  font-size: 1.15rem;
+  font-weight: 900;
+  margin: 0;
+  color: var(--gold-bright);
+}
+.modal-body {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #efeaff;
+  margin: 0;
+}
+.modal-error {
+  font-size: 0.8rem;
+  color: #ff9d9d;
+  margin: 0;
+}
+
+/* ── badge celebration ── */
+.badge-celebrate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: linear-gradient(90deg, rgba(57, 255, 20, 0.16), rgba(255, 211, 90, 0.16));
+  border: 1px solid rgba(255, 211, 90, 0.4);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  animation: pop 0.5s ease;
+}
+.badge-celebrate-emoji {
+  animation: wiggle 0.9s ease infinite;
+}
+.badge-celebrate-text b {
+  color: var(--gold-bright);
+}
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-12deg);
+  }
+  50% {
+    transform: rotate(12deg);
+  }
+}
+
 .loading {
   font-size: 3rem;
   animation: spinCoin 1s linear infinite;

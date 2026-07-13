@@ -59,7 +59,23 @@ export async function commitToday(
   return next;
 }
 
-/** 획득한 뱃지 목록 (7일/30일 등 이정표) */
+/**
+ * 끊긴 streak 를 복구해요. 마지막 방문일을 '어제'로 당겨,
+ * 오늘 뽑으면 연속으로 이어지게 만들어요. (리워드 광고 시청 후 호출)
+ */
+export async function recoverStreak(
+  rec: StreakRecord,
+  today = dateKey(),
+): Promise<StreakRecord> {
+  const bridged: StreakRecord = {
+    lastDate: yesterdayKey(today),
+    streak: Math.max(rec.streak, 1),
+  };
+  await saveItem(KEY, JSON.stringify(bridged));
+  return bridged;
+}
+
+/** 획득한 뱃지 목록 (3/7/30/100일 이정표) */
 export function badgesFor(streak: number): string[] {
   const badges: string[] = [];
   if (streak >= 3) badges.push("🔥 3일");
@@ -67,4 +83,14 @@ export function badgesFor(streak: number): string[] {
   if (streak >= 30) badges.push("👑 30일");
   if (streak >= 100) badges.push("💎 100일");
   return badges;
+}
+
+/** 이번 뽑기로 '새로' 달성한 뱃지가 있으면 반환해요 (연출용). */
+export function newlyEarnedBadge(
+  prevStreak: number,
+  nextStreak: number,
+): string | null {
+  const before = new Set(badgesFor(prevStreak));
+  const gained = badgesFor(nextStreak).filter((b) => !before.has(b));
+  return gained.length > 0 ? gained[gained.length - 1] : null;
 }
