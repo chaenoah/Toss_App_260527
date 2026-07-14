@@ -50,9 +50,13 @@ export function Checklist({ items, onToggle, onRemove, onAdd, checkedCount, tota
         ))}
       </div>
 
-      {done && (
+      {done ? (
         <div className="checklist__done-banner">
-          ✅ 필수 준비물 완료! 오늘도 출근 OK 🫡
+          ✅ 필수 준비물 완료! 토스포인트 10원 지급 💰
+        </div>
+      ) : (
+        <div className="checklist__reward-hint">
+          💰 필수 준비물 다 체크하면 토스포인트 10원 지급
         </div>
       )}
 

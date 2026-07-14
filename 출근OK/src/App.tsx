@@ -10,7 +10,6 @@ import { CompletionModal } from './components/CompletionModal';
 import { CalendarView } from './components/CalendarView';
 import { SettingsView } from './components/SettingsView';
 import { BottomNav } from './components/BottomNav';
-import { BannerAd } from './components/BannerAd';
 import { StreakInsuranceCard } from './components/StreakInsuranceCard';
 import { useRewardAd } from './hooks/useRewardAd';
 import { useInterstitialAd } from './hooks/useInterstitialAd';
@@ -157,7 +156,6 @@ export default function App() {
         />
 
         <StreakFooter streak={streak.count} onCalendarClick={() => setView('calendar')} />
-        <BannerAd />
       </div>
     );
   };

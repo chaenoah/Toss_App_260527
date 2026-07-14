@@ -80,7 +80,7 @@ export function WeatherCard({
                 onClick={onWatchAd}
                 disabled={watching}
               >
-                {watching ? '광고 시청 중…' : '🎁 광고 보고 오늘 옷차림 추천받기'}
+                {watching ? '광고 시청 중…' : '🎁 광고 보고 옷차림 추천받고 +10원 받기'}
               </button>
               {notReady && <div className="weather-card__notready">{notReady}</div>}
             </>

@@ -1013,14 +1013,6 @@ body { background: var(--toss-gray-100); }
   background: rgba(255, 255, 255, 0.25);
 }
 
-/* ── 배너 광고 ── */
-.banner-ad {
-  margin: 0 16px;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  min-height: 50px;
-}
-
 /* ── 스트릭 보험 카드 ── */
 .streak-insurance {
   display: flex;
@@ -1103,4 +1095,16 @@ body { background: var(--toss-gray-100); }
   font-size: 11px;
   line-height: 1.5;
   color: var(--toss-gray-500);
+}
+
+/* ── 체크리스트 리워드 힌트 ── */
+.checklist__reward-hint {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: #fff8e1;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: #b45309;
+  text-align: center;
 }
