@@ -15,6 +15,7 @@ import { StreakInsuranceCard } from './components/StreakInsuranceCard';
 import { useRewardAd } from './hooks/useRewardAd';
 import { useInterstitialAd } from './hooks/useInterstitialAd';
 import { useStreakInsurance } from './hooks/useStreakInsurance';
+import { usePromotion } from './hooks/usePromotion';
 import { loadCity, saveCity, loadCommuteTime, saveCommuteTime, loadAlarmEnabled, loadAlarmTime } from './lib/storage';
 import { registerSW, scheduleAlarm } from './lib/alarm';
 import { trackEvent } from './lib/adTracking';
@@ -32,9 +33,10 @@ export default function App() {
   const [city, setCity] = useState(() => loadCity());
   const { weather, airQuality, loading, error, needsUmbrella, needsMask } = useWeather(city);
   const { streak, markComplete, restoreStreak, isMilestone } = useStreak();
-  const { unlocked, watching, watchAd } = useRewardAd();
+  const { unlocked, watching, pointMsg, notReady, watchAd } = useRewardAd();
   const { showIfReady } = useInterstitialAd(); // 앱 진입 시 전면광고 프리로드 + 노출 제어
   const insurance = useStreakInsurance(streak, restoreStreak); // 스트릭 보험
+  const checkinPromo = usePromotion('checkin'); // 출근 체크리스트 완료 프로모션(10원)
 
   const [view, setView] = useState<ViewType>('home');
   const [showModal, setShowModal] = useState(false);
@@ -65,6 +67,9 @@ export default function App() {
 
       // 체크리스트 완료 도달 트래킹 (전면광고 노출 퍼널의 상단 지표)
       trackEvent('checklist_completed', { streak: streak.count });
+
+      // 출근 체크 완료 프로모션 지급 (전면광고와 병렬, 중복/실패는 조용히 처리)
+      void checkinPromo.claim();
 
       // 전면광고 노출 시도(로드돼 있으면 즉시, 아니면 최대 800ms 대기 후 스킵).
       // 광고 흐름이 끝나거나 스킵되면 완료 모달을 띄움.
@@ -125,6 +130,8 @@ export default function App() {
           error={error}
           unlocked={unlocked}
           watching={watching}
+          pointMsg={pointMsg}
+          notReady={notReady}
           onWatchAd={watchAd}
         />
         <WeatherTip needsUmbrella={needsUmbrella} needsMask={needsMask} airQuality={airQuality} />
@@ -163,6 +170,7 @@ export default function App() {
         <CompletionModal
           streak={streak.count}
           isMilestone={isMilestone}
+          promoStatus={checkinPromo.status}
           onClose={() => setShowModal(false)}
         />
       )}

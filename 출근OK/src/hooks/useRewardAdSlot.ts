@@ -73,29 +73,34 @@ export function useRewardAdSlot(adGroupId: string, slot: string) {
     return loadedRef.current;
   }, [adGroupId]);
 
-  /** 광고 노출. 보상 획득(userEarnedReward) 시 true, 그 외 false */
-  const show = useCallback(async (): Promise<boolean> => {
+  /**
+   * 광고 노출 결과.
+   * - earned: 보상 획득(userEarnedReward) 여부
+   * - failed: 노출/로드 실패 여부 (미지원·미로드·failedToShow·에러).
+   *           유저가 그냥 닫은 경우(dismissed, 보상 없음)는 failed=false.
+   */
+  const show = useCallback(async (): Promise<{ earned: boolean; failed: boolean }> => {
     if (!GoogleAdMob.showAppsInTossAdMob.isSupported()) {
       trackAd('rewarded', 'show_skip', { slot, reason: 'unsupported' });
-      return false;
+      return { earned: false, failed: true };
     }
     const ready = await ensureLoaded();
     if (!ready) {
       trackAd('rewarded', 'show_skip', { slot, reason: 'not_loaded_in_time' });
       preload();
-      return false;
+      return { earned: false, failed: true };
     }
 
     trackAd('rewarded', 'show_request', { slot });
-    return new Promise<boolean>((resolve) => {
+    return new Promise<{ earned: boolean; failed: boolean }>((resolve) => {
       let earned = false;
       let settled = false;
-      const done = () => {
+      const done = (failed: boolean) => {
         if (settled) return;
         settled = true;
         loadedRef.current = false;
         preload(); // 다음 사용을 위해 재프리로드
-        resolve(earned);
+        resolve({ earned, failed });
       };
       GoogleAdMob.showAppsInTossAdMob({
         options: { adGroupId },
@@ -113,17 +118,17 @@ export function useRewardAdSlot(adGroupId: string, slot: string) {
               break;
             case 'failedToShow':
               trackAd('rewarded', 'failed_to_show', { slot, reason: 'event' });
-              done();
+              done(true);
               break;
             case 'dismissed':
               trackAd('rewarded', 'dismissed', { slot });
-              done();
+              done(false);
               break;
           }
         },
         onError: (err) => {
           trackAd('rewarded', 'failed_to_show', { slot, message: errMessage(err) });
-          done();
+          done(true);
         },
       });
     });

@@ -9,10 +9,18 @@ interface Props {
   error: boolean;
   unlocked: boolean;
   watching: boolean;
+  pointMsg: string | null;
+  notReady: string | null;
   onWatchAd: () => void;
 }
 
-export function WeatherCard({ city, weather, airQuality, loading, error, unlocked, watching, onWatchAd }: Props) {
+const PROMO_NOTICE =
+  '옷차림 추천받기 완료 시 토스포인트 10원 지급 · 1인 1일 1회 · 예산 소진 시 조기 종료될 수 있어요';
+
+export function WeatherCard({
+  city, weather, airQuality, loading, error,
+  unlocked, watching, pointMsg, notReady, onWatchAd,
+}: Props) {
   return (
     <div className="weather-card">
       <div className="weather-card__city">📍 {city}</div>
@@ -63,16 +71,22 @@ export function WeatherCard({ city, weather, airQuality, loading, error, unlocke
                 </div>
               )}
               <div className="weather-card__outfit">{getOutfitTip(weather.temperature)}</div>
+              {pointMsg && <div className="weather-card__point">{pointMsg}</div>}
             </div>
           ) : (
-            <button
-              className="weather-card__reward-btn"
-              onClick={onWatchAd}
-              disabled={watching}
-            >
-              {watching ? '광고 시청 중…' : '🎁 광고 보고 오늘 옷차림 추천받기'}
-            </button>
+            <>
+              <button
+                className="weather-card__reward-btn"
+                onClick={onWatchAd}
+                disabled={watching}
+              >
+                {watching ? '광고 시청 중…' : '🎁 광고 보고 오늘 옷차림 추천받기'}
+              </button>
+              {notReady && <div className="weather-card__notready">{notReady}</div>}
+            </>
           )}
+
+          <div className="weather-card__promo-notice">{PROMO_NOTICE}</div>
         </>
       )}
     </div>

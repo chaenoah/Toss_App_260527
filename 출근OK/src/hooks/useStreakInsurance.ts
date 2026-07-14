@@ -47,7 +47,7 @@ export function useStreakInsurance(streak: StreakData, restoreStreak: () => void
   const watchToProtect = useCallback(async () => {
     if (!canUse) return;
     setWatching(true);
-    const earned = await show();
+    const { earned } = await show();
     setWatching(false);
     if (!earned) return;
 
