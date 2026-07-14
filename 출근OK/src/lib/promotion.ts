@@ -18,14 +18,14 @@ export const REWARD_AMOUNT = 10; // 10원
 export const PROMOS = {
   // 미션1: 출근 체크리스트 완료
   checkin: {
-    live: '01KXG0Q3DSPNNWPFYESYHQ0A29',
-    test: 'TEST_01KXG0Q3DSPNNWPFYESYHQ0A29',
+    live: '01KXG0MC8DM131FMQG4EREX117',
+    test: 'TEST_01KXG0MC8DM131FMQG4EREX117',
     storageKey: 'promo_checkin_claimed',
   },
   // 미션2: 옷차림 추천받기(리워드 광고 시청)
   outfit: {
-    live: '01KXG0MC8DM131FMQG4EREX117',
-    test: 'TEST_01KXG0MC8DM131FMQG4EREX117',
+    live: '01KXG0Q3DSPNNWPFYESYHQ0A29',
+    test: 'TEST_01KXG0Q3DSPNNWPFYESYHQ0A29',
     storageKey: 'promo_outfit_claimed',
   },
 } as const;
