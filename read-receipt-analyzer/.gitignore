@@ -5,6 +5,7 @@ node_modules/
 dist/
 *.ait
 .ait/
+.granite/
 
 # logs
 *.log
