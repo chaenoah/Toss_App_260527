@@ -79,47 +79,47 @@ export function ShareCard({ fortune, onReward }: Props) {
 
 function drawCard(ctx: CanvasRenderingContext2D, f: Fortune) {
   const S = SIZE;
-  // 배경 (다크 → 딥퍼플)
-  const bg = ctx.createLinearGradient(0, 0, 0, S);
-  bg.addColorStop(0, "#241b3a");
-  bg.addColorStop(1, "#120d20");
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, S, S);
+  const BLUE = "#3182f6";
 
-  // 골드 테두리 (직각)
-  ctx.strokeStyle = "rgba(245,166,35,0.55)";
-  ctx.lineWidth = 10;
-  ctx.strokeRect(40, 40, S - 80, S - 80);
+  // 배경 (라이트)
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, S, S);
+  // 은은한 상단 톤
+  const top = ctx.createLinearGradient(0, 0, 0, 260);
+  top.addColorStop(0, "#eaf2ff");
+  top.addColorStop(1, "#ffffff");
+  ctx.fillStyle = top;
+  ctx.fillRect(0, 0, S, 260);
 
   ctx.textAlign = "center";
 
   // 상단 라벨
-  ctx.fillStyle = "#F5A623";
+  ctx.fillStyle = BLUE;
   ctx.font = "700 44px sans-serif";
   ctx.fillText("오늘의 재물운", S / 2, 150);
 
   // 이모지 + 등급
-  ctx.font = "160px sans-serif";
-  ctx.fillText(f.emoji, S / 2, 360);
-  ctx.fillStyle = "#FFD35A";
-  ctx.font = "800 78px sans-serif";
-  ctx.fillText(f.grade, S / 2, 470);
+  ctx.font = "150px sans-serif";
+  ctx.fillText(f.emoji, S / 2, 380);
+  ctx.fillStyle = "#191f28";
+  ctx.font = "800 76px sans-serif";
+  ctx.fillText(f.grade, S / 2, 480);
 
   // 점수
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = "#191f28";
   ctx.font = "900 200px sans-serif";
   ctx.fillText(String(f.score), S / 2, 700);
-  ctx.fillStyle = "#c9c4dc";
+  ctx.fillStyle = "#8b95a1";
   ctx.font = "600 52px sans-serif";
   ctx.fillText("점", S / 2 + measureOffset(ctx, f.score), 700);
 
   // 코멘트
-  ctx.fillStyle = "#efeaff";
+  ctx.fillStyle = "#4e5968";
   ctx.font = "500 42px sans-serif";
   wrapText(ctx, f.comment, S / 2, 800, S - 200, 56);
 
   // 행운 요약
-  ctx.fillStyle = "#F5A623";
+  ctx.fillStyle = BLUE;
   ctx.font = "700 40px sans-serif";
   ctx.fillText(
     `행운의 색 ${f.luckyColor.name} · 방향 ${f.luckyDirection}`,
@@ -128,7 +128,7 @@ function drawCard(ctx: CanvasRenderingContext2D, f: Fortune) {
   );
 
   // 워터마크 (재유입 유도)
-  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  ctx.fillStyle = "#8b95a1";
   ctx.font = "600 36px sans-serif";
   ctx.fillText(`📲 ${APP_NAME}`, S / 2, 1010);
 }
