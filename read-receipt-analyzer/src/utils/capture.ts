@@ -32,7 +32,7 @@ async function elementToPngBlob(el: HTMLElement): Promise<Blob> {
 // 결과 카드를 이미지로 저장/공유. 반환값으로 어떤 경로를 탔는지 알려준다.
 export async function saveCardImage(
   el: HTMLElement,
-  fileName = "읽씹판독기_결과.png",
+  fileName = "답장판독기_결과.png",
 ): Promise<SaveResult> {
   const blob = await elementToPngBlob(el);
   const file = new File([blob], fileName, { type: "image/png" });
@@ -43,7 +43,7 @@ export async function saveCardImage(
   };
   if (nav.share && nav.canShare?.({ files: [file] })) {
     try {
-      await nav.share({ files: [file], title: "읽씹 판독기 결과" });
+      await nav.share({ files: [file], title: "답장 판독기 결과" });
       return "shared";
     } catch {
       // 사용자가 공유 취소 → 다음 폴백으로

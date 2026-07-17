@@ -42,7 +42,7 @@ export const ResultCard = forwardRef<HTMLDivElement, Props>(function ResultCard(
 
       {/* 하단 고정 브랜딩 문구 (유입 핵심) */}
       <div className="card__footer" style={{ borderColor: colors.soft }}>
-        <span className="card__footer-title">읽씹 판독기</span>
+        <span className="card__footer-title">답장 판독기</span>
         <span className="card__footer-sub">토스에서 검색</span>
       </div>
     </div>

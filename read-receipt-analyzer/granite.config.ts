@@ -1,11 +1,11 @@
 import { defineConfig } from "@apps-in-toss/web-framework/config";
 
 export default defineConfig({
-  appName: "read-receipt-analyzer",
+  appName: "ghostcheck", // 앱인토스 콘솔에 등록한 appName과 동일해야 함
   brand: {
-    displayName: "읽씹 판독기", // 화면에 노출될 앱의 한글 이름
-    primaryColor: "#4DB6AC", // 화면에 노출될 앱의 기본 색상으로 바꿔주세요.
-    icon: "", // 화면에 노출될 앱의 아이콘 이미지 주소로 바꿔주세요.
+    displayName: "답장 판독기", // 콘솔 표시명과 동일
+    primaryColor: "#3182F6", // 토스 블루 (앱 내 포인트 색과 통일)
+    icon: "https://static.toss.im/appsintoss/43957/f903cf6b-8dd3-4aab-a93f-c6cb124bec17.png",
   },
   web: {
     host: "localhost",
