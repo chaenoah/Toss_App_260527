@@ -1,65 +1,63 @@
-import { Asset, Button, Top } from "@toss/tds-mobile";
+import { useCallback, useState } from "react";
 import "./App.css";
-{{SAMPLE_IMPORTS}}
+import { analyze } from "./logic";
+import { IntroScreen } from "./screens/IntroScreen";
+import { InputScreen } from "./screens/InputScreen";
+import { LoadingScreen } from "./screens/LoadingScreen";
+import { ResultScreen } from "./screens/ResultScreen";
+import type { Answers, QuestionId, ReadResult, Step } from "./types";
 
+// 앱 루트: 단계(step) 상태 머신으로 4개 화면을 전환한다.
+// intro → input → loading → result → (다시) intro
 function App() {
-  {{PAGE_STATE_AND_ROUTES}}
+  const [step, setStep] = useState<Step>("intro");
+  const [answers, setAnswers] = useState<Answers>({});
+  const [result, setResult] = useState<ReadResult | null>(null);
+
+  // 질문 하나에 답 저장
+  const handlePick = useCallback((id: QuestionId, optionIndex: number) => {
+    setAnswers((prev) => ({ ...prev, [id]: optionIndex }));
+  }, []);
+
+  // 입력 완료 → 로딩 연출로
+  const handleComplete = useCallback(() => {
+    setStep("loading");
+  }, []);
+
+  // 로딩 끝 → 결과 계산(한 번) 후 결과 화면. 멘트 랜덤은 여기서 고정된다.
+  const handleLoaded = useCallback(() => {
+    setResult(analyze(answers));
+    setStep("result");
+  }, [answers]);
+
+  // 처음부터 다시 (다른 사람 재측정)
+  const handleRestart = useCallback(() => {
+    setAnswers({});
+    setResult(null);
+    setStep("intro");
+  }, []);
+
   return (
-    <>
-      <Top
-        title={<Top.TitleParagraph size={22}>반가워요</Top.TitleParagraph>}
-        subtitleBottom={
-          <Top.SubtitleParagraph size={17}>
-            앱인토스 개발을 시작해 보세요.
-          </Top.SubtitleParagraph>
-        }
-      />
+    <div className="app">
+      {step === "intro" && (
+        <IntroScreen onStart={() => setStep("input")} />
+      )}
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-          padding: "24px",
-        }}
-      >
-        <Button
-          as="a"
-          variant="weak"
-          href="https://developers-apps-in-toss.toss.im"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          개발자센터
-        </Button>
-        <Button
-          as="a"
-          variant="weak"
-          href="https://techchat-apps-in-toss.toss.im"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          개발자 커뮤니티
-        </Button>
-        {{SAMPLE_BUTTONS}}
-      </div>
-
-      <div
-        style={{
-          position: "fixed",
-          bottom: "24px",
-          left: "50%",
-          transform: "translateX(-50%)",
-        }}
-      >
-        <Asset.Image
-          alt="apps in toss logo"
-          frameShape={{ width: 160 }}
-          backgroundColor="transparent"
-          src={`${import.meta.env.BASE_URL}appsintoss-logo.png`}
+      {step === "input" && (
+        <InputScreen
+          answers={answers}
+          onPick={handlePick}
+          onComplete={handleComplete}
+          onExit={() => setStep("intro")}
         />
-      </div>
-    </>
+      )}
+
+      {step === "loading" && <LoadingScreen onDone={handleLoaded} />}
+
+      {step === "result" && result && (
+        <ResultScreen result={result} onRestart={handleRestart} />
+      )}
+    </div>
   );
 }
 
