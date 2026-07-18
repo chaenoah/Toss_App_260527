@@ -385,6 +385,72 @@
   font-weight: 600;
 }
 
+/* 프로모션(하루 한 번) */
+.promo {
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 4px;
+}
+.promo__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.promo__title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.promo__badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--toss-blue);
+  background: #eff5ff;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.promo__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.promo__btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: 1px solid var(--gray200);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: left;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: transform 0.08s ease, opacity 0.2s ease;
+}
+.promo__btn:active {
+  transform: scale(0.99);
+}
+.promo__btn-right {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--toss-blue);
+  white-space: nowrap;
+  margin-left: 12px;
+}
+.promo__btn--done,
+.promo__btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.promo__btn--done .promo__btn-right {
+  color: var(--gray400);
+}
+
 /* 토스트 */
 .toast {
   position: fixed;

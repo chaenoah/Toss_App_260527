@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { PromotionSection } from "../components/PromotionSection";
 import { ResultCard } from "../components/ResultCard";
 import { temperatureColors } from "../theme";
 import type { ReadResult } from "../types";
@@ -85,6 +86,10 @@ export function ResultScreen({ result, onRestart }: Props) {
         >
           {busy === "save" ? "이미지 만드는 중…" : "이미지로 저장"}
         </button>
+
+        {/* 프로모션(하루 한 번) */}
+        <PromotionSection onNotify={showToast} />
+
         <button
           type="button"
           className="ghost-btn"
