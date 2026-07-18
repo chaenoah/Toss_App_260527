@@ -64,15 +64,26 @@ export function ResultScreen({ result, onRestart }: Props) {
       const outcome = await shareResult(cardRef.current, result);
       if (outcome === "cancelled") return; // 공유 취소 시 보상 없음
 
+      // 이미지 전달 방식에 대한 안내(토스 WebView는 앨범 저장 후 첨부 유도)
+      const shareNote =
+        outcome === "saved+link"
+          ? "이미지를 앨범에 저장했어요. 사진도 함께 올려주세요! "
+          : outcome === "fallback"
+            ? "링크를 복사했어요. 스크린샷으로 올려주세요. "
+            : "";
+
       // 2) 10원 보상(하루 한 번)
       const { result: claim, message } = await claimPromotion(PROMO_INVITE);
-      if (claim === "success")
-        showToast(`공유 완료! ${PROMO_INVITE.amount}원을 받았어요 🎉`);
-      else if (claim === "already")
-        showToast("공유 완료! 오늘 보상은 이미 받았어요");
-      else if (claim === "unsupported")
-        showToast("공유 완료! 보상은 최신 버전에서 받을 수 있어요");
-      else showToast(message ?? "공유는 됐지만 보상 지급에 실패했어요");
+      const rewardNote =
+        claim === "success"
+          ? `${PROMO_INVITE.amount}원 지급 🎉`
+          : claim === "already"
+            ? "오늘 보상은 이미 받았어요"
+            : claim === "unsupported"
+              ? "보상은 최신 버전에서 받을 수 있어요"
+              : (message ?? "보상 지급에 실패했어요");
+
+      showToast(`${shareNote}${rewardNote}`.trim());
     } catch {
       showToast("공유에 실패했어요. 스크린샷으로 공유해 주세요");
     } finally {
@@ -87,7 +98,7 @@ export function ResultScreen({ result, onRestart }: Props) {
     try {
       const how = await saveCardImage(cardRef.current);
       if (how === "shared") showToast("공유 창을 열었어요");
-      else if (how === "downloaded") showToast("이미지를 저장했어요");
+      else if (how === "saved") showToast("이미지를 앨범에 저장했어요");
       else showToast("스크린샷으로 저장해 주세요");
     } catch {
       showToast("저장에 실패했어요. 스크린샷으로 저장해 주세요");
