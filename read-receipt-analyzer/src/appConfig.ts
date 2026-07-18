@@ -21,16 +21,19 @@ export interface Promotion {
   amount: number;
 }
 
-// 결과 화면에 노출할 프로모션 목록. 각 프로모션은 '1일 1회'만 참여 가능(아래 로직에서 제한).
-export const PROMOTIONS: Promotion[] = [
-  {
-    label: "읽씹 이유 확인하기",
-    code: "TEST_01KXS8ZM8JBK4PA4KYV1P7AWCE",
-    amount: 100,
-  },
-  {
-    label: "읽씹 판독 같이 해보기",
-    code: "TEST_01KXS92YG69YR1BXX9HR0S7N5B",
-    amount: 100,
-  },
-];
+// 각 프로모션은 '1일 1회'만 지급 가능(promotion 로직에서 제한).
+// ⚠️ amount(원)는 콘솔 프로모션의 '1회 지급 금액'과 일치해야 함(불일치 시 4114 에러).
+
+// ① 분석 완료 보상: 결과 화면 진입(분석 완료) 시 자동 지급, 1원
+export const PROMO_ANALYSIS: Promotion = {
+  label: "읽씹 이유 확인하기",
+  code: "TEST_01KXS8ZM8JBK4PA4KYV1P7AWCE",
+  amount: 1,
+};
+
+// ② 친구 초대 보상: 공유(친구 유입) 시 지급, 10원
+export const PROMO_INVITE: Promotion = {
+  label: "친구 읽씹도 판독시키고 10원 받기",
+  code: "TEST_01KXS92YG69YR1BXX9HR0S7N5B",
+  amount: 10,
+};
