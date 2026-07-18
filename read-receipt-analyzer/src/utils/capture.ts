@@ -1,17 +1,8 @@
-// 결과 카드 DOM을 이미지로 캡처해서 저장/공유하는 유틸.
-//
-// 앱인토스 WebView 환경에서는 일반 다운로드가 막힐 수 있어 여러 방법을 순차 시도한다.
-//   1) html2canvas로 카드를 PNG(Blob)로 렌더
-//   2) Web Share API(파일 공유)가 되면 공유 시트로 저장/전송  ← 모바일에서 가장 자연스러움
-//   3) 안 되면 <a download>로 브라우저 저장 시도
-//   4) 그래도 안 되면 "스크린샷으로 저장" 안내
-//
-// 참고: 실제 기기 동작은 반드시 토스 샌드박스 앱에서 검증하세요.
-
-export type SaveResult = "shared" | "downloaded" | "fallback";
+// 결과 카드 DOM을 이미지(PNG)로 렌더/저장하는 유틸.
+// 공유 로직은 share.ts에서 이 함수들을 재사용한다.
 
 // 카드 엘리먼트를 PNG Blob으로 변환
-async function elementToPngBlob(el: HTMLElement): Promise<Blob> {
+export async function renderCardToPng(el: HTMLElement): Promise<Blob> {
   // html2canvas는 용량이 커서 실제 사용할 때만 동적 import (초기 로딩 가볍게)
   const { default: html2canvas } = await import("html2canvas");
   const canvas = await html2canvas(el, {
@@ -29,15 +20,29 @@ async function elementToPngBlob(el: HTMLElement): Promise<Blob> {
   });
 }
 
-// 결과 카드를 이미지로 저장/공유. 반환값으로 어떤 경로를 탔는지 알려준다.
+// Blob을 브라우저 다운로드로 저장
+export function downloadBlob(blob: Blob, fileName: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+export type SaveResult = "shared" | "downloaded" | "fallback";
+
+// 결과 카드를 '이미지로 저장'. (이미지 단독 저장/공유 버튼용)
+// Web Share(파일) → 다운로드 → 스크린샷 안내 순으로 폴백.
 export async function saveCardImage(
   el: HTMLElement,
   fileName = "답장판독기_결과.png",
 ): Promise<SaveResult> {
-  const blob = await elementToPngBlob(el);
+  const blob = await renderCardToPng(el);
   const file = new File([blob], fileName, { type: "image/png" });
 
-  // 2) Web Share API로 파일 공유 (지원 & 파일 공유 가능할 때)
   const nav = navigator as Navigator & {
     canShare?: (data?: ShareData) => boolean;
   };
@@ -46,23 +51,14 @@ export async function saveCardImage(
       await nav.share({ files: [file], title: "답장 판독기 결과" });
       return "shared";
     } catch {
-      // 사용자가 공유 취소 → 다음 폴백으로
+      // 취소 → 다음 폴백
     }
   }
 
-  // 3) 브라우저 다운로드 시도
   try {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    downloadBlob(blob, fileName);
     return "downloaded";
   } catch {
-    // 4) 최종 폴백
     return "fallback";
   }
 }

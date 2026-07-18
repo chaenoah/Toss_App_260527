@@ -70,6 +70,22 @@
   cursor: default;
 }
 
+.secondary-btn {
+  width: 100%;
+  border: none;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--gray600);
+  font-size: 16px;
+  font-weight: 700;
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: transform 0.08s ease, opacity 0.2s ease;
+}
+.secondary-btn:active {
+  transform: scale(0.98);
+}
+
 .ghost-btn {
   width: 100%;
   border: none;
@@ -79,6 +95,11 @@
   font-weight: 600;
   padding: 14px;
   cursor: pointer;
+}
+.ghost-btn:disabled,
+.secondary-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .icon-btn {
