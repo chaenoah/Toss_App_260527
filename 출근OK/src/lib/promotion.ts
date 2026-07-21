@@ -9,23 +9,23 @@ import { trackEvent } from './adTracking';
  */
 
 // ⚠️ 테스트 모드: true면 TEST_ 코드, false면 라이브 코드 사용.
-// 테스트 검증 완료 → 라이브(false)로 전환됨.
-export const IS_PROMO_TEST = false;
+// 새 프로모션 코드 테스트를 위해 테스트 모드로 전환.
+export const IS_PROMO_TEST = true;
 
 export const REWARD_AMOUNT = 10; // 10원
 
 // 프로모션별 디스크립터 (test/live 코드 + 중복방지 storageKey)
 export const PROMOS = {
-  // 미션1: 출근 체크리스트 완료
+  // 미션1: 출근 준비물 챙기기(체크리스트 완료)
   checkin: {
-    live: '01KXG0MC8DM131FMQG4EREX117',
-    test: 'TEST_01KXG0MC8DM131FMQG4EREX117',
+    live: '01KY3FZGYD8VHZM9WHWPRJZ82V',
+    test: 'TEST_01KY3FZGYD8VHZM9WHWPRJZ82V',
     storageKey: 'promo_checkin_claimed',
   },
   // 미션2: 옷차림 추천받기(리워드 광고 시청)
   outfit: {
-    live: '01KXG0Q3DSPNNWPFYESYHQ0A29',
-    test: 'TEST_01KXG0Q3DSPNNWPFYESYHQ0A29',
+    live: '01KY3FY5AJ0GTRNVH21BA9FX83',
+    test: 'TEST_01KY3FY5AJ0GTRNVH21BA9FX83',
     storageKey: 'promo_outfit_claimed',
   },
 } as const;
