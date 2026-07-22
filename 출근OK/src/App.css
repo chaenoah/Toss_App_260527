@@ -1108,3 +1108,20 @@ body { background: var(--toss-gray-100); }
   color: #b45309;
   text-align: center;
 }
+
+/* ── 테스트 전용 초기화 버튼 (라이브에선 미노출) ── */
+.test-reset-btn {
+  position: fixed;
+  left: 12px;
+  bottom: 72px;
+  z-index: 200;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}

@@ -11,6 +11,7 @@ import { CalendarView } from './components/CalendarView';
 import { SettingsView } from './components/SettingsView';
 import { BottomNav } from './components/BottomNav';
 import { StreakInsuranceCard } from './components/StreakInsuranceCard';
+import { TestResetButton } from './components/TestResetButton';
 import { useRewardAd } from './hooks/useRewardAd';
 import { useInterstitialAd } from './hooks/useInterstitialAd';
 import { useStreakInsurance } from './hooks/useStreakInsurance';
@@ -164,6 +165,7 @@ export default function App() {
     <div className="app">
       {renderView()}
       <BottomNav current={view} onChange={setView} />
+      <TestResetButton />
       {showModal && (
         <CompletionModal
           streak={streak.count}
