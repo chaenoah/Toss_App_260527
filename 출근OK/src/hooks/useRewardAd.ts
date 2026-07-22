@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useRewardAdSlot } from './useRewardAdSlot';
-import { claimPromotion } from '../lib/promotion';
+import { claimPromotion, promoAmount } from '../lib/promotion';
 
 const REWARD_AD_GROUP_ID = 'ait.v2.live.becc31f22b064178';
 const UNLOCK_KEY = 'outfit_unlocked_date';
@@ -33,8 +33,8 @@ export function useRewardAd() {
       setUnlocked(true);
       // 2) 잠금해제 직후 프로모션 지급 (userEarnedReward 시점).
       //    이미 지급/실패는 조용히 스킵 — 옷차림 추천은 정상 제공됨.
-      const r = await claimPromotion('outfit');
-      if (r === 'granted') setPointMsg('+10원 지급 완료 💰');
+      const { result } = await claimPromotion('outfit');
+      if (result === 'granted') setPointMsg(`+${promoAmount('outfit')}원 지급 완료 💰`);
     } else if (failed) {
       // 광고 로드/노출 실패 → 혜택탭 유저가 막히지 않게 인라인 안내
       setNotReady('잠시 후 다시 시도해주세요');

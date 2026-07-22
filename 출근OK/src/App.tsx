@@ -169,6 +169,7 @@ export default function App() {
           streak={streak.count}
           isMilestone={isMilestone}
           promoStatus={checkinPromo.status}
+          promoErrorCode={checkinPromo.errorCode}
           onClose={() => setShowModal(false)}
         />
       )}

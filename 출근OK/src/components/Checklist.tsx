@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import type { ChecklistItem as Item } from '../types';
 import { ChecklistItem } from './ChecklistItem';
+import { promoAmount } from '../lib/promotion';
+
+const CHECKIN_AMOUNT = promoAmount('checkin');
 
 interface Props {
   items: Item[];
@@ -52,11 +55,11 @@ export function Checklist({ items, onToggle, onRemove, onAdd, checkedCount, tota
 
       {done ? (
         <div className="checklist__done-banner">
-          ✅ 필수 준비물 완료! 토스포인트 10원 지급 💰
+          ✅ 필수 준비물 완료! 토스포인트 {CHECKIN_AMOUNT}원 지급 💰
         </div>
       ) : (
         <div className="checklist__reward-hint">
-          💰 필수 준비물 다 체크하면 토스포인트 10원 지급
+          💰 필수 준비물 다 체크하면 토스포인트 {CHECKIN_AMOUNT}원 지급
         </div>
       )}
 

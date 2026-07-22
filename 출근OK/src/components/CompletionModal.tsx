@@ -1,19 +1,22 @@
 import { useEffect } from 'react';
 import { getCompletionCopy, getMilestoneCopy, getShareCopy } from '../lib/copy';
 import { shareWithReward } from '../lib/shareReward';
+import { IS_PROMO_TEST, promoAmount } from '../lib/promotion';
 import type { PromoStatus } from '../hooks/usePromotion';
 
 interface Props {
   streak: number;
   isMilestone: boolean;
   promoStatus: PromoStatus;
+  promoErrorCode?: string;
   onClose: () => void;
 }
 
+const CHECKIN_AMOUNT = promoAmount('checkin');
 const PROMO_NOTICE =
-  '출근 체크 완료 시 토스포인트 10원 지급 · 1인 1일 1회 · 예산 소진 시 조기 종료될 수 있어요';
+  `출근 체크 완료 시 토스포인트 ${CHECKIN_AMOUNT}원 지급 · 1인 1일 1회 · 예산 소진 시 조기 종료될 수 있어요`;
 
-export function CompletionModal({ streak, isMilestone, promoStatus, onClose }: Props) {
+export function CompletionModal({ streak, isMilestone, promoStatus, promoErrorCode, onClose }: Props) {
   const copy = isMilestone ? getMilestoneCopy(streak) : getCompletionCopy(streak);
 
   useEffect(() => {
@@ -47,10 +50,16 @@ export function CompletionModal({ streak, isMilestone, promoStatus, onClose }: P
 
         {/* 프로모션 지급 상태 */}
         {promoStatus === 'granted' && (
-          <div className="modal__promo modal__promo--granted">토스포인트 10원 지급 완료 💰</div>
+          <div className="modal__promo modal__promo--granted">토스포인트 {CHECKIN_AMOUNT}원 지급 완료 💰</div>
         )}
         {promoStatus === 'already' && (
           <div className="modal__promo modal__promo--already">오늘 포인트는 이미 받았어요</div>
+        )}
+        {/* 테스트 모드에서만 실패 사유(에러코드) 노출 — 라이브에선 조용히 스킵 */}
+        {IS_PROMO_TEST && promoStatus === 'failed' && (
+          <div className="modal__promo modal__promo--already">
+            [테스트] 지급 실패 · 코드 {promoErrorCode ?? 'UNKNOWN'}
+          </div>
         )}
 
         {/* 공유 카드 미리보기 */}
