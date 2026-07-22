@@ -9,8 +9,8 @@ import { trackEvent } from './adTracking';
  */
 
 // ⚠️ 테스트 모드: true면 TEST_ 코드, false면 라이브 코드 사용.
-// 새 프로모션 코드 테스트를 위해 테스트 모드로 전환.
-export const IS_PROMO_TEST = true;
+// 테스트 검증 완료 → 라이브(실지급)로 전환.
+export const IS_PROMO_TEST = false;
 
 // 프로모션별 디스크립터 (test/live 코드 + 지급 금액 + 중복방지 storageKey)
 // ⚠️ amount는 반드시 콘솔에 설정된 "1회 지급 금액"과 일치해야 함.
